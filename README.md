@@ -1,5 +1,8 @@
 # ASTRION | Portal de Solicitações de Consórcios — v2
 
+**Status atual do ambiente:** consulte [IMPLANTACAO.md](IMPLANTACAO.md) antes de executar etapas de instalação. O projeto Supabase exclusivo e a publicação no GitHub Pages já foram realizados.
+
+
 Sistema web em HTML, CSS e JavaScript, para relacionamento **entre a assessoria Astrion e seus corretores**. Uma solicitação é a demanda do cliente que será analisada pela assessoria; **não é uma proposta oficial emitida por uma administradora**. Não há cadastros de regras, cotas, taxas ou formulários particulares de administradoras.
 
 ## Jornada operacional
@@ -104,7 +107,7 @@ Execute `supabase/security_audit.sql` e `tests/seguranca.md`. Crie **dois corret
 
 ## Restrições e próximos passos
 
-- Este pacote **não foi instalado no Supabase em produção, nem publicado no GitHub/Cloudflare**. Falta provisionamento, integração e testes end-to-end reais com perfis separados.
+- **Implantação parcial concluída em 16/10/2026:** projeto dedicado `ruibwnajvardznucetcg` criado na região de São Paulo; banco com RLS instalado; Edge Function `invite-broker` ativa; `config.js` conectado e login publicado no GitHub Pages. **Pendentes para uso real:** primeiro usuário administrador via Supabase Auth, URL Configuration/SMTP e testes end-to-end com dois corretores. A ativação do painel de usuários não acontece só por publicar o frontend.
 - Atualmente não há anexo/upload de documentos, integração direta com parceiros, notificações transacionais automáticas, aceite digital formal, envio automatizado de contratos ou comissionamento.
 - Atualização de tela por recarga e polling a cada 60 segundos. Limite atual: até 10 mil registros por tabela no cliente e 150 eventos por solicitação. Para volumes grandes, implementar paginação e agregação SQL seguras.
 - A trilha de eventos é imutável pela API da aplicação, mas não é um log antifraude de nível pericial. Para auditoria ampliada, incluir trilha de alteração dos campos antes/depois, retenção e alertas de acesso.
