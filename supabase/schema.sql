@@ -248,8 +248,13 @@ GRANT INSERT(owner_id,created_by,full_name,phone,email,city,state,privacy_basis,
 GRANT INSERT(owner_id,created_by,client_id,product_id,stage,purpose,reference_asset,asset_condition,asset_value,credit_amount,desired_term_months,max_installment,bid_intention,bid_type,bid_amount,bid_percentage,urgency,needs_quick_contemplation,accepts_standard_quota,source,next_action_at,notes),
  UPDATE(product_id,stage,purpose,reference_asset,asset_condition,asset_value,credit_amount,desired_term_months,max_installment,bid_intention,bid_type,bid_amount,bid_percentage,urgency,needs_quick_contemplation,accepts_standard_quota,source,next_action_at,notes) ON public.opportunities TO authenticated;
 GRANT INSERT(opportunity_id,owner_id,actor_id,event_type,message,is_internal) ON public.opportunity_events TO authenticated;
+-- As tabelas possuem colunas distintas: conceder permissões separadamente.
 GRANT INSERT(opportunity_id,owner_id,created_by,label,partner_name,credit_amount,term_months,installment_amount,admin_fee_percentage,reserve_fund_percentage,insurance_amount,bid_guidance,conditions,valid_until,published),
- UPDATE(label,partner_name,credit_amount,term_months,installment_amount,admin_fee_percentage,reserve_fund_percentage,insurance_amount,bid_guidance,conditions,valid_until,published) ON public.quote_options, public.partner_checks TO authenticated;
+ UPDATE(label,partner_name,credit_amount,term_months,installment_amount,admin_fee_percentage,reserve_fund_percentage,insurance_amount,bid_guidance,conditions,valid_until,published)
+ ON public.quote_options TO authenticated;
+GRANT INSERT(opportunity_id,owner_id,recorded_by,partner_name,result_status,credit_amount,term_months,installment_amount,research_notes),
+ UPDATE(partner_name,result_status,credit_amount,term_months,installment_amount,research_notes)
+ ON public.partner_checks TO authenticated;
 
 -- Funções trigger privilegiadas não devem ser diretamente executáveis pelos papéis do site.
 REVOKE ALL ON FUNCTION private.on_user_created() FROM PUBLIC, anon, authenticated;
