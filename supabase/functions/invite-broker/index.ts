@@ -6,7 +6,8 @@
  */
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
 
-const SITE = Deno.env.get('CRM_SITE_URL') || '';
+// Endereço publicado atualmente. CRM_SITE_URL pode substituir este padrão no futuro.
+const SITE = Deno.env.get('CRM_SITE_URL') || 'https://astrion360.github.io/CRM_CORRETORES/';
 const SITE_ORIGIN = SITE ? new URL(SITE).origin : '';
 const URL = Deno.env.get('SUPABASE_URL') || '';
 const serviceKeys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}');
