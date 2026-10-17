@@ -62,25 +62,25 @@ Crie **um projeto novo**, exclusivo para este portal, para não colocar em risco
 
 Tabelas: `profiles`, `products` (somente categorias genéricas), `clients`, `opportunities`, `opportunity_events`, `partner_checks` (internas) e `quote_options` (devolutivas). RLS está habilitado em todas.
 
-### 2. Configure o acesso
+### 2. Regra oficial de contas: criação manual
 
-Em Supabase Authentication, desabilite inscrições públicas, configure SMTP transacional, política de senhas e URLs permitidas. Crie seu usuário **manualmente** em Authentication → Users. O trigger cria os perfis **inativos por padrão**, inclusive o primeiro administrador. Após a criação, execute no SQL Editor:
+**Somente a administração cadastra usuários.** Corretores **não** criam as próprias contas. Não usamos links de convite ou mensagens automáticas de ativação.
 
-```sql
-UPDATE public.profiles SET role = 'admin', active = true
-WHERE email = 'SEU_EMAIL@ASTRION360.COM.BR';
-SELECT id,email,role,active FROM public.profiles;
-```
+No novo projeto Supabase, abra **Authentication → Users → Add user → Create new user** (não `Send invite`). Defina o e-mail e uma **senha provisória forte**, com confirmação manual de e-mail no ato de criação. Não compartilhe a senha por e-mail aberto, repositório ou planilha.
 
-Confira manualmente que apenas seu usuário tem `role='admin'`. Recomenda-se ativar MFA do administrador e configurar política de sessão compatível com o risco.
+No CRM → **Corretores → Cadastrar corretor**, há instruções para esse cadastro. Após criar a conta no Supabase, clique em **Atualizar**, escolha **Gerenciar** para completar nome, empresa e telefone e marque **Ativo**. A conta aparece automaticamente na tabela `profiles` pelo trigger de criação do Auth, inicialmente suspensa.
 
-### 3. Convites aos corretores
+O corretor recebe as credenciais por canal privado e acessa o CRM. **O primeiro acesso exige a substituição da senha provisória**, com mínimo de 12 caracteres e confirmação. Até que o Auth registre a atualização de senha, as políticas RLS impedem o acesso aos clientes, oportunidades, categorias e dados internos; somente o próprio perfil fica visível.
 
-Implante `supabase/functions/invite-broker/index.ts` como Edge Function com nome `invite-broker`. Habilite verificação JWT no gateway. Defina variável de ambiente privada:
+A coluna `public.profiles.password_change_required` (default `true`) é limpa automaticamente por trigger protegido quando o Supabase Auth registra alteração de `encrypted_password`. O papel `authenticated` não tem permissão de alterar diretamente o marcador. Contas pré-existentes receberam `false` na implantação de 16/10/2026. A RLS verifica `active AND NOT password_change_required` para as ações de negócio.
 
-`CRM_SITE_URL=https://corretores.astrion360.com.br`
+É necessário **desabilitar o cadastro público (Allow new users to sign up)** nas configurações do Supabase Auth. Essa configuração depende do painel Auth e ainda requer verificação pelo proprietário do projeto. Embora a RLS mantenha contas não autorizadas sem acesso, isso não equivale a desabilitar inscrições no serviço de autenticação.
 
-A função verifica a sessão e o papel admin no banco, convida pelo Auth e **ativa explicitamente** o perfil broker recém-criado. Usa `SUPABASE_SECRET_KEYS` (ou `SUPABASE_SERVICE_ROLE_KEY` legado) no **ambiente da função**, jamais no cliente. Configure e teste o template e entrega do convite/recuperação por e-mail.
+### 3. Convites desativados
+
+A função legada `invite-broker` retorna **HTTP 410 (Gone)** e permanece apenas como rota desativada. O fluxo de registro por convite foi removido da interface. **Não existe Edge Function de provisionamento de usuários operante**: a criação é realizada manualmente no painel Supabase Auth.
+
+Para o acesso por senha, não é necessário SMTP no momento do cadastro manual. A recuperação de senha por e-mail permanece no frontend e exige SMTP transacional configurado e URLs de redirecionamento corretas.
 
 ### 4. Conecte o frontend
 
@@ -99,7 +99,7 @@ Não publique `sb_secret`, `service_role`, senhas, tokens pessoais, `DATABASE_UR
 
 Envie os arquivos da pasta para um repositório GitHub (preferencialmente privado). Em Cloudflare Pages, conecte o GitHub, projeto **sem build**, saída `.` (raiz). Configure o subdomínio em Custom Domains e verifique HTTPS. Cloudflare hospeda **apenas o frontend estático**; Auth, dados e funções ficam no Supabase.
 
-Se preferir teste local de interface: `python -m http.server 8000` na raiz. Login local exige URL autorizada no Auth. Convites via Edge Function exigem correspondência exata com `CRM_SITE_URL`.
+Se preferir teste local de interface: `python -m http.server 8000` na raiz. Login local exige URL autorizada no Auth. Os e-mails de recuperação dependem de SMTP transacional e URLs permitidas no Supabase Auth.
 
 ### 6. Homologação obrigatória
 
@@ -107,7 +107,7 @@ Execute `supabase/security_audit.sql` e `tests/seguranca.md`. Crie **dois corret
 
 ## Restrições e próximos passos
 
-- **Implantação parcial concluída em 16/10/2026:** projeto dedicado `ruibwnajvardznucetcg` criado na região de São Paulo; banco com RLS instalado; Edge Function `invite-broker` ativa; `config.js` conectado e login publicado no GitHub Pages. **Pendentes para uso real:** primeiro usuário administrador via Supabase Auth, URL Configuration/SMTP e testes end-to-end com dois corretores. A ativação do painel de usuários não acontece só por publicar o frontend.
+- **Em 16/10/2026:** Supabase exclusivo ativo; RLS e fluxo de troca obrigatória de senha implantados; contas cadastradas manualmente em Auth; função de convites desativada. Pendente: configuração Auth (cadastro público, URLs e SMTP para recuperação), homologação end-to-end com usuário real e domínio próprio.
 - Atualmente não há anexo/upload de documentos, integração direta com parceiros, notificações transacionais automáticas, aceite digital formal, envio automatizado de contratos ou comissionamento.
 - Atualização de tela por recarga e polling a cada 60 segundos. Limite atual: até 10 mil registros por tabela no cliente e 150 eventos por solicitação. Para volumes grandes, implementar paginação e agregação SQL seguras.
 - A trilha de eventos é imutável pela API da aplicação, mas não é um log antifraude de nível pericial. Para auditoria ampliada, incluir trilha de alteração dos campos antes/depois, retenção e alertas de acesso.
