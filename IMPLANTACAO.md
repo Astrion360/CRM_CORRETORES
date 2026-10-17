@@ -24,13 +24,24 @@ Foram realizados testes transacionais no banco `ruibwnajvardznucetcg` usando ide
 
 **Limitação:** esses testes verificam as regras do PostgreSQL com papéis/JWT simulados, mas **não** comprovam login real, entrega de convites, SMTP, integridade de JWT na API ou comportamento real entre navegadores. Testes end-to-end com contas de corretores continuam obrigatórios.
 
+## Política de usuários — atualizada em 16/10/2026
+
+**Padrão adotado:** cadastro manual no Supabase Authentication → Users → Add user → Create new user, senha provisória informada pela Astrion e troca obrigatória no primeiro login. Usuário não cria a própria conta.
+
+- Banco: `password_change_required BOOLEAN NOT NULL DEFAULT TRUE` em `public.profiles`; políticas de leitura/escrita exigem `active` e senha inicial já substituída. O próprio perfil continua disponível para guiar a troca.
+- Trigger protegido `private.mark_initial_password_changed`: limpa pendência quando o Auth registra mudança da senha; conta criada manualmente começa suspensa e é ativada pelo gestor no CRM.
+- Interface: botão **Cadastrar corretor** informa o procedimento; a situação **Troca de senha pendente** aparece nos cadastros; primeiro login exige nova senha e confirmação (mínimo 12 caracteres).
+- Convites: `invite-broker` **desativada**, versão 2, responde `410`. Nenhum endpoint alternativo de criação foi implantado.
+- Testes SQL com `ROLLBACK`: perfil novo, mesmo marcado ativo para fins de teste, vê **0 produtos** antes da troca; após limpeza privilegiada da pendência, vê **6**; usuário comum não consegue alterar a pendência diretamente. Teste ponta a ponta da troca pelo Auth ainda pendente.
+- **Pendente em Supabase Auth:** desabilitar `Allow new users to sign up` no painel; configurar `Site URL` e `Redirect URLs` corretas (não localhost); configurar SMTP para eventual recuperação de senha. Estas opções **não** foram modificadas via conectores nesta etapa.
+
 ## Pendências antes de uso de dados reais
 
-1. **Finalizar o primeiro administrador:** usuário `wellington@astrion360.com.br` criado no Supabase Auth e marcado como `role='admin', active=false`. Aguardando confirmação do e-mail pelo próprio titular. Migration `activate_initial_admin_only_after_email_verification` libera `active=true` automaticamente apenas para o ID do primeiro usuário quando o Auth confirmar o e-mail. A página temporária `ativar.html` já foi excluída do GitHub (commit `0ae000b`).
+1. **Administrador inicial:** já criado e confirmado no Supabase Auth, com papel `admin` e perfil ativo. A página temporária de ativação foi excluída do GitHub.
 2. Authentication → URL Configuration: configurar **Site URL** e redirect permitido `https://astrion360.github.io/CRM_CORRETORES/`. Reavaliar quando configurar Cloudflare.
-3. Authentication: desabilitar self-signup público; definir SMTP transacional e testar convites/recuperação de senha; habilitar MFA do administrador.
+3. Authentication: **desabilitar autoinscrição pública**; configurar Site URL/Redirect URLs, SMTP para recuperação e MFA administrativo. Convites foram substituídos pelo cadastro manual.
 4. Testar na prática contas de **dois corretores diferentes**, inclusive tentativas de ler ou modificar IDs da carteira alheia diretamente pela API, consultas privadas da assessoria e cotação publicada/não publicada.
-5. Homologar o convite via `invite-broker`, status comercial, cadastro de clientes, propostas e notas; revisar LGPD e retenção.
+5. Homologar cadastro manual pelo Supabase Auth, ativação via CRM, troca obrigatória da senha no primeiro login, status comercial, clientes, propostas e notas; revisar LGPD e retenção.
 6. Conectar domínio Cloudflare quando estiver disponível e atualizar `CRM_SITE_URL`, CORS e redirect URLs do Auth para o novo domínio.
 
 ## Observações de segurança
