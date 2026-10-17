@@ -72,6 +72,8 @@ No CRM → **Corretores → Cadastrar corretor**, há instruções para esse cad
 
 O corretor recebe as credenciais por canal privado e acessa o CRM. **O primeiro acesso exige a substituição da senha provisória**, com mínimo de 12 caracteres e confirmação. Até que o Auth registre a atualização de senha, as políticas RLS impedem o acesso aos clientes, oportunidades, categorias e dados internos; somente o próprio perfil fica visível.
 
+Após o primeiro acesso, o usuário também pode selecionar **Alterar minha senha** no menu lateral. A nova senha passa pelo Supabase Auth; por segurança, o portal encerra a sessão globalmente e solicita novo login.
+
 A coluna `public.profiles.password_change_required` (default `true`) é limpa automaticamente por trigger protegido quando o Supabase Auth registra alteração de `encrypted_password`. O papel `authenticated` não tem permissão de alterar diretamente o marcador. Contas pré-existentes receberam `false` na implantação de 16/10/2026. A RLS verifica `active AND NOT password_change_required` para as ações de negócio.
 
 É necessário **desabilitar o cadastro público (Allow new users to sign up)** nas configurações do Supabase Auth. Essa configuração depende do painel Auth e ainda requer verificação pelo proprietário do projeto. Embora a RLS mantenha contas não autorizadas sem acesso, isso não equivale a desabilitar inscrições no serviço de autenticação.
