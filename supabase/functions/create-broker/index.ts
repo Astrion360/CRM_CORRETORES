@@ -1,7 +1,7 @@
 /**
  * ASTRION CRM Corretores | Cadastro manual de corretores
  * Acessível apenas para usuário admin ativo, com JWT verificado.
- * A senha provisória é gerada no servidor e retornada UMA ÚNICA VEZ ao administrador.
+ * A senha provisória é definida pela administração, transmitida apenas ao Supabase Auth.
  * Nunca registrar senhas em logs, GitHub, banco de dados auxiliar ou e-mail.
  */
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
@@ -25,9 +25,6 @@ function respond(body: Record<string,unknown>, status=200) {
    }
  });
 }
-function provisionalPassword() {
- return Array.from(crypto.getRandomValues(new Uint8Array(18)),v=>v.toString(16).padStart(2,'0')).join('');
-}
 Deno.serve(async (req: Request) => {
  if(req.headers.get('origin')!==SITE_ORIGIN) return respond({error:'Origem não permitida'},403);
  if(req.method==='OPTIONS') return respond({ok:true});
@@ -49,14 +46,15 @@ Deno.serve(async (req: Request) => {
    const fullName=String(payload.full_name||'').trim();
    const company=String(payload.company||'').trim();
    const phone=String(payload.phone||'').trim();
+   const temporaryPassword=String(payload.temporary_password||'');
    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||email.length>250||
-     fullName.length<2||fullName.length>140||company.length>140||phone.length>30)
+     fullName.length<2||fullName.length>140||company.length>140||phone.length>30||
+     temporaryPassword.length<12||temporaryPassword.length>128)
      return respond({error:'Preencha nome e e-mail válidos; revise os demais campos.'},400);
 
-   const tempPassword=provisionalPassword();
    const {data:newUser,error:createError}=await admin.auth.admin.createUser({
      email,
-     password:tempPassword,
+     password:temporaryPassword,
      email_confirm:true,
      user_metadata:{full_name:fullName},
    });
@@ -77,7 +75,7 @@ Deno.serve(async (req: Request) => {
    }
    return respond({
      ok:true,user_id:newUser.user.id,email:newProfile.email,
-     temporary_password:tempPassword,must_change_password:true
+     must_change_password:true
    },201);
  }catch(_e){
    return respond({error:'Não foi possível concluir o cadastro'},500);
