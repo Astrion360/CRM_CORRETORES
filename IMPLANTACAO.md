@@ -20,13 +20,13 @@ Foram realizados testes transacionais no banco `ruibwnajvardznucetcg` usando ide
 - Administrador simulado: 2 clientes e 1 pesquisa interna visíveis.
 - Tentativa de atualizar cliente de outra carteira: 0 registros alterados.
 - Tentativas simuladas de elevar função para administrador, inserir cliente em carteira alheia, registrar pesquisa interna, forjar evento de status e publicar cotação: todas negadas com SQLSTATE `42501`.
-- Security Advisor do Supabase sem alertas na última execução disponível.
+- Security Advisor: aviso `auth_leaked_password_protection` (proteção contra senhas vazadas desabilitada); habilitar pelo painel de autenticação antes de liberar corretores externos.
 
 **Limitação:** esses testes verificam as regras do PostgreSQL com papéis/JWT simulados, mas **não** comprovam login real, entrega de convites, SMTP, integridade de JWT na API ou comportamento real entre navegadores. Testes end-to-end com contas de corretores continuam obrigatórios.
 
 ## Pendências antes de uso de dados reais
 
-1. **Bootstrap do primeiro administrador:** no painel Supabase do novo projeto, acessar Authentication → Users → Add user e criar conta com e-mail corporativo. Não registrar senha em código, GitHub ou chat. Depois autorizar esse **ID exato** com `role='admin', active=true` no banco, mediante confirmação do titular.
+1. **Finalizar o primeiro administrador:** usuário `wellington@astrion360.com.br` criado no Supabase Auth e marcado como `role='admin', active=false`. Aguardando confirmação do e-mail pelo próprio titular. Migration `activate_initial_admin_only_after_email_verification` libera `active=true` automaticamente apenas para o ID do primeiro usuário quando o Auth confirmar o e-mail. A página temporária `ativar.html` já foi excluída do GitHub (commit `0ae000b`).
 2. Authentication → URL Configuration: configurar **Site URL** e redirect permitido `https://astrion360.github.io/CRM_CORRETORES/`. Reavaliar quando configurar Cloudflare.
 3. Authentication: desabilitar self-signup público; definir SMTP transacional e testar convites/recuperação de senha; habilitar MFA do administrador.
 4. Testar na prática contas de **dois corretores diferentes**, inclusive tentativas de ler ou modificar IDs da carteira alheia diretamente pela API, consultas privadas da assessoria e cotação publicada/não publicada.
@@ -34,6 +34,9 @@ Foram realizados testes transacionais no banco `ruibwnajvardznucetcg` usando ide
 6. Conectar domínio Cloudflare quando estiver disponível e atualizar `CRM_SITE_URL`, CORS e redirect URLs do Auth para o novo domínio.
 
 ## Observações de segurança
+- O log do Supabase registrou `mail.send` para confirmação de cadastro, mas isso não prova entrega na caixa de entrada. A confirmação da titularidade precisa ser concluída pelo destinatário.
+- A ativação automática não substitui os testes de login e de e-mail; o campo `active` permanece falso até `email_confirmed_at` ser registrado pelo Auth.
+
 - **Nunca publicar** service role, chaves secretas, senhas, conexões de banco ou segredos SMTP no frontend ou no repositório.
 - Login visível não significa autenticação/admin operacional até criar conta e completar homologação.
 - O projeto Supabase anterior da Astrion **não foi alterado**.
