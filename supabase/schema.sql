@@ -11,15 +11,16 @@ CREATE TABLE public.profiles (
  company text NOT NULL DEFAULT '', phone text NOT NULL DEFAULT '',
  role text NOT NULL DEFAULT 'broker' CHECK (role IN ('admin','broker')),
  active boolean NOT NULL DEFAULT false,
+ password_change_required boolean NOT NULL DEFAULT true,
  created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX profiles_role_active_idx ON public.profiles(role, active);
 
 CREATE FUNCTION private.is_active() RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
- SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND active)
+ SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND active AND NOT password_change_required)
 $$;
 CREATE FUNCTION private.is_admin() RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
- SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND active AND role='admin')
+ SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND active AND role='admin' AND NOT password_change_required)
 $$;
 REVOKE ALL ON FUNCTION private.is_active() FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION private.is_admin() FROM PUBLIC, anon;
@@ -35,6 +36,24 @@ BEGIN
 END $$;
 CREATE TRIGGER crm_new_user AFTER INSERT ON auth.users
 FOR EACH ROW EXECUTE FUNCTION private.on_user_created();
+
+-- Até atualizar a senha inicial, o usuário vê somente o próprio perfil.
+-- A troca oficial pelo Supabase Auth libera automaticamente os dados protegidos por RLS.
+CREATE FUNCTION private.mark_initial_password_changed()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $
+BEGIN
+ IF OLD.encrypted_password IS DISTINCT FROM NEW.encrypted_password
+    AND NEW.encrypted_password IS NOT NULL THEN
+   UPDATE public.profiles SET password_change_required = false
+   WHERE id = NEW.id AND password_change_required = true AND active = true;
+ END IF;
+ RETURN NEW;
+END;
+$;
+CREATE TRIGGER crm_initial_password_changed
+AFTER UPDATE OF encrypted_password ON auth.users
+FOR EACH ROW EXECUTE FUNCTION private.mark_initial_password_changed();
+REVOKE ALL ON FUNCTION private.mark_initial_password_changed() FROM PUBLIC, anon, authenticated;
 
 -- Apenas categorias genéricas. Nenhum cadastro/parâmetro individual por administradora.
 CREATE TABLE public.products (
@@ -258,6 +277,7 @@ GRANT INSERT(opportunity_id,owner_id,recorded_by,partner_name,result_status,cred
 
 -- Funções trigger privilegiadas não devem ser diretamente executáveis pelos papéis do site.
 REVOKE ALL ON FUNCTION private.on_user_created() FROM PUBLIC, anon, authenticated;
+REVOKE UPDATE(password_change_required) ON public.profiles FROM authenticated;
 REVOKE ALL ON FUNCTION private.touch_updated() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION private.validate_opportunity() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION private.log_stage() FROM PUBLIC, anon, authenticated;
@@ -269,5 +289,5 @@ INSERT INTO public.products(name,category) VALUES
 COMMIT;
 
 -- Primeiro admin, SOMENTE após criação de usuário em Authentication (substituir e-mail):
--- UPDATE public.profiles SET role='admin',active=true WHERE email='SEU-EMAIL@DOMINIO.COM';
+-- UPDATE public.profiles SET role='admin',active=true,password_change_required=false WHERE email='SEU-EMAIL@DOMINIO.COM';
 -- SELECT id,email,role,active FROM public.profiles;
