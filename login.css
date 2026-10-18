@@ -1,220 +1,65 @@
-/* Astrion CRM | Tela real de login baseada na arte aprovada, 18/10/2026.
-   Regras limitadas a .astrion-reference-login: não modificam o CRM autenticado. */
-#app .astrion-reference-login{display:grid!important;grid-template-columns:minmax(0,40.7fr) minmax(0,59.3fr)!important;min-height:100vh;min-height:100svh;background:#fff;overflow:hidden;font-family:Manrope,"DM Sans",system-ui,sans-serif}
-#app .astrion-reference-login .login-left{display:flex!important;flex-direction:column;align-items:stretch;min-width:0;min-height:100svh;padding:44px clamp(30px,6.2vw,96px) 44px!important;background:#fff!important;position:relative}
-#app .astrion-reference-login .reference-brand{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;flex:0 0 auto;min-height:118px}
-#app .astrion-reference-login .reference-brand img{height:120px;width:178px;max-width:56%;object-fit:contain;display:block}
-#app .astrion-reference-login .brand-fallback{display:none;font-size:22px;font-weight:800;letter-spacing:.18em;color:#092858}
-#app .astrion-reference-login .reference-brand .brand-divider{display:block;width:1px;height:61px;background:#9eb4cb;flex:0 0 1px}
-#app .astrion-reference-login .reference-brand .brand-detail{color:#102f60;font-size:12px;line-height:1.6;font-weight:850;letter-spacing:.115em;text-transform:uppercase}
-#app .astrion-reference-login .login-inner{width:100%!important;max-width:435px!important;margin:73px 0 0!important}
-#app .astrion-reference-login .login-inner>.eyebrow{display:block;color:#4b8bc5;font-size:10px;letter-spacing:.29em;font-weight:850;margin-bottom:16px}
-#app .astrion-reference-login .login-inner h1{font-family:Manrope,"DM Sans",sans-serif;font-size:clamp(32px,3.1vw,46px);line-height:1.06;letter-spacing:-.065em;color:#0b2957;font-weight:850;margin:0 0 12px}
-#app .astrion-reference-login .login-inner h1 .brand-blue{display:block;color:#0c5198}
-#app .astrion-reference-login .login-inner>p{color:#5e7696;font-size:15px;line-height:1.6;margin:0 0 33px}
-#app .astrion-reference-login .login-form{display:flex;flex-direction:column;gap:18px}
-#app .astrion-reference-login .login-form label{font-size:13px;line-height:1.2;font-weight:800;color:#163760;margin:0 0 8px;display:block}
-#app .astrion-reference-login .login-field-wrap{position:relative}
-#app .astrion-reference-login .login-field-wrap>svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:#5d7898;pointer-events:none}
-#app .astrion-reference-login .login-field-wrap>.field{height:53px;width:100%;border:1px solid #ccdaeb;border-radius:10px;background:linear-gradient(180deg,#e8f1fb,#edf4fc);padding:11px 48px 11px 49px;box-shadow:none;color:#102b53;font-size:14px}
-#app .astrion-reference-login .login-field-wrap>.field::placeholder{color:#8196ae;opacity:1}
-#app .astrion-reference-login .login-field-wrap>.field:focus{outline:2px solid #5395d0;outline-offset:1px;border-color:#659ccf}
-#app .astrion-reference-login .password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:10px;color:#5d7898;display:grid;place-items:center;border-radius:8px;cursor:pointer}
-#app .astrion-reference-login .password-toggle:hover{background:#d7e7f6;color:#163f77}
-#app .astrion-reference-login .password-toggle svg{width:19px;height:19px}
-#app .astrion-reference-login .login-form .btn-primary{min-height:54px;border:0;border-radius:10px;background:linear-gradient(110deg,#07518b,#103a74);color:#fff;font-size:14px;font-weight:850;box-shadow:0 10px 21px rgba(6,56,109,.12);margin-top:5px}
-#app .astrion-reference-login .login-form .btn-primary:hover{background:linear-gradient(110deg,#0961a4,#0d386b)}
-#app .astrion-reference-login .auth-link{margin:11px 0 0;text-align:right}
-#app .astrion-reference-login .auth-link .link-button{color:#084b90;font-size:13px;font-weight:800}
-#app .astrion-reference-login .login-assurance{border-top:1px solid #dbe3ed;padding-top:30px;margin-top:39px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start;gap:0}
-#app .astrion-reference-login .assurance-item{display:flex;gap:9px;align-items:center;padding:0 8px;font-size:10px;line-height:1.45;color:#2c5180}
+/* Astrion CRM Corretores | Login responsivo v4. Escopo restrito ao login. */
+#app .astrion-reference-login{--deep:#082550;--blue:#09549b;display:grid;grid-template-columns:minmax(410px,41.2%) minmax(0,1fr);min-height:100svh;min-width:0;background:#fff;color:#153354;font-family:Manrope,'DM Sans',system-ui,sans-serif;overflow:visible}
+#app .astrion-reference-login *{box-sizing:border-box}
+#app .astrion-reference-login .login-left{min-width:0;min-height:100svh;display:flex;flex-direction:column;align-items:stretch;padding:clamp(22px,3.1vh,44px) clamp(27px,5.7vw,94px) clamp(18px,3vh,40px);background:#fff;isolation:isolate}
+#app .astrion-reference-login .reference-brand{min-height:108px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:clamp(12px,1.5vw,22px);width:100%;margin:0 auto}
+#app .astrion-reference-login .reference-brand img{height:clamp(84px,9.4vh,117px);width:clamp(126px,13vw,186px);max-width:55%;object-fit:contain;display:block}
+#app .astrion-reference-login .brand-fallback{display:none;font-size:22px;font-weight:800;letter-spacing:.2em;color:#123967}
+#app .astrion-reference-login .brand-divider{height:60px;flex:0 0 1px;background:#b5c4d4}
+#app .astrion-reference-login .brand-detail{font-size:clamp(10px,.9vw,13px);font-weight:800;letter-spacing:.11em;line-height:1.62;color:#143560;text-transform:uppercase}
+#app .astrion-reference-login .login-inner{width:min(100%,440px);max-width:none;margin:auto auto;min-width:0;padding:clamp(16px,3vh,30px) 0}
+#app .astrion-reference-login .login-inner>.eyebrow{display:block;margin:0 0 18px;color:#4282c0;font-size:10px;letter-spacing:.3em;font-weight:850}
+#app .astrion-reference-login .login-inner h1{font:850 clamp(29px,3.15vw,46px)/1.09 Manrope,system-ui,sans-serif;letter-spacing:-.065em;color:#0b2b55;margin:0 0 11px;text-wrap:balance}
+#app .astrion-reference-login .login-inner h1 .brand-blue{color:#0c569b;display:block}
+#app .astrion-reference-login .login-inner>p{color:#5a7696;line-height:1.62;font-size:clamp(13px,1.05vw,15px);margin:0 0 clamp(23px,3.2vh,36px)}
+#app .astrion-reference-login .login-form{display:flex;flex-direction:column;gap:clamp(12px,1.9vh,20px);width:100%}
+#app .astrion-reference-login .login-form label{display:block;margin:0 0 7px;color:#193b68;font-size:13px;font-weight:800;line-height:1.3}
+#app .astrion-reference-login .login-field-wrap{width:100%;position:relative}
+#app .astrion-reference-login .login-field-wrap>svg{width:19px;height:19px;position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#587795;pointer-events:none;z-index:1}
+#app .astrion-reference-login .login-field-wrap input.field{height:clamp(49px,5.6vh,58px);width:100%;border:1px solid #cbdcee;border-radius:10px;background:#eaf2fb;color:#17375f;font:500 14px 'DM Sans',system-ui,sans-serif;padding:10px 48px 10px 49px;box-shadow:none;outline:none}
+#app .astrion-reference-login .login-field-wrap input.field:focus{border-color:#397bbd;box-shadow:0 0 0 3px rgba(43,124,194,.16)}
+#app .astrion-reference-login .login-field-wrap input.field::placeholder{color:#7e94ac;opacity:1}
+#app .astrion-reference-login .password-toggle{position:absolute;right:7px;top:50%;transform:translateY(-50%);border:0;border-radius:8px;display:grid;place-items:center;padding:10px;background:transparent;color:#5a7997;cursor:pointer}
+#app .astrion-reference-login .password-toggle:hover{background:#dae8f6}
+#app .astrion-reference-login .password-toggle svg{width:20px;height:20px}
+#app .astrion-reference-login .login-form button[type=submit]{width:100%;height:clamp(52px,5.9vh,61px);border:0;border-radius:10px;background:linear-gradient(115deg,#0c598f,#0f3974);color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 10px 21px rgba(13,60,115,.1);margin-top:4px}
+#app .astrion-reference-login .login-form button[type=submit]:hover{filter:brightness(1.1)}
+#app .astrion-reference-login .auth-link{margin:10px 0 0;text-align:right;min-height:19px}
+#app .astrion-reference-login .auth-link .link-button{color:#0d4c8d;font-weight:800;font-size:13px}
+#app .astrion-reference-login .login-assurance{margin-top:clamp(23px,4vh,43px);padding-top:clamp(16px,2.9vh,30px);border-top:1px solid #dce5ed;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+#app .astrion-reference-login .assurance-item{display:flex;align-items:center;gap:9px;min-width:0;padding:0 9px;color:#335778;line-height:1.43;font-size:clamp(9px,.72vw,11px)}
 #app .astrion-reference-login .assurance-item:first-child{padding-left:0}
-#app .astrion-reference-login .assurance-item+.assurance-item{border-left:1px solid #d6e1ed}
-#app .astrion-reference-login .assurance-item svg{width:27px;height:27px;color:#092d64;flex:0 0 27px}
-#app .astrion-reference-login .login-foot{margin-top:auto;padding-top:28px;color:#8295b1;font-size:10px;line-height:1.5}
-#app .astrion-reference-login .login-right{padding:0!important;display:block!important;position:relative;min-width:0;min-height:100svh;overflow:hidden;background:radial-gradient(ellipse at 84% 28%,#315d8b 0,#164779 26%,#092f60 59%,#052346 100%)!important}
-#app .astrion-reference-login .login-right:after{display:none}
-#app .astrion-reference-login .reference-scenery{position:absolute;left:0;right:0;top:31.5%;height:47%;z-index:0;background-image:linear-gradient(to bottom,#0c3769 0%,rgba(7,34,64,0) 16%,rgba(6,29,57,0) 60%,#062a53 100%),url("./assets/login-scenery.webp");background-repeat:no-repeat;background-position:center center,center top;background-size:100% 100%,100% auto;opacity:.98}
-#app .astrion-reference-login .login-right .hero-panel{display:contents}
-#app .astrion-reference-login .reference-hero-top{position:absolute;z-index:2;top:6.7%;left:7%;right:5%;max-width:760px}
-#app .astrion-reference-login .reference-hero-top .eyebrow{font-size:10px;letter-spacing:.37em;color:#daeafd;font-weight:750;margin:0 0 19px}
-#app .astrion-reference-login .reference-hero-top h2{font-family:Manrope,"DM Sans",sans-serif;font-size:clamp(35px,3.25vw,53px)!important;line-height:1.055!important;letter-spacing:-.065em!important;margin:0!important;color:white;max-width:740px;font-weight:850}
-#app .astrion-reference-login .reference-hero-top h2 .title-gradient{color:#99c9fb}
-#app .astrion-reference-login .reference-hero-top p{font-size:16px!important;color:#e6eef8!important;line-height:1.42!important;margin:18px 0 0;max-width:570px}
-#app .astrion-reference-login .reference-accent{width:45px;height:2px;border-radius:1px;background:#d7ad56;margin:18px 0 0}
-#app .astrion-reference-login .reference-cards{position:absolute;z-index:3;left:7%;right:7%;bottom:18.2%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-#app .astrion-reference-login .reference-card{min-width:0;min-height:154px;padding:19px 16px 14px;border:1px solid rgba(230,242,255,.28);border-radius:13px;background:linear-gradient(125deg,rgba(122,170,211,.27),rgba(8,34,68,.38));box-shadow:inset 0 1px 0 rgba(255,255,255,.19),0 12px 35px rgba(5,19,42,.11);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);transition:transform .25s ease,background-color .25s ease}
-#app .astrion-reference-login .reference-card:hover{transform:translateY(-5px);background-color:rgba(91,149,194,.2)}
-#app .astrion-reference-login .reference-card svg{width:33px;height:33px;color:#fff;stroke-width:1.5;display:block;margin-bottom:12px}
-#app .astrion-reference-login .reference-card strong{display:block;color:#fff;font-size:14px;line-height:1.35;font-weight:800;margin-bottom:7px}
-#app .astrion-reference-login .reference-card small{display:block;color:#d6e2f1;font-size:11px;line-height:1.48}
-#app .astrion-reference-login .reference-bottom{position:absolute;z-index:3;left:7%;right:5%;bottom:5%;display:grid;grid-template-columns:repeat(4,minmax(0,.95fr)) minmax(148px,1.35fr);gap:18px;align-items:start}
-#app .astrion-reference-login .reference-step{display:flex;flex-direction:column;gap:4px;min-width:0;position:relative;color:#fff}
-#app .astrion-reference-login .reference-step:not(:nth-child(4)):after{content:"›";position:absolute;right:-12px;top:16px;font-size:22px;color:#e0ecf6;font-weight:300}
-#app .astrion-reference-login .reference-step svg{width:29px;height:29px;display:block;margin-bottom:5px;stroke-width:1.45;color:#edf6ff}
-#app .astrion-reference-login .reference-step strong{font-size:12px;color:#fff;font-weight:800}
-#app .astrion-reference-login .reference-step small{color:#c2d4e8;font-size:10px;line-height:1.45}
-#app .astrion-reference-login .reference-signature{font-family:"Great Vibes","Brush Script MT","Segoe Script",cursive;font-size:clamp(22px,2.5vw,34px);color:#f6e1cf;font-style:italic;line-height:1.03;text-align:center;letter-spacing:.01em;transform:rotate(-7deg);padding-top:6px}
-#app .astrion-reference-login .reference-signature:after{content:"";display:block;width:80px;height:2px;background:#d4ad61;margin:11px 20% 0 auto}
-@media(max-width:1400px){#app .astrion-reference-login .login-left{padding-left:clamp(30px,5vw,83px)!important;padding-right:clamp(30px,5vw,83px)!important}#app .astrion-reference-login .login-inner{margin-top:48px!important}#app .astrion-reference-login .reference-hero-top h2{font-size:clamp(33px,3.45vw,49px)!important}#app .astrion-reference-login .reference-card{padding:16px 12px;min-height:135px}#app .astrion-reference-login .reference-card small{font-size:10px}#app .astrion-reference-login .reference-bottom{gap:12px}}
-@media(min-width:901px) and (max-height:800px){#app .astrion-reference-login .login-left{padding-top:20px!important;padding-bottom:20px!important}#app .astrion-reference-login .reference-brand{min-height:85px}#app .astrion-reference-login .reference-brand img{height:85px}#app .astrion-reference-login .login-inner{margin-top:30px!important}#app .astrion-reference-login .login-inner h1{font-size:36px}#app .astrion-reference-login .login-assurance{margin-top:22px;padding-top:18px}#app .astrion-reference-login .reference-cards{bottom:18%}#app .astrion-reference-login .reference-bottom{bottom:3%}#app .astrion-reference-login .reference-hero-top h2{font-size:36px!important}#app .astrion-reference-login .reference-card{min-height:112px;padding:12px}#app .astrion-reference-login .reference-card svg{width:25px;height:25px;margin-bottom:6px}}
-@media(max-width:900px){#app .astrion-reference-login{grid-template-columns:minmax(0,1fr)!important}#app .astrion-reference-login .login-left{min-height:100svh;padding:24px max(20px,5vw) 23px!important}#app .astrion-reference-login .reference-brand img{height:96px}#app .astrion-reference-login .login-inner{margin:40px auto 0!important}#app .astrion-reference-login .login-right{display:none!important}#app .astrion-reference-login .login-foot{margin-top:40px}#app .astrion-reference-login .login-assurance{margin-top:28px;padding-top:20px}}
-@media(max-width:470px){#app .astrion-reference-login .reference-brand{gap:10px;min-height:78px}#app .astrion-reference-login .reference-brand img{width:135px;height:85px}#app .astrion-reference-login .reference-brand .brand-divider{height:48px}#app .astrion-reference-login .reference-brand .brand-detail{font-size:10px}#app .astrion-reference-login .login-inner h1{font-size:33px}#app .astrion-reference-login .login-inner>p{font-size:13px}#app .astrion-reference-login .assurance-item{font-size:9px;padding:0 5px;gap:5px}#app .astrion-reference-login .assurance-item svg{width:22px;height:22px;flex-basis:22px}}
-@media(prefers-reduced-motion:reduce){#app .astrion-reference-login .reference-card{transition:none!important}}
-
-/* Correção responsiva 18/10: evitar sobreposição entre cartões e etapas.
-   Layout usa fluxo vertical real em vez de posicionamento absoluto percentual. */
-#app .astrion-reference-login{
-  align-items:stretch;
-  overflow:visible;
-}
-#app .astrion-reference-login .login-right{
-  display:flex!important;
-  flex-direction:column;
-  justify-content:flex-start;
-  align-items:stretch;
-  min-height:max(100svh,780px);
-  padding:0!important;
-  isolation:isolate;
-}
-#app .astrion-reference-login .reference-hero-top{
-  position:relative;
-  top:auto;left:auto;right:auto;
-  flex:0 0 auto;
-  width:auto;
-  max-width:none;
-  margin:0 6.8%;
-  padding-top:clamp(36px,6.6vh,72px);
-}
-#app .astrion-reference-login .reference-scenery{
-  position:absolute;
-  top:27%;bottom:0;left:0;right:0;
-  height:auto;
-  z-index:-1;
-  background-image:
-    linear-gradient(to bottom,#103967 0%,rgba(13,45,81,.10) 12%,rgba(5,30,58,.02) 42%,rgba(6,34,66,.36) 60%,#072d58 89%,#062a53 100%),
-    url("./assets/login-scenery.webp");
-  background-size:100% 100%,100% auto;
-  background-position:center,center top;
-  background-repeat:no-repeat;
-  opacity:1;
-}
-#app .astrion-reference-login .reference-cards{
-  position:relative;
-  left:auto;right:auto;top:auto;bottom:auto;
-  z-index:2;
-  flex:0 0 auto;
-  margin:auto 6.8% 0;
-  gap:clamp(8px,.85vw,14px);
-}
-#app .astrion-reference-login .reference-card{
-  min-height:clamp(120px,15vh,155px);
-  padding:clamp(11px,1.25vw,18px);
-}
-#app .astrion-reference-login .reference-bottom{
-  position:relative;
-  left:auto;right:auto;top:auto;bottom:auto;
-  z-index:2;
-  flex:0 0 auto;
-  margin:clamp(24px,4.2vh,44px) 6.8% clamp(27px,5vh,53px);
-  gap:clamp(6px,1vw,15px);
-  grid-template-columns:repeat(4,minmax(0,1fr)) minmax(125px,1.15fr);
-}
-#app .astrion-reference-login .reference-signature{
-  font-size:clamp(23px,2.5vw,34px);
-  line-height:1.1;
-  padding-top:0;
-}
-#app .astrion-reference-login .login-left{
-  min-height:max(100svh,780px);
-  padding-top:clamp(24px,3.5vh,44px)!important;
-  padding-bottom:clamp(22px,3.8vh,44px)!important;
-}
-#app .astrion-reference-login .login-inner{
-  margin-top:clamp(28px,5.5vh,66px)!important;
-}
-#app .astrion-reference-login .login-assurance{
-  margin-top:clamp(22px,3.5vh,36px);
-  padding-top:clamp(16px,2.7vh,26px);
-}
-@media(min-width:901px) and (max-width:1450px){
-  #app .astrion-reference-login .reference-hero-top h2{
-    font-size:clamp(31px,3.3vw,47px)!important;
-    line-height:1.06!important;
-  }
-  #app .astrion-reference-login .reference-hero-top p{
-    font-size:clamp(12px,1.2vw,15px)!important;
-  }
-  #app .astrion-reference-login .reference-card svg{
-    width:clamp(24px,2.7vw,31px);
-    height:clamp(24px,2.7vw,31px);
-    margin-bottom:8px;
-  }
-  #app .astrion-reference-login .reference-card strong{font-size:clamp(11px,1.1vw,14px)}
-  #app .astrion-reference-login .reference-card small{font-size:clamp(9px,.85vw,11px)}
-  #app .astrion-reference-login .reference-step svg{width:24px;height:24px}
-  #app .astrion-reference-login .reference-step strong{font-size:11px}
-  #app .astrion-reference-login .reference-step small{font-size:10px}
-  #app .astrion-reference-login .reference-bottom{margin-top:26px;margin-bottom:34px}
-}
-@media(min-width:901px) and (max-height:790px){
-  #app .astrion-reference-login .login-right{min-height:780px}
-  #app .astrion-reference-login .login-left{min-height:780px}
-  #app .astrion-reference-login .reference-hero-top{padding-top:30px}
-  #app .astrion-reference-login .reference-hero-top h2{font-size:clamp(30px,3vw,40px)!important}
-  #app .astrion-reference-login .reference-card{min-height:113px}
-  #app .astrion-reference-login .reference-cards{margin-top:auto}
-  #app .astrion-reference-login .reference-bottom{margin-top:23px;margin-bottom:25px}
-}
-@media(max-width:900px){
-  #app .astrion-reference-login .login-right{display:none!important}
-  #app .astrion-reference-login .login-left{min-height:100svh}
-  #app .astrion-reference-login .login-inner{margin:38px auto 0!important}
-}
-
-/* Acabamento: slogan completo sem corte no rodapé da arte */
-#app .astrion-reference-login .reference-bottom{
-  grid-template-columns:repeat(4,minmax(0,1fr)) minmax(158px,1.72fr);
-  align-items:start;
-}
-#app .astrion-reference-login .reference-signature{
-  font-size:clamp(21px,2.05vw,28px);
-  line-height:.99;
-  letter-spacing:-.016em;
-  padding:0 2px 5px;
-  transform:rotate(-4deg);
-  overflow:visible;
-}
-#app .astrion-reference-login .reference-signature:after{
-  margin-top:8px;
-}
-@media(min-width:901px) and (max-height:1000px){
-  #app .astrion-reference-login .reference-hero-top{
-    padding-top:clamp(27px,4.8vh,46px);
-  }
-  #app .astrion-reference-login .reference-hero-top .eyebrow{
-    margin-bottom:12px;
-  }
-  #app .astrion-reference-login .reference-hero-top h2{
-    font-size:clamp(29px,2.95vw,43px)!important;
-    line-height:1.07!important;
-  }
-  #app .astrion-reference-login .reference-hero-top p{
-    margin-top:12px;
-  }
-  #app .astrion-reference-login .reference-accent{
-    margin-top:12px;
-  }
-  #app .astrion-reference-login .reference-card{
-    min-height:120px;
-    padding:11px 12px 12px;
-  }
-  #app .astrion-reference-login .reference-bottom{
-    margin-top:clamp(17px,2.4vh,24px);
-    margin-bottom:clamp(24px,3.6vh,36px);
-    gap:clamp(5px,.8vw,12px);
-  }
-  #app .astrion-reference-login .reference-signature{
-    font-size:clamp(21px,2vw,27px);
-  }
-}
+#app .astrion-reference-login .assurance-item+.assurance-item{border-left:1px solid #dae5ef}
+#app .astrion-reference-login .assurance-item svg{width:27px;height:27px;flex:0 0 27px;color:#173b6f}
+#app .astrion-reference-login .login-foot{margin-top:0;display:block;flex:0 0 auto;color:#8196ac;font-size:10px;line-height:1.55;padding-top:12px}
+/* Imagem real 2K ocupa o painel inteiro, com cover e focal; nada de faixas. */
+#app .astrion-reference-login .login-right{position:relative;display:grid;grid-template-rows:auto minmax(clamp(100px,16vh,240px),1fr) auto auto;min-width:0;min-height:100svh;overflow:hidden;isolation:isolate;background:#072c56;color:#fff;padding:clamp(27px,4.9vh,64px) clamp(22px,4.2vw,69px) clamp(21px,3.7vh,45px)}
+#app .astrion-reference-login .login-right::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(4,34,74,.84) 0%,rgba(3,27,58,.66) 24%,rgba(3,29,62,.04) 45%,rgba(3,31,64,.16) 63%,rgba(3,26,55,.80) 82%,rgba(4,26,55,.98) 100%)}
+#app .astrion-reference-login .reference-scenery{position:absolute;inset:0;z-index:-2;overflow:hidden;background:#164674}
+#app .astrion-reference-login .reference-scenery .reference-scenery-image{display:block;width:100%;height:100%;object-fit:cover;object-position:56% 50%;image-rendering:auto;filter:saturate(1.07) contrast(1.025)}
+#app .astrion-reference-login .reference-hero-top{grid-row:1;position:relative;margin:0;inset:auto;width:100%;max-width:780px;z-index:1}
+#app .astrion-reference-login .reference-hero-top>.eyebrow{color:#ebf3fc;font-size:clamp(9px,.78vw,11px);font-weight:700;letter-spacing:.32em;margin:0 0 clamp(13px,2.1vh,21px)}
+#app .astrion-reference-login .reference-hero-top h2{font:850 clamp(31px,3.08vw,54px)/1.065 Manrope,system-ui,sans-serif;letter-spacing:-.06em;color:#fff;margin:0;max-width:770px;text-wrap:balance}
+#app .astrion-reference-login .reference-hero-top h2 .title-gradient{color:#9dd2ff}
+#app .astrion-reference-login .reference-hero-top p{color:#e9f0f9;font-size:clamp(12px,1.04vw,16px);line-height:1.5;max-width:600px;margin:clamp(12px,2vh,22px) 0 0}
+#app .astrion-reference-login .reference-accent{height:2px;width:48px;background:#d8ae5b;margin:clamp(10px,1.6vh,17px) 0 0}
+#app .astrion-reference-login .reference-cards{grid-row:3;position:relative;inset:auto;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(7px,.8vw,13px);margin:0 0 clamp(20px,3vh,36px);width:100%;max-width:none}
+#app .astrion-reference-login .reference-card{min-width:0;min-height:clamp(115px,15vh,157px);padding:clamp(11px,1.2vw,19px);border:1px solid rgba(233,245,255,.35);border-radius:14px;background:linear-gradient(135deg,rgba(27,73,120,.68),rgba(7,38,75,.75));backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px);box-shadow:inset 0 1px 0 rgba(255,255,255,.13);transition:transform .2s,background .2s}
+#app .astrion-reference-login .reference-card:hover{transform:translateY(-4px);background:rgba(19,76,126,.81)}
+#app .astrion-reference-login .reference-card svg{display:block;width:clamp(26px,2.3vw,34px);height:clamp(26px,2.3vw,34px);stroke-width:1.65;color:#fff;margin:0 0 clamp(7px,1.2vh,12px)}
+#app .astrion-reference-login .reference-card strong{display:block;color:#fff;font-size:clamp(12px,.98vw,15px);font-weight:800;margin-bottom:6px;line-height:1.22}
+#app .astrion-reference-login .reference-card small{display:block;color:#d4e2f2;font-size:clamp(10px,.72vw,12px);line-height:1.43}
+#app .astrion-reference-login .reference-bottom{grid-row:4;position:relative;inset:auto;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(110px,1.15fr);align-items:start;gap:clamp(8px,.95vw,15px);width:100%;margin:0}
+#app .astrion-reference-login .reference-step{min-width:0;display:flex;flex-direction:column;gap:4px;position:relative;color:#fff}
+#app .astrion-reference-login .reference-step svg{height:clamp(22px,2vw,30px);width:clamp(22px,2vw,30px);display:block;margin-bottom:2px;color:#fff}
+#app .astrion-reference-login .reference-step strong{font-size:clamp(10px,.83vw,13px);font-weight:800;color:#fff}
+#app .astrion-reference-login .reference-step small{font-size:clamp(9px,.7vw,11px);line-height:1.4;color:#cedff0}
+#app .astrion-reference-login .reference-step:not(:nth-child(4)):after{content:'›';position:absolute;right:-8px;top:9px;color:#dfedfa;font-size:18px}
+#app .astrion-reference-login .reference-signature{align-self:center;max-width:100%;padding:0 0 6px;color:#fff1e6;letter-spacing:0;font:normal clamp(22px,2vw,31px)/.95 'Great Vibes','Segoe Script',cursive;text-align:center;transform:rotate(-5deg);overflow:visible}
+#app .astrion-reference-login .reference-signature:after{content:'';display:block;width:70px;height:2px;background:#e2b05d;margin:9px 8% 0 auto}
+@media(min-width:981px) and (max-width:1360px){#app .astrion-reference-login{grid-template-columns:minmax(390px,42%) minmax(0,1fr)}#app .astrion-reference-login .login-left{padding-left:clamp(30px,4vw,56px);padding-right:clamp(30px,4vw,56px)}#app .astrion-reference-login .login-right{padding-left:clamp(24px,3.2vw,48px);padding-right:clamp(24px,3.2vw,48px)}#app .astrion-reference-login .reference-hero-top h2{font-size:clamp(30px,3vw,43px)}#app .astrion-reference-login .reference-card{padding:12px;min-height:118px}#app .astrion-reference-login .reference-signature{font-size:clamp(20px,2vw,27px)}}
+@media(min-width:981px) and (max-height:760px){#app .astrion-reference-login .login-right{grid-template-rows:auto minmax(55px,1fr) auto auto;padding-top:23px;padding-bottom:22px}#app .astrion-reference-login .reference-hero-top h2{font-size:clamp(27px,2.75vw,42px)}#app .astrion-reference-login .reference-hero-top p{margin-top:9px}#app .astrion-reference-login .reference-card{min-height:108px;padding:10px}#app .astrion-reference-login .reference-cards{margin-bottom:19px}#app .astrion-reference-login .reference-card svg{margin-bottom:6px}#app .astrion-reference-login .login-left{padding-top:17px;padding-bottom:17px}#app .astrion-reference-login .reference-brand{min-height:81px}#app .astrion-reference-login .reference-brand img{height:78px}#app .astrion-reference-login .login-inner{padding-top:10px;padding-bottom:10px}#app .astrion-reference-login .login-assurance{margin-top:17px;padding-top:17px}}
+/* Menor que 980px: empilhamento genuíno; nenhum bloco é espremido ou cortado. */
+@media(max-width:980px){#app .astrion-reference-login{grid-template-columns:minmax(0,1fr)}#app .astrion-reference-login .login-left{min-height:100svh;padding:22px clamp(20px,7vw,90px) 24px}#app .astrion-reference-login .reference-brand{min-height:90px}#app .astrion-reference-login .reference-brand img{height:88px}#app .astrion-reference-login .login-inner{width:min(100%,450px);margin:38px auto}#app .astrion-reference-login .login-right{min-height:690px;grid-template-rows:auto minmax(110px,1fr) auto auto;padding:40px clamp(24px,6vw,76px) 32px}#app .astrion-reference-login .reference-hero-top h2{font-size:clamp(34px,5.5vw,53px)}#app .astrion-reference-login .reference-card{min-height:128px}#app .astrion-reference-login .reference-card small{font-size:11px}#app .astrion-reference-login .reference-step small{font-size:11px}#app .astrion-reference-login .reference-signature{font-size:28px}}
+@media(max-width:600px){#app .astrion-reference-login .login-right{grid-template-rows:auto minmax(150px,1fr) auto auto;min-height:1040px;padding:28px 21px 31px}#app .astrion-reference-login .reference-hero-top h2{font-size:clamp(30px,8vw,43px)}#app .astrion-reference-login .reference-hero-top h2 br{display:none}#app .astrion-reference-login .reference-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:26px}#app .astrion-reference-login .reference-card{min-height:130px;padding:15px}#app .astrion-reference-login .reference-card svg{width:30px;height:30px}#app .astrion-reference-login .reference-card strong{font-size:14px}#app .astrion-reference-login .reference-bottom{grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 12px}#app .astrion-reference-login .reference-step:after{display:none}#app .astrion-reference-login .reference-step svg{width:28px;height:28px}#app .astrion-reference-login .reference-step strong{font-size:12px}#app .astrion-reference-login .reference-signature{grid-column:1/-1;margin:12px auto 0;font-size:31px}#app .astrion-reference-login .reference-scenery-image{object-position:62% center}#app .astrion-reference-login .assurance-item{font-size:9px;gap:6px;padding:0 5px}#app .astrion-reference-login .assurance-item svg{width:22px;height:22px;flex-basis:22px}#app .astrion-reference-login .login-inner h1{font-size:34px}}
+@media(prefers-reduced-motion:reduce){#app .astrion-reference-login .reference-card{transition:none}}
