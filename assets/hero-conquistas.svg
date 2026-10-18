@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 730" role="img" aria-labelledby="title desc">
+<title id="title">Conquistas e planos para o futuro</title><desc id="desc">Ilustração contemporânea de um imóvel, um veículo e uma paisagem ao entardecer, em cores institucionais da Astrion</desc>
+<defs>
+  <linearGradient id="sky" x2=".8" y2="1"><stop stop-color="#0C2C57"/><stop offset=".45" stop-color="#336898"/><stop offset=".75" stop-color="#82A8C6"/><stop offset="1" stop-color="#F1BDA5"/></linearGradient>
+  <radialGradient id="sun"><stop stop-color="#FFEDD3" stop-opacity=".9"/><stop offset="1" stop-color="#F8D7AF" stop-opacity="0"/></radialGradient>
+  <linearGradient id="water" x2="0" y2="1"><stop stop-color="#1A547F"/><stop offset="1" stop-color="#0D315B"/></linearGradient>
+  <linearGradient id="home" x2="0" y2="1"><stop stop-color="#F6F6F2"/><stop offset="1" stop-color="#A6B7BF"/></linearGradient>
+  <linearGradient id="glass" x2=".8" y2="1"><stop stop-color="#99C8D4"/><stop offset=".55" stop-color="#214E70"/><stop offset="1" stop-color="#102F51"/></linearGradient>
+  <linearGradient id="car" x2="0" y2="1"><stop stop-color="#D9E4EC"/><stop offset=".5" stop-color="#6C859E"/><stop offset="1" stop-color="#1A344F"/></linearGradient>
+  <filter id="blur"><feGaussianBlur stdDeviation="18"/></filter>
+  <filter id="shadow"><feDropShadow dx="0" dy="15" stdDeviation="15" flood-color="#06152B" flood-opacity=".5"/></filter>
+  <filter id="glow"><feGaussianBlur stdDeviation="4"/></filter>
+</defs>
+<rect width="1060" height="730" fill="url(#sky)"/>
+<ellipse cx="855" cy="325" rx="285" ry="180" fill="url(#sun)"/>
+<path d="M0 338 115 302 207 328 305 283 419 338 566 268 692 328 824 270 940 302 1060 270V730H0Z" fill="#456788" opacity=".5"/>
+<path d="M0 405 143 366 265 386 378 347 515 386 668 334 811 381 943 347 1060 378V730H0Z" fill="#214F77" opacity=".72"/>
+<path d="M0 510 140 478 302 505 481 474 653 503 837 459 1060 481V730H0Z" fill="#12395E"/>
+<rect x="0" y="525" width="1060" height="205" fill="url(#water)"/>
+<path d="M0 535q115 14 237 1t228 0q115 12 213 0t382 0" fill="none" stroke="#B0D0DA" stroke-opacity=".25" stroke-width="3"/>
+<path d="M0 595q189-21 359 0t356-5q156-17 345 0" stroke="#FFF1D9" stroke-opacity=".11" stroke-width="3" fill="none"/>
+<!-- Modern house -->
+<g filter="url(#shadow)">
+<path d="M125 293 395 235 675 282 674 515 119 507Z" fill="#DDE2E4"/>
+<path d="M120 294 395 226 682 278 663 306 395 260 123 329Z" fill="#E8EDEB"/>
+<path d="M151 327 379 275 378 496 150 503Z" fill="#E4E9E7"/>
+<path d="M395 280 644 316 644 512 395 496Z" fill="#B0C6CC"/>
+<rect x="414" y="325" width="207" height="171" fill="url(#glass)"/>
+<path d="M445 341V494M513 340V496M582 347V500M413 413H623" stroke="#102F4E" stroke-width="11"/>
+<path d="M430 345V483M580 358V472" stroke="#F8D8A7" stroke-opacity=".25" stroke-width="14" filter="url(#blur)"/>
+<rect x="173" y="344" width="173" height="143" fill="url(#glass)" stroke="#9BAFBB" stroke-width="6"/>
+<path d="M254 345v143M173 413h173" stroke="#244B65" stroke-width="9"/>
+<path d="M186 355 244 347V483L187 486Z" fill="#B6D9E3" opacity=".17"/>
+<path d="M88 508 672 516 720 547 35 548Z" fill="#76899B"/>
+<path d="M20 547H751" stroke="#D1D8D8" stroke-width="15" stroke-opacity=".7"/>
+</g>
+<!-- terrace plants -->
+<g fill="#102E45">
+<rect x="84" y="494" width="53" height="21" rx="4"/>
+<path d="M111 494q-37-45-35-78 32 17 35 47 6-56 42-64-4 35-42 95Z" fill="#275F63"/>
+<rect x="652" y="496" width="34" height="20" rx="4"/>
+<path d="M668 497q-27-58-9-87 12 25 9 56 14-31 37-38-4 40-37 69Z" fill="#194E59"/>
+</g>
+<!-- driveway and vehicle -->
+<path d="M0 589 331 536 776 548 1060 618v112H0Z" fill="#162F4A"/>
+<path d="M0 617 369 550 780 563 1060 648" stroke="#8CAAC2" stroke-width="3" opacity=".23" fill="none"/>
+<g filter="url(#shadow)" transform="translate(480 450)">
+<path d="M18 87q9-32 40-46l92-17q34-7 55 6l56 40 53 11q14 3 17 23v31H9v-21q1-19 9-27Z" fill="url(#car)" stroke="#D5E2E9" stroke-width="5"/>
+<path d="m100 41 45-10q24-5 40 7l36 32-137-1Z" fill="#163953" stroke="#99BACC" stroke-width="4"/>
+<path d="M240 73 285 82 310 97 237 94Z" fill="#D6E5EB" opacity=".58"/>
+<rect x="13" y="95" width="40" height="14" rx="6" fill="#FDE8BA" filter="url(#glow)"/>
+<rect x="290" y="98" width="34" height="12" rx="4" fill="#F7D2C0"/>
+<path d="M10 131H332" stroke="#10283D" stroke-width="15"/>
+<circle cx="85" cy="135" r="29" fill="#0A1E30" stroke="#BEC9D3" stroke-width="10"/>
+<circle cx="85" cy="135" r="11" fill="#71889A"/>
+<circle cx="257" cy="135" r="29" fill="#0A1E30" stroke="#BEC9D3" stroke-width="10"/>
+<circle cx="257" cy="135" r="11" fill="#71889A"/>
+</g>
+<!-- atmospheric highlights -->
+<path d="M704 96q25 6 33 16-25 6-46-3M767 118q26 5 36 15-26 7-48-3" stroke="#EDF4F4" stroke-opacity=".36" stroke-width="3" fill="none" stroke-linecap="round"/>
+<rect width="1060" height="730" fill="#06182F" opacity=".08"/>
+</svg>
