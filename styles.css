@@ -35,3 +35,36 @@
 @media(max-width:1120px){.catalog-grid{grid-template-columns:1fr}.catalog-stats{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:650px){.catalog-grid{grid-template-columns:1fr}.catalog-card{padding:18px}.catalog-stats{grid-template-columns:1fr}.catalog-head{flex-wrap:wrap}.topbar{padding-left:20px;padding-right:20px}.content{padding-left:16px;padding-right:16px}}
 @media print{.sidebar,.topbar,.page-actions{display:none!important}.main{width:100%}.content{max-width:100%;padding:0}}
+
+/* Astrion | refinamento visual final, tema de conquistas */
+.login-logo{gap:20px}
+.login-logo .astrion-logo-holder{background:transparent!important;border:0!important;box-shadow:none!important;width:105px!important;min-width:105px!important;height:92px!important;padding:0!important;justify-content:center!important;overflow:hidden}
+.login-logo .astrion-logo-holder img{width:105px!important;max-width:105px!important;max-height:90px!important;height:90px!important;object-fit:contain;display:block}
+.login-logo .brand-name{display:block!important;color:#102D57;font-size:26px!important;letter-spacing:.23em!important;line-height:1!important}
+.login-logo .brand-sub{display:block!important;color:#426791!important;font-size:11px!important;letter-spacing:.2em!important;margin-top:10px!important}
+.login-logo .brand-name+.brand-sub{white-space:normal}
+.login-left{padding:32px clamp(32px,4.6vw,100px) 36px!important}
+.login-right{padding:46px!important;background:radial-gradient(ellipse at 80% 16%,#2B5E91 0%,#102F55 53%,#071B38 100%)}
+.hero-panel{max-width:680px!important}
+.hero-panel h2{font-size:clamp(32px,3.3vw,49px)!important;line-height:1.14!important;letter-spacing:-.05em!important;max-width:650px;margin:14px 0!important}
+.hero-panel>p{color:#D1E1F1!important;line-height:1.7!important;font-size:15px!important;max-width:595px}
+.dream-hero{margin-top:28px;position:relative;border:1px solid rgba(255,255,255,.28);overflow:hidden;border-radius:25px;background:#153C65;box-shadow:0 28px 78px rgba(3,15,33,.34);min-height:350px;isolation:isolate;transition:transform .45s cubic-bezier(.19,1,.22,1),box-shadow .45s}
+.dream-hero:hover{transform:translateY(-6px);box-shadow:0 38px 92px rgba(3,15,33,.45)}
+.dream-hero-image{position:absolute;inset:0;background-image:linear-gradient(0deg,rgba(5,24,44,.85) 0,rgba(5,24,44,.03) 54%,rgba(5,24,44,.05) 100%),url('./assets/hero-conquistas.svg');background-size:cover;background-position:center;transition:transform .8s cubic-bezier(.19,1,.22,1);z-index:-1}
+.dream-hero:hover .dream-hero-image{transform:scale(1.055)}
+.dream-hero-bottom{display:flex;align-items:center;gap:20px;position:absolute;bottom:0;left:0;right:0;padding:28px 27px 24px}
+.dream-hero-bottom strong{display:block;color:#FFF;max-width:450px;font-size:17px;line-height:1.35;font-weight:800;letter-spacing:-.02em}
+.dream-hero-bottom small{display:block;color:#B9D2E8;font-size:12px;margin-top:7px}
+.dream-symbol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:54px;height:74px;color:#fff;font-size:18px;border:1px solid rgba(255,255,255,.28);border-radius:14px;background:rgba(255,255,255,.1);backdrop-filter:blur(12px)}
+.dream-symbol span{line-height:1}
+.dream-steps{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:23px 3px 0;font-size:12px;color:#EAF4FC}
+.dream-steps span{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.dream-steps b{color:#9BCBF1;font-size:12px;font-weight:800}
+.dream-steps i{height:1px;background:rgba(196,223,247,.35);flex:1;min-width:9px}
+.topbar .home-shortcut{border:1px solid #DCE5F0;padding:8px 14px;font-size:12px;font-weight:750;border-radius:8px;background:#F7FAFF;color:#1E507D}
+.topbar .home-shortcut:hover{background:#EDF5FD}
+.modal-footer{flex-wrap:wrap}
+@media (max-width:1240px){.login-right{padding:35px!important}.dream-hero{min-height:290px}.hero-panel h2{font-size:36px!important}}
+@media (max-width:900px){.login-right{display:none!important}.login-left{min-height:100vh}.login-logo .astrion-logo-holder{width:80px!important;min-width:80px!important;height:72px!important}.login-logo .astrion-logo-holder img{height:70px!important;width:80px!important}.login-logo .brand-name{font-size:22px!important}}
+@media (max-width:580px){.login-left{padding:20px 23px!important}.login-logo{gap:11px}.login-logo .brand-name{font-size:20px!important}.login-logo .brand-sub{font-size:9px!important}}
+@media (prefers-reduced-motion:reduce){.dream-hero,.dream-hero-image{transition:none!important}}
