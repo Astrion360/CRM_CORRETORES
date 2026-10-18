@@ -6,7 +6,7 @@
 - Migration instalada `astrion_crm_initial_secure_schema_v2`.
 - Sete tabelas públicas: `profiles`, `products`, `clients`, `opportunities`, `opportunity_events`, `quote_options`, `partner_checks`; RLS habilitada em todas; 6 categorias genéricas.
 - Segurança do Supabase: análise automática inicial sem avisos; teste com perfil não aprovado retorna zero produtos/perfis/registros internos.
-- Edge Function `invite-broker` implantada e ativa, `verify_jwt=true`. Valida o usuário e seu papel de administrador em tempo de execução.
+- Edge Function legada `invite-broker` desativada (resposta HTTP 410). Novos corretores são cadastrados manualmente no painel Authentication → Users.
 - GitHub Pages: https://astrion360.github.io/CRM_CORRETORES/ abre a tela de login (e-mail/senha) após atualização de `config.js` com URL e chave **publicável**.
 - Correção de permissões do SQL `GRANT` publicada na branch `main`.
 
@@ -33,20 +33,21 @@ Foram realizados testes transacionais no banco `ruibwnajvardznucetcg` usando ide
 - Interface: botão **Cadastrar corretor** informa o procedimento; a situação **Troca de senha pendente** aparece nos cadastros; primeiro login exige nova senha e confirmação (mínimo 12 caracteres).
 - Convites: `invite-broker` **desativada**, versão 2, responde `410`. Nenhum endpoint alternativo de criação foi implantado.
 - Testes SQL com `ROLLBACK`: perfil novo, mesmo marcado ativo para fins de teste, vê **0 produtos** antes da troca; após limpeza privilegiada da pendência, vê **6**; usuário comum não consegue alterar a pendência diretamente. Teste ponta a ponta da troca pelo Auth ainda pendente.
-- **Pendente em Supabase Auth:** desabilitar `Allow new users to sign up` no painel; configurar `Site URL` e `Redirect URLs` corretas (não localhost); configurar SMTP para eventual recuperação de senha. Estas opções **não** foram modificadas via conectores nesta etapa.
+- **Atualizado em 18/10/2026:** `Allow new users to sign up` desabilitado; login por e-mail e senha preservado. `Site URL` alterada de `http://localhost:3000` para `https://astrion360.github.io/CRM_CORRETORES/` e o mesmo endereço adicionado aos Redirect URLs. Configurações salvas e confirmadas pela interface.
+- **Ainda pendente:** SMTP transacional para recuperação de senha; proteção contra senhas vazadas e MFA administrativo; testes reais com os dois primeiros corretores.
 
 ## Pendências antes de uso de dados reais
 
 1. **Administrador inicial:** já criado e confirmado no Supabase Auth, com papel `admin` e perfil ativo. A página temporária de ativação foi excluída do GitHub.
-2. Authentication → URL Configuration: configurar **Site URL** e redirect permitido `https://astrion360.github.io/CRM_CORRETORES/`. Reavaliar quando configurar Cloudflare.
-3. Authentication: **desabilitar autoinscrição pública**; configurar Site URL/Redirect URLs, SMTP para recuperação e MFA administrativo. Convites foram substituídos pelo cadastro manual.
+2. Authentication → URL Configuration: **concluído** para o endereço GitHub Pages em 18/10/2026. Reavaliar quando configurar Cloudflare.
+3. Authentication: **autoinscrição desabilitada** e URLs corrigidas. Ainda é necessário configurar SMTP para recuperação, proteção de senhas vazadas e MFA administrativo. Convites foram substituídos pelo cadastro manual.
 4. Testar na prática contas de **dois corretores diferentes**, inclusive tentativas de ler ou modificar IDs da carteira alheia diretamente pela API, consultas privadas da assessoria e cotação publicada/não publicada.
 5. Homologar cadastro manual pelo Supabase Auth, ativação via CRM, troca obrigatória da senha no primeiro login, status comercial, clientes, propostas e notas; revisar LGPD e retenção.
 6. Conectar domínio Cloudflare quando estiver disponível e atualizar `CRM_SITE_URL`, CORS e redirect URLs do Auth para o novo domínio.
 
 ## Observações de segurança
-- O log do Supabase registrou `mail.send` para confirmação de cadastro, mas isso não prova entrega na caixa de entrada. A confirmação da titularidade precisa ser concluída pelo destinatário.
-- A ativação automática não substitui os testes de login e de e-mail; o campo `active` permanece falso até `email_confirmed_at` ser registrado pelo Auth.
+- O cadastro inicial de administrador foi confirmado. Para novos corretores, o cadastro manual usa `Auto confirm user` e senha provisória; a pessoa deve obrigatoriamente trocar a senha antes de acessar dados de negócios.
+- Perfis de corretores criados manualmente pelo Auth começam inativos no CRM, mesmo com e-mail autoconfirmado, até ativação expressa pela administração.
 
 - **Nunca publicar** service role, chaves secretas, senhas, conexões de banco ou segredos SMTP no frontend ou no repositório.
 - Login visível não significa autenticação/admin operacional até criar conta e completar homologação.
