@@ -1,3 +1,25 @@
+# ASTRION CRM Corretores | Operação de cotações — v3
+
+**Versão publicada:** https://astrion360.github.io/CRM_CORRETORES/
+
+## Jornada comercial v3
+
+1. O corretor cadastra o cliente com base legal apropriada e uma solicitação com dados do bem, crédito, prazo, parcela, tipo de cliente, plano preferido, fonte do lance, garantias e documentação.
+2. A administração revisa os dados em **Solicitações de cotação**, emite **Ficha para Âncora → Imprimir / Salvar em PDF** e registra protocolo/status no menu **Envios à Âncora**. O envio continua manual, por canal escolhido pela assessoria.
+3. A Âncora devolve condições específicas. A Astrion cadastra uma ou mais **Condições** por solicitação: grupo, plano, prazo, crédito, parcela inicial e pós-contemplação, taxas, fundo, seguro, correção, referência, validade e ressalvas.
+4. A administração publica apenas as condições aprovadas. O corretor vê as opções publicadas e pode emitir uma **Devolutiva em PDF** com identidade Astrion.
+5. Histórico, notas internas, permissões RLS e estados de negociação continuam preservados.
+
+**Catálogo de referência:** menu **Catálogo / Grupos**, organizado em 6 segmentos e 11 grupos de referência. Dados derivados de **Treinamento atualizado.pptm**, slides 2–21, com limites e regras historicamente informados no treinamento. Os parâmetros **não são cotação, homologação nem garantia de disponibilidade ou contemplação**; devem ser revisados com a administradora por grupo/data. O administrador pode editar as regras, revisar valores e cadastrar grupos.
+
+**Impressão:** a tela de documentos usa formato A4 e botão *Imprimir / Salvar em PDF* do navegador. Não existe envio automático ao parceiro. As fichas para cotação são internas da Astrion; as devolutivas do corretor trazem somente condições já publicadas.
+
+**Segurança e dados:** sem alteração das identidades existentes; corretores continuam isolados por carteira; a tabela interna de encaminhamentos é acessível somente ao administrador; cotações em rascunho não são visíveis ao corretor. A primeira troca obrigatória de senha permanece aplicada. Não inclua CPF, documentos, dados de saúde ou renda detalhada em campos de observações.
+
+**Pendências de produção:** validar o primeiro fluxo completo em navegadores autenticados com contas reais; homologar regras/grupos com a Âncora; revisar privacidade/retenção, configurar SMTP transacional e proteção contra senhas vazadas no Supabase.
+
+---
+
 # ASTRION | Portal de Solicitações de Consórcios — v2
 
 **Status atual do ambiente:** consulte [IMPLANTACAO.md](IMPLANTACAO.md) antes de executar etapas de instalação. O projeto Supabase exclusivo e a publicação no GitHub Pages já foram realizados.
