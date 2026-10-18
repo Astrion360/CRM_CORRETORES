@@ -153,8 +153,8 @@ function renderCatalog(){
     <p><strong>Correção:</strong> ${H(s.adjustment_index||'A confirmar')}</p>
     <p class="help"><strong>Exigências:</strong> ${H(s.documentation_notes||'A confirmar')}</p>
     <p class="help"><strong>Regras / atenção:</strong> ${H(s.policy_notes||'A confirmar')}</p>
-    <div class="catalog-tags">${groups.map(g=>`<span class="catalog-tag">Grupo ${H(g.code)} · ${g.credit_min!=null?BRL(g.credit_min):'Faixa pendente'}${g.credit_max!=null?' – '+BRL(g.credit_max):''}</span>`).join('')||'<span class="muted">Sem grupos de referência cadastrados</span>'}</div>
-    <p class="help">${s.confirmed_by_partner?'Regras revisadas pela assessoria com o parceiro':'Dados importados do treinamento; pendente confirmar condições atuais por grupo.'}</p>
+    <div class="catalog-tags">${groups.map(g=>`<button class="catalog-tag" data-action="edit-group" data-id="${H(g.code)}">Grupo ${H(g.code)} · ${g.credit_min!=null?BRL(g.credit_min):'Faixa pendente'}${g.credit_max!=null?' – '+BRL(g.credit_max):''}</button>`).join('')||'<span class="muted">Sem grupos de referência cadastrados</span>'}</div>
+    ${admin?`<button class="btn btn-outline btn-sm" data-action="add-group" data-id="${H(s.code)}">+ Grupo neste segmento</button>`:''}<p class="help">${s.confirmed_by_partner?'Regras revisadas pela assessoria com o parceiro':'Dados importados do treinamento; pendente confirmar condições atuais por grupo.'}</p>
   </article>`;
  }).join('');
  root.innerHTML=pageHead('Catálogo de produtos e grupos','Base do treinamento da Âncora, com limites, elegibilidade, planos e regras de lance. Sem garantia de disponibilidade.')+
@@ -170,6 +170,22 @@ function renderDispatches(){
  document.querySelector('#page-root').innerHTML=pageHead('Encaminhamentos à Âncora','Controle interno das solicitações enviadas para cotação.')+
  `<section class="table-card"><div class="table-scroll"><table><thead><tr><th>Solicitação</th><th>Parceiro</th><th>Estado</th><th>Protocolo</th><th>Último registro</th><th>Ações</th></tr></thead><tbody>${rows||'<tr><td colspan="6">Ainda não há encaminhamentos. Abra uma solicitação e clique em Encaminhar à Âncora.</td></tr>'}</tbody></table></div></section>`;
 }
+
+function modalGroup(id,segmentCode){
+ if(!isAdmin())return;
+ const g=id?state.catalogGroups.find(x=>x.code===id):null;
+ const parent=segmentCode||g?.segment_code;if(!parent)return;
+ const body=`<form id="record-form" data-form="catalog-group" data-id="${H(id||'')}"><input type="hidden" name="segment_code" value="${H(parent)}"><div class="modal-content"><div class="notice">Dados de grupos oriundos do treinamento são informativos até validação atual com o parceiro. Mantenha os limites e a disponibilidade atualizados.</div>
+ <div class="form-grid">${field('code','Número do grupo *',g?.code||'','required maxlength="35" '+(g?'readonly':'') )}
+ ${field('credit_min','Crédito mínimo (R$)',g?.credit_min??'','type="number" min="0" step="0.01"')}
+ ${field('credit_max','Crédito máximo (R$)',g?.credit_max??'','type="number" min="0" step="0.01"')}
+ ${field('plans','Planos aplicáveis (separar por vírgula)',(g?.plans||[]).join(', '),'maxlength="400"')}
+ ${formArea('notes','Observações e regras específicas',g?.notes||'')}
+ <div class="form-group full"><label class="checkbox-line"><input type="checkbox" name="confirmed_by_partner" ${g?.confirmed_by_partner?'checked':''}> Condições deste grupo confirmadas pela assessoria com a Âncora</label></div>
+ </div></div></form>`;
+ setModal(g?'Atualizar grupo '+g.code:'Novo grupo · '+parent,body,'<button class="btn btn-outline" data-action="close-modal">Cancelar</button><button class="btn btn-primary" type="submit" form="record-form">Salvar grupo</button>',true);
+}
+
 function modalCatalog(id){
  const s=state.catalogSegments.find(x=>x.code===id);if(!s||!isAdmin())return;
  const body=`<form id="record-form" data-form="catalog" data-id="${H(id)}"><div class="modal-content">
@@ -317,6 +333,14 @@ async function submitRecord(form){const kind=form.dataset.form, id=form.dataset.
       confirmed_by_partner:raw.confirmed_by_partner==='on',updated_at:new Date().toISOString()
     }).eq('code',id);
     if(error)throw error;
+  }else if(kind==='catalog-group'&&isAdmin()){
+    const min=raw.credit_min===''?null:Number(raw.credit_min),max=raw.credit_max===''?null:Number(raw.credit_max);
+    if(min!=null&&max!=null&&min>max)throw Error('Crédito mínimo não pode superar o máximo.');
+    const payload={credit_min:min,credit_max:max,plans:(raw.plans||'').split(',').map(x=>x.trim()).filter(Boolean),
+      notes:raw.notes||'',confirmed_by_partner:raw.confirmed_by_partner==='on',updated_at:new Date().toISOString()};
+    if(!id){payload.code=(raw.code||'').trim();payload.segment_code=raw.segment_code;payload.source_slides='Cadastro interno Astrion';}
+    const {error}=await (id?sb.from('catalog_groups').update(payload).eq('code',id):sb.from('catalog_groups').insert(payload));
+    if(error)throw error;
   }else if(kind==='dispatch'&&isAdmin()){
     const o=state.opps.find(x=>x.id===id);if(!o)throw Error('Solicitação não localizada');
     const prev=state.dispatches.find(x=>x.opportunity_id===id);
@@ -380,6 +404,8 @@ async function action(a,id){switch(a){case'menu':document.querySelector('#sideba
 case'print-return':printOpportunity(id,'return');break;
 case'dispatch':if(isAdmin())modalDispatch(id);break;
 case'edit-catalog':if(isAdmin())modalCatalog(id);break;
+case'edit-group':if(isAdmin())modalGroup(id);break;
+case'add-group':if(isAdmin())modalGroup(null,id);break;
 case'new-product':if(isAdmin())modalProduct();break;case'edit-product':if(isAdmin())modalProduct(id);break;case'close-modal':closeModal();break;case'forgot':state.authMode='recovery';renderAuth();break;case'back-login':state.authMode='login';renderAuth();break;case'export':if(isAdmin())exportCSV();break;case'clear-filters':state.filterBroker='all';state.filterProduct='all';state.filterStage='all';state.search='';renderPage();break;}}
 document.addEventListener('click',e=>{if(e.target?.dataset?.backdrop==='1'){closeModal();return;}const b=e.target.closest('[data-action],[data-nav]');if(!b)return;e.preventDefault();if(b.dataset.nav){state.page=b.dataset.nav;state.search='';renderShell();window.scrollTo(0,0);}else action(b.dataset.action,b.dataset.id);});
 document.addEventListener('submit',async e=>{const form=e.target.closest('form[data-form]');if(!form)return;e.preventDefault();const kind=form.dataset.form;form.dataset.intent=e.submitter?.dataset?.intent||'draft';if(['login','recovery','newpass','firstpass'].includes(kind)){await submitAuth(kind,form);return;}if(kind==='filters'){const x=formObject(form);state.search=(x.search||'').trim();state.filterBroker=x.broker||'all';state.filterProduct=x.product||'all';state.filterStage=x.stage||'all';renderPage();return;}await submitRecord(form);});
