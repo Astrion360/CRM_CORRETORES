@@ -108,7 +108,9 @@ try{
 async function enter(){if(!sb)return;const {data:{user},error}=await sb.auth.getUser();if(error||!user){state.user=null;state.profile=null;renderAuth();return;}state.user=user;await loadData(true);if(!state.interval)state.interval=window.setInterval(()=>{if(state.user&&!document.hidden&&!modalRoot.children.length)loadData(true);},60000);}
 
 function extraRequestFields(o){
- const categories=[...new Set(state.catalogSegments.flatMap(x=>Array.isArray(x.asset_types)?x.asset_types:[]))].sort();
+ const defaultCategory=state.products.find(p=>p.id===o?.product_id)?.category||state.products.find(p=>p.active)?.category;
+ const segment=state.catalogSegments.find(x=>x.product_category===defaultCategory);
+ const categories=[...new Set(segment?.asset_types||[])].sort();
  const options=categories.map(x=>`<option value="${H(x)}"></option>`).join('');
  const yes=(name,title,val)=>formSelect(name,title,[['nao_informado','Não informado'],['sim','Sim'],['nao','Não'],['avaliando','A avaliar']].map(x=>opt(x[0],x[1],val)).join(''));
  return `<div class="form-section"><div class="section-caption">05 · Produto e enquadramento</div><div class="form-grid">
@@ -120,7 +122,7 @@ function extraRequestFields(o){
  ${formSelect('contemplation_profile','Objetivo principal',opt('equilibrio','Equilíbrio entre lance e parcela',o?.contemplation_profile)+opt('menor_parcela','Menor parcela possível',o?.contemplation_profile)+opt('antecipar','Buscar antecipação (sem garantia)',o?.contemplation_profile))}
  ${formSelect('bid_resource','Fonte pretendida para lance',opt('a_definir','A definir',o?.bid_resource)+opt('recursos_proprios','Recursos próprios',o?.bid_resource)+opt('embutido','Embutido, se permitido',o?.bid_resource)+opt('fgts','FGTS, quando elegível',o?.bid_resource)+opt('troca_de_chave','Troca de chave, quando elegível',o?.bid_resource)+opt('combinado','Combinado, quando permitido',o?.bid_resource))}
  <div class="form-group"><label>Há bem disponível para troca de chave?</label><label class="checkbox-line"><input type="checkbox" name="trade_in_available" ${o?.trade_in_available?'checked':''}> Possui veículo/bem em seu nome (elegibilidade será avaliada)</label></div>
- </div></div>
+ </div><p class="help full" id="catalog-hint">${segment?'Referência do treinamento: '+BRL(segment.credit_min)+' a '+BRL(segment.credit_max)+' · até '+segment.max_term_months+' meses. Confirmar com Âncora.':'Escolha uma categoria para consultar os parâmetros de referência.'}</p></div>
  <div class="form-section"><div class="section-caption">06 · Pré-análise e documentação</div><div class="form-grid">
  ${formSelect('income_proof_status','Comprovação de renda',opt('nao_informado','Não informado',o?.income_proof_status)+opt('disponivel','Disponível',o?.income_proof_status)+opt('pendente','Pendente',o?.income_proof_status)+opt('nao_possui','Não possui',o?.income_proof_status))}
  ${yes('guarantor_available','Fiador disponível?',o?.guarantor_available)}
@@ -409,7 +411,18 @@ case'add-group':if(isAdmin())modalGroup(null,id);break;
 case'new-product':if(isAdmin())modalProduct();break;case'edit-product':if(isAdmin())modalProduct(id);break;case'close-modal':closeModal();break;case'forgot':state.authMode='recovery';renderAuth();break;case'back-login':state.authMode='login';renderAuth();break;case'export':if(isAdmin())exportCSV();break;case'clear-filters':state.filterBroker='all';state.filterProduct='all';state.filterStage='all';state.search='';renderPage();break;}}
 document.addEventListener('click',e=>{if(e.target?.dataset?.backdrop==='1'){closeModal();return;}const b=e.target.closest('[data-action],[data-nav]');if(!b)return;e.preventDefault();if(b.dataset.nav){state.page=b.dataset.nav;state.search='';renderShell();window.scrollTo(0,0);}else action(b.dataset.action,b.dataset.id);});
 document.addEventListener('submit',async e=>{const form=e.target.closest('form[data-form]');if(!form)return;e.preventDefault();const kind=form.dataset.form;form.dataset.intent=e.submitter?.dataset?.intent||'draft';if(['login','recovery','newpass','firstpass'].includes(kind)){await submitAuth(kind,form);return;}if(kind==='filters'){const x=formObject(form);state.search=(x.search||'').trim();state.filterBroker=x.broker||'all';state.filterProduct=x.product||'all';state.filterStage=x.stage||'all';renderPage();return;}await submitRecord(form);});
-document.addEventListener('change',e=>{if(e.target?.name==='owner_id'&&e.target.closest('form[data-form="opportunity"]')){const select=document.querySelector('#client_id');if(select){select.innerHTML=state.clients.filter(c=>c.owner_id===e.target.value).map(c=>opt(c.id,c.full_name)).join('');}}});
+document.addEventListener('change',e=>{
+ if(e.target?.name==='product_id'&&e.target.closest('form[data-form="opportunity"]')){
+   const selected=state.products.find(p=>p.id===e.target.value);
+   const segment=state.catalogSegments.find(x=>x.product_category===selected?.category);
+   const list=document.querySelector('#asset-types-list');
+   if(list)list.innerHTML=(segment?.asset_types||[]).map(t=>'<option value="'+H(t)+'"></option>').join('');
+   const hint=document.querySelector('#catalog-hint');
+   if(hint)hint.textContent=segment
+     ?'Referência do treinamento: '+BRL(segment.credit_min)+' a '+BRL(segment.credit_max)+' · até '+segment.max_term_months+' meses. Exigências e planos sujeitos à validação pela Âncora.'
+     :'Nenhum parâmetro cadastrado para esta categoria.';
+ }
+ if(e.target?.name==='owner_id'&&e.target.closest('form[data-form="opportunity"]')){const select=document.querySelector('#client_id');if(select){select.innerHTML=state.clients.filter(c=>c.owner_id===e.target.value).map(c=>opt(c.id,c.full_name)).join('');}}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 async function init(){if(!validConfig){renderConfig();return;}state.authMode=/(?:[&#?])type=recovery(?:&|$)/.test(location.href)?'newpass':'login';const {data:{session}}=await sb.auth.getSession();if(session&&state.authMode!=='newpass')await enter();else renderAuth();sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){state.authMode='newpass';renderAuth();}else if(event==='SIGNED_OUT'){state.user=null;state.profile=null;renderAuth();}else if(event==='SIGNED_IN'&&session&&!state.user&&state.authMode!=='newpass'){setTimeout(()=>enter(),0);}});}
 init().catch(e=>{toast(safe(e),true);renderAuth();});
