@@ -103,7 +103,15 @@ function renderAuth(){if(!validConfig){renderConfig();return;}
    <small class="login-foot">© ${new Date().getFullYear()} Astrion Assessoria. Todos os direitos reservados.<br>Uso interno e parceiros autorizados.</small>
   </section>
   <aside class="login-right" aria-label="Consórcios, planejamento e realizações">
-   <div class="reference-scenery" role="img" aria-label="Casa moderna, veículo, avião e paisagem litorânea"></div>
+   <div class="reference-scenery">
+    <img class="reference-scenery-image"
+      src="https://images.pexels.com/photos/19075385/pexels-photo-19075385.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=2600"
+      srcset="https://images.pexels.com/photos/19075385/pexels-photo-19075385.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1600 1600w, https://images.pexels.com/photos/19075385/pexels-photo-19075385.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=2600 2600w"
+      sizes="(max-width: 980px) 100vw, 65vw"
+      alt="Residência contemporânea com piscina e paisagem litorânea ao entardecer"
+      loading="eager" fetchpriority="high" decoding="async"
+      onerror="this.onerror=null;this.removeAttribute('srcset');this.src='./assets/login-scenery.webp';">
+   </div>
    <div class="reference-hero-top">
     <div class="eyebrow">CONSÓRCIOS · PLANEJAMENTO · REALIZAÇÕES</div>
     <h2>Mais que cotações.<br><span class="title-gradient">Conexões para grandes<br>conquistas.</span></h2>
