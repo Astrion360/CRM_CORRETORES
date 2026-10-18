@@ -106,6 +106,104 @@ try{
  if(!state.profile){app.innerHTML=`<div class="empty"><h2>Não foi possível carregar seu perfil.</h2><p>${H(safe(e))}</p><button class="btn btn-outline" data-action="logout">Sair</button></div>`;}
 }finally{state.loading=false;}}
 async function enter(){if(!sb)return;const {data:{user},error}=await sb.auth.getUser();if(error||!user){state.user=null;state.profile=null;renderAuth();return;}state.user=user;await loadData(true);if(!state.interval)state.interval=window.setInterval(()=>{if(state.user&&!document.hidden&&!modalRoot.children.length)loadData(true);},60000);}
+
+function extraRequestFields(o){
+ const categories=[...new Set(state.catalogSegments.flatMap(x=>Array.isArray(x.asset_types)?x.asset_types:[]))].sort();
+ const options=categories.map(x=>`<option value="${H(x)}"></option>`).join('');
+ const yes=(name,title,val)=>formSelect(name,title,[['nao_informado','Não informado'],['sim','Sim'],['nao','Não'],['avaliando','A avaliar']].map(x=>opt(x[0],x[1],val)).join(''));
+ return `<div class="form-section"><div class="section-caption">05 · Produto e enquadramento</div><div class="form-grid">
+ ${formSelect('customer_type','Perfil do cliente',opt('nao_informado','A definir',o?.customer_type)+opt('pf','Pessoa física',o?.customer_type)+opt('pj','Pessoa jurídica',o?.customer_type))}
+ ${field('asset_type','Tipo específico de bem',o?.asset_type||'','list="asset-types-list" maxlength="130" placeholder="Ex.: Apartamento, Caminhão, Reforma"')}
+ <datalist id="asset-types-list">${options}</datalist>
+ ${formSelect('plan_preference','Plano de interesse',opt('avaliar','Avaliar todas as opções',o?.plan_preference)+opt('normal','Normal',o?.plan_preference)+opt('plano_50','Plano 50%',o?.plan_preference)+opt('plano_70','Plano 70%',o?.plan_preference)+opt('meia_parcela','Meia parcela (quando disponível)',o?.plan_preference))}
+ ${formSelect('credit_flexibility','Aceita outros valores de crédito?',opt('avaliar','A avaliar',o?.credit_flexibility)+opt('sim','Sim',o?.credit_flexibility)+opt('nao','Não',o?.credit_flexibility))}
+ ${formSelect('contemplation_profile','Objetivo principal',opt('equilibrio','Equilíbrio entre lance e parcela',o?.contemplation_profile)+opt('menor_parcela','Menor parcela possível',o?.contemplation_profile)+opt('antecipar','Buscar antecipação (sem garantia)',o?.contemplation_profile))}
+ ${formSelect('bid_resource','Fonte pretendida para lance',opt('a_definir','A definir',o?.bid_resource)+opt('recursos_proprios','Recursos próprios',o?.bid_resource)+opt('embutido','Embutido, se permitido',o?.bid_resource)+opt('fgts','FGTS, quando elegível',o?.bid_resource)+opt('troca_de_chave','Troca de chave, quando elegível',o?.bid_resource)+opt('combinado','Combinado, quando permitido',o?.bid_resource))}
+ <div class="form-group"><label>Há bem disponível para troca de chave?</label><label class="checkbox-line"><input type="checkbox" name="trade_in_available" ${o?.trade_in_available?'checked':''}> Possui veículo/bem em seu nome (elegibilidade será avaliada)</label></div>
+ </div></div>
+ <div class="form-section"><div class="section-caption">06 · Pré-análise e documentação</div><div class="form-grid">
+ ${formSelect('income_proof_status','Comprovação de renda',opt('nao_informado','Não informado',o?.income_proof_status)+opt('disponivel','Disponível',o?.income_proof_status)+opt('pendente','Pendente',o?.income_proof_status)+opt('nao_possui','Não possui',o?.income_proof_status))}
+ ${yes('guarantor_available','Fiador disponível?',o?.guarantor_available)}
+ ${yes('collateral_available','Garantia disponível?',o?.collateral_available)}
+ ${formSelect('documentation_status','Situação da documentação',opt('a_verificar','A verificar',o?.documentation_status)+opt('pendente','Pendente',o?.documentation_status)+opt('parcial','Parcial',o?.documentation_status)+opt('completa','Completa',o?.documentation_status))}
+ ${formArea('special_conditions','Pontos de atenção / exigências específicas',o?.special_conditions||'')}
+ </div><p class="help">Referências do treinamento não substituem avaliação formal de crédito, elegibilidade, regras de grupos nem condições atualizadas da Âncora. Evite enviar CPF, dados bancários, comprovantes de renda ou dados de saúde nas observações.</p></div>`;
+}
+function extraQuoteFields(){
+ const codes=state.catalogGroups.map(g=>`<option value="${H(g.code)}"></option>`).join('');
+ return `${field('group_code','Grupo ofertado','','list="catalog-groups" maxlength="30"')}<datalist id="catalog-groups">${codes}</datalist>
+ ${formSelect('plan_name','Plano efetivamente cotado',opt('','Não confirmado')+opt('Normal','Normal')+opt('Plano 50%','Plano 50%')+opt('Plano 70%','Plano 70%')+opt('Meia parcela','Meia parcela')+opt('Outro','Outro'))}
+ ${field('partner_reference','Protocolo da Âncora / referência','','maxlength="90"')}
+ ${field('partner_return_date','Data de resposta','','type="date"')}
+ ${field('adjustment_index','Índice de correção confirmado','','maxlength="100" placeholder="Ex.: INCC / IGP-M / fabricante"')}
+ ${field('installment_after_contemplation','Parcela após contemplação (R$)','','type="number" min="0" step="0.01"')}
+ ${formArea('sales_plan_notes','Plano, adesão, ressalvas e critérios do parceiro','')}`;
+}
+function renderCatalog(){
+ const root=document.querySelector('#page-root');if(!root)return;
+ const admin=isAdmin();
+ const cards=state.catalogSegments.map(s=>{
+  const groups=state.catalogGroups.filter(g=>g.segment_code===s.code);
+  const range=[s.credit_min!=null?BRL(s.credit_min):'A confirmar',s.credit_max!=null?BRL(s.credit_max):'A confirmar'].join(' — ');
+  return `<article class="catalog-card">
+    <div class="catalog-kicker">REFERÊNCIA COMERCIAL · SLIDES ${H(s.source_slides||'—')}</div>
+    <div class="catalog-head"><h3>${H(s.name)}</h3>${admin?`<button class="btn btn-outline btn-sm" data-action="edit-catalog" data-id="${H(s.code)}">Editar regras</button>`:''}</div>
+    <div class="catalog-stats"><span><b>Crédito</b>${H(range)}</span><span><b>Prazo máximo</b>${s.max_term_months?H(s.max_term_months)+' meses':'Validar'}</span><span><b>Renda</b>${s.income_multiple?H(s.income_multiple)+'× parcela':'A validar'}</span></div>
+    <p class="help"><strong>Bens e finalidades:</strong> ${(s.asset_types||[]).map(H).join(' · ')}</p>
+    <p><strong>Correção:</strong> ${H(s.adjustment_index||'A confirmar')}</p>
+    <p class="help"><strong>Exigências:</strong> ${H(s.documentation_notes||'A confirmar')}</p>
+    <p class="help"><strong>Regras / atenção:</strong> ${H(s.policy_notes||'A confirmar')}</p>
+    <div class="catalog-tags">${groups.map(g=>`<span class="catalog-tag">Grupo ${H(g.code)} · ${g.credit_min!=null?BRL(g.credit_min):'Faixa pendente'}${g.credit_max!=null?' – '+BRL(g.credit_max):''}</span>`).join('')||'<span class="muted">Sem grupos de referência cadastrados</span>'}</div>
+    <p class="help">${s.confirmed_by_partner?'Regras revisadas pela assessoria com o parceiro':'Dados importados do treinamento; pendente confirmar condições atuais por grupo.'}</p>
+  </article>`;
+ }).join('');
+ root.innerHTML=pageHead('Catálogo de produtos e grupos','Base do treinamento da Âncora, com limites, elegibilidade, planos e regras de lance. Sem garantia de disponibilidade.')+
+ '<div class="notice">Os valores do treinamento são parâmetros de consulta. Somente a cotação formal devolvida pelo parceiro define plano, grupo, taxas e prazos aplicáveis à solicitação.</div>'+
+ '<div class="catalog-grid">'+cards+'</div>';
+}
+function renderDispatches(){
+ if(!isAdmin())return;
+ const rows=state.dispatches.map(d=>{
+   const o=state.opps.find(x=>x.id===d.opportunity_id);
+   return `<tr><td><strong>${H(o?clientName(o.client_id):'Solicitação não localizada')}</strong><div class="cell-sub">${H(o?.reference_asset||'')}</div></td><td>${H(d.partner_name)}</td><td>${H(d.request_status)}</td><td>${H(d.protocol||'—')}</td><td>${dateTime(d.sent_at||d.created_at)}</td><td><button class="btn btn-outline btn-sm" data-action="print-request" data-id="${H(d.opportunity_id)}">Imprimir ficha</button><button class="btn btn-outline btn-sm" data-action="dispatch" data-id="${H(d.opportunity_id)}">Atualizar</button></td></tr>`;
+ }).join('');
+ document.querySelector('#page-root').innerHTML=pageHead('Encaminhamentos à Âncora','Controle interno das solicitações enviadas para cotação.')+
+ `<section class="table-card"><div class="table-scroll"><table><thead><tr><th>Solicitação</th><th>Parceiro</th><th>Estado</th><th>Protocolo</th><th>Último registro</th><th>Ações</th></tr></thead><tbody>${rows||'<tr><td colspan="6">Ainda não há encaminhamentos. Abra uma solicitação e clique em Encaminhar à Âncora.</td></tr>'}</tbody></table></div></section>`;
+}
+function modalCatalog(id){
+ const s=state.catalogSegments.find(x=>x.code===id);if(!s||!isAdmin())return;
+ const body=`<form id="record-form" data-form="catalog" data-id="${H(id)}"><div class="modal-content">
+ <div class="notice">Edite somente referências verificadas. Alterar regras do catálogo não gera cotações nem altera propostas já publicadas.</div>
+ <div class="form-grid">${field('credit_min','Crédito mínimo (R$)',s.credit_min??'','type="number" min="0" step="0.01"')}
+ ${field('credit_max','Crédito máximo (R$)',s.credit_max??'','type="number" min="0" step="0.01"')}
+ ${field('max_term_months','Prazo máximo (meses)',s.max_term_months??'','type="number" min="1" max="400"')}
+ ${field('adjustment_index','Índice de correção',s.adjustment_index||'','maxlength="100"')}
+ ${formArea('documentation_notes','Documentação / exigências',s.documentation_notes||'')}
+ ${formArea('policy_notes','Regras / exceções / ressalvas',s.policy_notes||'')}
+ <div class="form-group full"><label class="checkbox-line"><input type="checkbox" name="confirmed_by_partner" ${s.confirmed_by_partner?'checked':''}> Regras verificadas com o parceiro pela Astrion</label></div></div></div></form>`;
+ setModal('Atualizar regras · '+s.name,body,'<button class="btn btn-outline" data-action="close-modal">Cancelar</button><button class="btn btn-primary" type="submit" form="record-form">Salvar regras</button>',true);
+}
+function modalDispatch(id){
+ const o=state.opps.find(x=>x.id===id);if(!o||!isAdmin())return;
+ const prev=state.dispatches.find(x=>x.opportunity_id===id);
+ const body=`<form id="record-form" data-form="dispatch" data-id="${H(id)}"><div class="modal-content">
+ <div class="notice">Controle interno Astrion. A ficha para a Âncora é gerada pelo botão Imprimir solicitação. O envio externo ainda é manual, sem integração automática com a administradora.</div>
+ <div class="form-grid">
+ ${field('partner_name','Parceiro para cotação',prev?.partner_name||'Âncora','required maxlength="160"')}
+ ${formSelect('request_status','Situação', ['preparada','enviada','aguardando','retornada','pendencia','cancelada'].map(k=>opt(k,({preparada:'Ficha preparada',enviada:'Enviada ao parceiro',aguardando:'Aguardando retorno',retornada:'Cotação recebida',pendencia:'Pendência',cancelada:'Cancelada'})[k],prev?.request_status)).join(''))}
+ ${field('protocol','Protocolo / referência externa',prev?.protocol||'','maxlength="100"')}
+ ${formArea('internal_notes','Observações internas',prev?.internal_notes||'')}
+ </div></div></form>`;
+ setModal('Controle de envio · '+clientName(o.client_id),body,'<button class="btn btn-outline" data-action="close-modal">Cancelar</button><button class="btn btn-primary" type="submit" form="record-form">Registrar andamento</button>',true);
+}
+function printOpportunity(id,kind){
+ const o=state.opps.find(x=>x.id===id);if(!o)return toast('Solicitação não encontrada.',true);
+ if(kind==='request'&&!isAdmin())return toast('A impressão para parceiros é exclusiva da administração.',true);
+ const c=state.clients.find(x=>x.id===o.client_id),b=state.profiles.find(x=>x.id===o.owner_id),p=state.products.find(x=>x.id===o.product_id);
+ const d=state.dispatches.find(x=>x.opportunity_id===id);
+ try{openDocument(kind,o,c,b,p,state.catalogSegments,state.quoteCache[id]||[],isAdmin()?d:null)}catch(e){toast(safe(e),true)}
+}
+
 function modalClient(id){const c=id?state.clients.find(x=>x.id===id):null;const owner=c?.owner_id||(isAdmin()?state.profiles.find(p=>p.role==='broker'&&p.active)?.id:state.user.id);
   if(!owner){toast('Cadastre e ative um corretor antes de cadastrar clientes.',true);return;}
   const basis=['procedimentos_preliminares','consentimento','legitimo_interesse'];const basisLabels={procedimentos_preliminares:'Procedimentos preliminares solicitados',consentimento:'Consentimento',legitimo_interesse:'Legítimo interesse (validado)'};
