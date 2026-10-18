@@ -51,11 +51,80 @@ function loginMock(){
  <div class="dream-hero-bottom"><div class="dream-symbol"><span>⌂</span><span>◇</span><span>✧</span></div><div><strong>Grandes conquistas começam com escolhas bem acompanhadas.</strong><small>Imóveis · Veículos · Serviços · Outros bens</small></div></div>
  </div><div class="dream-steps" aria-label="Etapas do atendimento"><span><b>01</b> Solicitação</span><i></i><span><b>02</b> Análise</span><i></i><span><b>03</b> Cotação</span><i></i><span><b>04</b> Devolutiva</span></div>`;
 }
+
+function loginIcon(name){
+ const shapes={
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+ lock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+ eye:'<path d="M2 12s3.7-6.5 10-6.5S22 12 22 12s-3.7 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/>',
+ shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2.2 2.2L16 9.5"/>',
+ users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+ house:'<path d="m3 10 9-8 9 8v11h-7v-7H10v7H3Z"/>',
+ car:'<path d="M5 17H3v-6l3-6h12l3 6v6h-2"/><path d="M5 17h14M3 11h18M7 17v3M17 17v3"/><circle cx="7" cy="14" r="1"/><circle cx="17" cy="14" r="1"/>',
+ gear:'<path d="M12 3.1 14 2l1.1 2.5 2.4.8 2.5-1 1.8 3.2-2 1.7.2 2.7 2.2 1.5-1.8 3.2-2.6-.8-2.2 1.4L14 22h-4l-.8-2.8-2.3-1.3-2.7.8-1.8-3.2 2.2-1.7v-2.7L2.3 9.5 4.1 6.3l2.6.8L9 5.6 10 3Z"/><circle cx="12" cy="12" r="3"/>',
+ plane:'<path d="M22 2 9.7 14.3 4 12l-2 2 6.9 3.1L12 24l2-2-2.3-5.7L24 4l-2-2Z"/><path d="m11 6 4.6 4.6"/>',
+ file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="m16 16 6 6"/>',
+ check:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>'
+ };
+ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes[name]||''}</svg>`;
+}
 function renderAuth(){if(!validConfig){renderConfig();return;}
-  const mode=state.authMode;
-  const title=mode==='firstpass'?'Troca obrigatória de senha':mode==='recovery'?'Recuperar acesso':mode==='newpass'?'Definir senha':'Bem-vindo ao portal';
-  const helper=mode==='firstpass'?'Substitua a senha provisória antes de acessar os dados.':mode==='recovery'?'Enviaremos um link para redefinir sua senha.':mode==='newpass'?'Defina uma senha segura para ativar ou recuperar seu acesso.':'Entre com as credenciais fornecidas pela Astrion.';
-  app.innerHTML=`<div class="login-wrap"><section class="login-left"><div class="brand login-logo"><span class="astrion-logo-holder"><img src="https://wellingtonmendesmendes.github.io/astrion-brand/assets/images/logo-astrion.png" alt="Astrion" loading="eager" onerror="this.style.display=\'none\'"></span><div><span class="brand-name">ASTRION</span><span class="brand-sub">CORRETORES</span></div></div><div class="login-inner"><span class="eyebrow">PORTAL RESTRITO · ACESSO SEGURO</span><h1>${title}</h1><p>${helper}</p><form class="login-form" id="auth-form" data-form="${mode}">${!['newpass','firstpass'].includes(mode)?`<div><label for="email">E-mail corporativo</label><input class="field" id="email" type="email" autocomplete="email" placeholder="voce@empresa.com.br" required></div>`:''}${mode!=='recovery'?`<div><label for="password">${['newpass','firstpass'].includes(mode)?'Nova senha':'Senha'}</label><input class="field" id="password" type="password" autocomplete="${['newpass','firstpass'].includes(mode)?'new-password':'current-password'}" minlength="12" placeholder="Mínimo de 12 caracteres" required></div>`:''}${mode==='firstpass'?`<div><label for="password_confirm">Confirmar nova senha</label><input class="field" id="password_confirm" type="password" autocomplete="new-password" minlength="12" required placeholder="Repita a nova senha"></div>`:''}<button class="btn btn-primary" type="submit">${mode==='recovery'?'Enviar link':mode==='newpass'?'Salvar nova senha':mode==='firstpass'?'Alterar senha e continuar':'Entrar no sistema'} →</button></form><div class="auth-link">${mode==='login'?'<button class="link-button" data-action="forgot">Esqueci minha senha</button>':mode==='recovery'?'<button class="link-button" data-action="back-login">Voltar ao login</button>':mode==='firstpass'?'<button class="link-button" data-action="logout">Sair da conta</button>':''}</div><div class="divider"></div><div class="help">Acesso permitido somente a corretores autorizados e à administração. Não existe cadastro público.</div></div><small class="login-foot">© ${new Date().getFullYear()} Astrion Assessoria · Uso interno e parceiros autorizados</small></section><aside class="login-right"><div class="hero-panel"><div class="eyebrow">PLANEJAMENTO · CONFIANÇA · REALIZAÇÕES</div><h2>Conexões que transformam planos em conquistas.</h2><p>Organize cada oportunidade e acompanhe as condições apresentadas com o apoio da Astrion.</p>${loginMock()}</div></aside></div>`;
+ const mode=state.authMode;
+ const isLogin=mode==='login';
+ const isFirst=mode==='firstpass';
+ const isRecovery=mode==='recovery';
+ const newPassword=mode==='newpass'||isFirst;
+ const title=isLogin?'Bem-vindo ao<br><span class="brand-blue">CRM Corretores</span>':isFirst?'Troca obrigatória<br><span class="brand-blue">de senha</span>':isRecovery?'Recuperar<br><span class="brand-blue">acesso</span>':'Definir<br><span class="brand-blue">nova senha</span>';
+ const helper=isLogin?'Suas oportunidades de consórcios organizadas, com o apoio da Astrion em todas as etapas.':isFirst?'Substitua sua senha provisória para liberar o acesso à sua carteira.':isRecovery?'Informe seu e-mail para receber o link de recuperação de acesso.':'Defina sua nova senha para continuar usando o CRM.';
+ const fieldEmail=!(newPassword)?`<div class="login-field-group"><label for="email">E-mail</label><div class="login-field-wrap">${loginIcon('mail')}<input class="field" id="email" type="email" autocomplete="email" placeholder="Seu e-mail corporativo" required></div></div>`:'';
+ const fieldPassword=!isRecovery?`<div class="login-field-group"><label for="password">${newPassword?'Nova senha':'Senha'}</label><div class="login-field-wrap">${loginIcon('lock')}<input class="field" id="password" type="password" autocomplete="${newPassword?'new-password':'current-password'}" ${newPassword?'minlength="12"':''} placeholder="${newPassword?'Mínimo de 12 caracteres':'Sua senha'}" required><button type="button" class="password-toggle" data-action="toggle-login-password" aria-label="Mostrar senha" aria-pressed="false" title="Mostrar ou ocultar senha">${loginIcon('eye')}</button></div></div>`:'';
+ const fieldConfirm=isFirst?`<div class="login-field-group"><label for="password_confirm">Confirmar nova senha</label><div class="login-field-wrap">${loginIcon('lock')}<input class="field" id="password_confirm" type="password" autocomplete="new-password" minlength="12" placeholder="Repita sua nova senha" required></div></div>`:'';
+ const buttonText=isLogin?'Entrar no sistema':isRecovery?'Enviar link de recuperação':isFirst?'Alterar senha e continuar':'Salvar nova senha';
+ const textActions=isLogin?'<button class="link-button" data-action="forgot" type="button">Esqueci minha senha</button>':isRecovery?'<button class="link-button" data-action="back-login" type="button">Voltar ao login</button>':isFirst?'<button class="link-button" data-action="logout" type="button">Sair da conta</button>':'';
+ const assurance=`<div class="login-assurance" aria-label="Segurança do portal">
+   <div class="assurance-item">${loginIcon('shield')}<span>Acesso<br>seguro</span></div>
+   <div class="assurance-item">${loginIcon('users')}<span>Uso exclusivo<br>para corretores</span></div>
+   <div class="assurance-item">${loginIcon('lock')}<span>Dados protegidos<br>e confidenciais</span></div>
+ </div>`;
+ const category=(symbol,name,desc)=>`<div class="reference-card" tabindex="0">${loginIcon(symbol)}<strong>${name}</strong><small>${desc}</small></div>`;
+ const step=(symbol,label,desc)=>`<div class="reference-step">${loginIcon(symbol)}<strong>${label}</strong><small>${desc}</small></div>`;
+ app.innerHTML=`<div class="login-wrap astrion-reference-login">
+  <section class="login-left">
+   <div class="reference-brand"><img src="https://wellingtonmendesmendes.github.io/astrion-brand/assets/images/logo-astrion.png" alt="Astrion Assessoria" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="brand-fallback">ASTRION</span><span class="brand-divider"></span><span class="brand-detail">CRM<br>CORRETORES</span></div>
+   <div class="login-inner">
+    <span class="eyebrow">PORTAL RESTRITO · ACESSO SEGURO</span>
+    <h1>${title}</h1>
+    <p>${helper}</p>
+    <form class="login-form" id="auth-form" data-form="${mode}">${fieldEmail}${fieldPassword}${fieldConfirm}<button class="btn btn-primary" type="submit">${buttonText} &nbsp;→</button></form>
+    <div class="auth-link">${textActions}</div>
+    ${assurance}
+   </div>
+   <small class="login-foot">© ${new Date().getFullYear()} Astrion Assessoria. Todos os direitos reservados.<br>Uso interno e parceiros autorizados.</small>
+  </section>
+  <aside class="login-right" aria-label="Consórcios, planejamento e realizações">
+   <div class="reference-scenery" role="img" aria-label="Casa moderna, veículo, avião e paisagem litorânea"></div>
+   <div class="reference-hero-top">
+    <div class="eyebrow">CONSÓRCIOS · PLANEJAMENTO · REALIZAÇÕES</div>
+    <h2>Mais que cotações.<br><span class="title-gradient">Conexões para grandes<br>conquistas.</span></h2>
+    <p>A Astrion ao seu lado, ajudando você a transformar planos em realidade.</p>
+    <div class="reference-accent"></div>
+   </div>
+   <div class="reference-cards" aria-label="Modalidades de consórcio">
+    ${category('house','Imóveis','Casas, apartamentos, terrenos e muito mais.')}
+    ${category('car','Veículos','Carros, motos, pesados e máquinas.')}
+    ${category('gear','Outros Bens','Equipamentos, eletrônicos e soluções.')}
+    ${category('plane','Serviços','Viagens, educação, procedimentos e mais.')}
+   </div>
+   <div class="reference-bottom" aria-label="Etapas da solicitação">
+    ${step('file','Solicitação','Você registra a oportunidade')}
+    ${step('search','Análise','Nossa equipe avalia o cenário')}
+    ${step('file','Cotação','Solicitamos à administradora')}
+    ${step('check','Devolutiva','Você recebe as opções organizadas')}
+    <div class="reference-signature">Realizar<br>é planejar<br>com quem entende.</div>
+   </div>
+  </aside>
+ </div>`;
 }
 function sidebar(){const menus=[['dashboard','▦','Visão geral'],['clients','♙','Clientes'],['opportunities','◈','Solicitações'],...(isAdmin()?[['brokers','◉','Corretores'],['catalog','▤','Catálogo / Grupos'],['dispatches','▣','Envios à Âncora'],['products','◈','Categorias']]:[])];
   return `<aside class="sidebar" id="sidebar"><div class="sidebar-brand"><div class="brand"><span class="astrion-logo-holder"><img src="https://wellingtonmendesmendes.github.io/astrion-brand/assets/images/logo-astrion.png" alt="Astrion" loading="eager" onerror="this.style.display=\'none\'"></span><div><span class="brand-name">ASTRION</span><span class="brand-sub">CORRETORES</span></div></div></div><span class="side-section">GESTÃO COMERCIAL</span><nav aria-label="Navegação principal">${menus.map(([key,ic,label])=>`<button class="nav-item ${state.page===key?'active':''}" data-nav="${key}"><span class="nav-icon">${ic}</span>${label}</button>`).join('')}</nav><div class="side-foot"><div class="side-user"><span class="avatar">${H(initials(myName()))}</span><div><strong>${H(myName())}</strong><small>${isAdmin()?'Administrador':'Corretor autorizado'}</small></div></div><button class="signout" data-action="change-password">Alterar minha senha</button><button class="signout" data-action="logout">Sair da conta ↗</button></div></aside>`;}
@@ -409,7 +478,7 @@ async function submitAuth(mode,form){const email=form.querySelector('#email')?.v
   else if(mode==='newpass'){const {error}=await sb.auth.updateUser({password});if(error)throw error;history.replaceState({},'',window.location.pathname);state.authMode='login';await enter();toast('Senha atualizada.');}
 }catch(e){toast(safe(e),true);}finally{if(btn)btn.disabled=false;}}
 function exportCSV(){const oo=visibleOpps();const csvSafe=x=>{let t=String(x??'');if(/^[\s]*[=+@\-\t\r]/.test(t))t="'"+t;return '"'+t.replaceAll('"','""')+'"';};const records=[['Cliente','Corretor','Categoria','Bem referência','Valor bem','Crédito solicitado','Intenção lance','Valor lance','Parcela desejada','Urgência','Status','Cadastro'],...oo.map(o=>[clientName(o.client_id),brokerName(o.owner_id),productName(o.product_id),o.reference_asset,o.asset_value,o.credit_amount,o.bid_intention,o.bid_amount,o.max_installment,o.urgency,stages[o.stage],date(o.created_at)])];const data='\ufeff'+records.map(r=>r.map(csvSafe).join(';')).join('\r\n');const blob=new Blob([data],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='astrion_solicitacoes_cotacao.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-async function action(a,id){switch(a){case'menu':document.querySelector('#sidebar')?.classList.toggle('open');break;case'change-password':if(state.user&&state.profile&&!state.profile.password_change_required)modalChangePassword();break;case'logout':await sb?.auth.signOut({ scope: 'global' });state.user=null;state.profile=null;state.profiles=[];state.clients=[];state.opps=[];if(state.interval){clearInterval(state.interval);state.interval=null;}renderAuth();break;case'refresh':await loadData();break;case'new-client':modalClient();break;case'edit-client':modalClient(id);break;case'new-opp':modalOpportunity();break;case'edit-opp':closeModal();modalOpportunity(id);break;case'detail':await showDetail(id);break;case'new-quote':if(isAdmin())modalQuote(id);break;case'new-research':if(isAdmin())modalResearch(id);break;case'publish-quote':if(isAdmin()){const o=state.opps.find(x=>x.id===document.querySelector(`[data-action="publish-quote"][data-id="${id}"]`)?.dataset.opp);if(!o){toast('Solicitação indisponível',true);break;}const {error}=await sb.from('quote_options').update({published:true}).eq('id',id);if(error)toast(safe(error),true);else{await loadData(true);await showDetail(o.id);toast('Condição disponibilizada ao corretor.');}}break;case'send-opp':{const o=state.opps.find(x=>x.id===id);if(o&&!isAdmin()){if(!o.reference_asset||!(o.asset_value>0)||!(o.credit_amount>0)||o.bid_intention==='indefinido'||o.urgency==='a_definir'){modalOpportunity(id);toast('Complete os campos obrigatórios para enviar.',true);break;}const {error}=await sb.from('opportunities').update({stage:'enviada'}).eq('id',id);if(error)toast(safe(error),true);else{await loadData(true);await showDetail(id);toast('Solicitação enviada à Astrion.');}}}break;case'add-broker':if(isAdmin())modalBroker();break;case'edit-broker':if(isAdmin())modalBroker(id);break;case'print-request':if(isAdmin())printOpportunity(id,'request');break;
+async function action(a,id){switch(a){case'toggle-login-password':{const el=document.querySelector('#password');const trigger=document.querySelector('.password-toggle');if(el){el.type=el.type==='password'?'text':'password';if(trigger){trigger.setAttribute('aria-pressed',String(el.type==='text'));trigger.setAttribute('aria-label',el.type==='text'?'Ocultar senha':'Mostrar senha');}}break;}case'menu':document.querySelector('#sidebar')?.classList.toggle('open');break;case'change-password':if(state.user&&state.profile&&!state.profile.password_change_required)modalChangePassword();break;case'logout':await sb?.auth.signOut({ scope: 'global' });state.user=null;state.profile=null;state.profiles=[];state.clients=[];state.opps=[];if(state.interval){clearInterval(state.interval);state.interval=null;}renderAuth();break;case'refresh':await loadData();break;case'new-client':modalClient();break;case'edit-client':modalClient(id);break;case'new-opp':modalOpportunity();break;case'edit-opp':closeModal();modalOpportunity(id);break;case'detail':await showDetail(id);break;case'new-quote':if(isAdmin())modalQuote(id);break;case'new-research':if(isAdmin())modalResearch(id);break;case'publish-quote':if(isAdmin()){const o=state.opps.find(x=>x.id===document.querySelector(`[data-action="publish-quote"][data-id="${id}"]`)?.dataset.opp);if(!o){toast('Solicitação indisponível',true);break;}const {error}=await sb.from('quote_options').update({published:true}).eq('id',id);if(error)toast(safe(error),true);else{await loadData(true);await showDetail(o.id);toast('Condição disponibilizada ao corretor.');}}break;case'send-opp':{const o=state.opps.find(x=>x.id===id);if(o&&!isAdmin()){if(!o.reference_asset||!(o.asset_value>0)||!(o.credit_amount>0)||o.bid_intention==='indefinido'||o.urgency==='a_definir'){modalOpportunity(id);toast('Complete os campos obrigatórios para enviar.',true);break;}const {error}=await sb.from('opportunities').update({stage:'enviada'}).eq('id',id);if(error)toast(safe(error),true);else{await loadData(true);await showDetail(id);toast('Solicitação enviada à Astrion.');}}}break;case'add-broker':if(isAdmin())modalBroker();break;case'edit-broker':if(isAdmin())modalBroker(id);break;case'print-request':if(isAdmin())printOpportunity(id,'request');break;
 case'print-return':printOpportunity(id,'return');break;
 case'dispatch':if(isAdmin())modalDispatch(id);break;
 case'edit-catalog':if(isAdmin())modalCatalog(id);break;
