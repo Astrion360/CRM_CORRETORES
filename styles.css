@@ -6,3 +6,32 @@
 .stage-rascunho{background:#f3f5f8;color:#697b8e}.stage-enviada{background:#e8f1fc;color:#2c6298}.stage-triagem{background:#e9f4fc;color:#206d9d}.stage-em_cotacao{background:#efeafc;color:#6e58a6}.stage-pendencia{background:#fff2df;color:#a27120}.stage-cotada{background:#e6f6f1;color:#137b70}.stage-em_negociacao{background:#e5f4f6;color:#277784}.stage-contratada{background:#dff6e8;color:#237c4f}.stage-encerrada{background:#f6e9e9;color:#aa5050}
 .form-section{padding:0 0 22px;margin:0 0 24px;border-bottom:1px solid #e8edf4}.form-section:last-of-type{border-bottom:0;margin-bottom:5px}.section-caption{font:800 12px Manrope,sans-serif;letter-spacing:.065em;text-transform:uppercase;color:#21588d;display:flex;align-items:center;gap:10px;margin-bottom:17px}.section-caption:after{content:"";height:1px;background:#e3ecf5;flex:1}.form-section .checkbox-line{font-size:12px;color:#496582;font-weight:600;padding:4px 0}.form-section .form-group{gap:9px}.modal-footer{flex-wrap:wrap}.modal-footer button{max-width:100%}.detail-layout section{min-width:0}.detail-card h4{margin:0 0 12px}.detail-card+.detail-card{margin-top:13px}.detail-card .form-group{margin-top:12px}.detail-card .summary-line{font-size:12px}.detail-card .summary-line span{max-width:50%}.detail-card .summary-line strong{text-align:right;max-width:58%;overflow-wrap:anywhere}.offer-card{border:1px solid #d7e6f5;background:#fff;border-radius:11px;padding:15px;margin:12px 0}.offer-head{display:flex;align-items:center;justify-content:space-between;gap:9px}.offer-head strong{font:800 14px Manrope,sans-serif;color:#21476c}.offer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:14px 0}.offer-grid>div{background:#f1f6fb;border:1px solid #e2ebf5;padding:11px;border-radius:8px}.offer-grid small{display:block;font-size:10px;color:#7b91a6;margin-bottom:6px}.offer-grid strong{font-size:13px;color:#254e79}.offer-note{font-size:12px;line-height:1.6;color:#55708a}.offer-foot{border-top:1px solid #e8edf4;padding-top:11px;margin:13px 0;font-size:11px;color:#8298ad}.detail-card .btn+.btn{margin-left:8px}.detail-card form .btn{margin-top:12px}
 @media(max-width:560px){.offer-grid{grid-template-columns:1fr 1fr;gap:7px}.offer-grid>div{padding:9px}.offer-grid strong{font-size:11px}.form-section{padding-bottom:18px;margin-bottom:18px}.modal-footer{justify-content:stretch}.modal-footer .btn{flex:1;min-width:135px}}
+
+/* CRM Astrion v3 · Brand institucional e catálogo de produtos */
+:root{--navy:#071b4d;--navy2:#0d2d64;--blue:#20589e;--bright:#4793e1;--ink:#152c51;--muted:#6d8098;--border:#dce6f1;--canvas:#f3f6fb;--radius:14px}
+.astrion-logo-holder{width:112px;min-width:112px;height:48px;display:flex;align-items:center;justify-content:center;background:white;border-radius:9px;padding:7px 8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.astrion-logo-holder img{display:block;max-width:100%;max-height:37px;object-fit:contain}
+.brand:has(.astrion-logo-holder) .brand-name{display:none}
+.brand:has(.astrion-logo-holder) .brand-sub{font-size:10px;font-weight:800;letter-spacing:.16em;margin:0;color:#98b4d7}
+.login-logo .astrion-logo-holder{width:146px;min-width:146px;height:68px;padding:10px 13px;border:1px solid #e1e9f3}
+.login-logo .astrion-logo-holder img{max-height:48px}
+.login-logo .brand-sub{color:#294b73!important;font-size:11px!important}
+.sidebar-brand{padding-bottom:26px}
+.catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.catalog-card{background:#fff;border:1px solid var(--border);border-radius:15px;padding:23px 25px;box-shadow:var(--shadow);min-width:0}
+.catalog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:9px 0 16px}
+.catalog-head h3{margin:0;color:#0b2a56;font-size:22px;letter-spacing:-.04em}
+.catalog-kicker{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#69839f}
+.catalog-stats{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px;border:1px solid #dce6f2;background:#f7faff;padding:14px;border-radius:10px;margin-bottom:14px}
+.catalog-stats span{font-weight:750;font-size:12px;color:#183e6e}
+.catalog-stats b{display:block;color:#7f90a4;font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.catalog-card p{margin:12px 0;line-height:1.6}
+.catalog-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px;border-top:1px solid #e8eff7;padding-top:13px}
+.catalog-tag{display:inline-block;border:1px solid #d6e4f3;background:#f0f6fc;color:#285686;border-radius:100px;padding:5px 9px;font-size:10px;font-weight:700}
+.catalog-card .help{color:#697b8f}
+.modal .form-section{border-bottom:1px solid #edf1f6;padding-bottom:17px;margin-bottom:20px}
+.modal .form-section:last-of-type{border-bottom:0}
+.section-caption{font-weight:800;letter-spacing:.11em;font-size:11px;text-transform:uppercase;color:#194a85;margin-bottom:18px}
+@media(max-width:1120px){.catalog-grid{grid-template-columns:1fr}.catalog-stats{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:650px){.catalog-grid{grid-template-columns:1fr}.catalog-card{padding:18px}.catalog-stats{grid-template-columns:1fr}.catalog-head{flex-wrap:wrap}.topbar{padding-left:20px;padding-right:20px}.content{padding-left:16px;padding-right:16px}}
+@media print{.sidebar,.topbar,.page-actions{display:none!important}.main{width:100%}.content{max-width:100%;padding:0}}
