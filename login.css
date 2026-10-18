@@ -15,7 +15,7 @@
 #app .astrion-reference-login .login-form{display:flex;flex-direction:column;gap:18px}
 #app .astrion-reference-login .login-form label{font-size:13px;line-height:1.2;font-weight:800;color:#163760;margin:0 0 8px;display:block}
 #app .astrion-reference-login .login-field-wrap{position:relative}
-#app .astrion-reference-login .login-field-wrap .login-field-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:#5d7898;pointer-events:none}
+#app .astrion-reference-login .login-field-wrap>svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:#5d7898;pointer-events:none}
 #app .astrion-reference-login .login-field-wrap>.field{height:53px;width:100%;border:1px solid #ccdaeb;border-radius:10px;background:linear-gradient(180deg,#e8f1fb,#edf4fc);padding:11px 48px 11px 49px;box-shadow:none;color:#102b53;font-size:14px}
 #app .astrion-reference-login .login-field-wrap>.field::placeholder{color:#8196ae;opacity:1}
 #app .astrion-reference-login .login-field-wrap>.field:focus{outline:2px solid #5395d0;outline-offset:1px;border-color:#659ccf}
