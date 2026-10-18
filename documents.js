@@ -16,8 +16,11 @@ function request(o,c,b,p,catalog,dispatch){
 }
 function returnQuotes(o,c,b,p,quotes){
  const records=(quotes||[]).filter(q=>q.published);
+ const comparison=records.length>1
+ ?'<section><h2>Comparativo das alternativas</h2><table class="comparison"><thead><tr><th>Alternativa</th><th>Grupo / Plano</th><th>Crédito</th><th>Prazo</th><th>Parcela</th></tr></thead><tbody>'+records.map(q=>'<tr><td>'+E(q.label)+'</td><td>'+E([q.group_code,q.plan_name].filter(Boolean).join(' / ')||'A confirmar')+'</td><td>'+BR(q.credit_amount)+'</td><td>'+E(q.term_months)+' meses</td><td>'+BR(q.installment_amount)+'</td></tr>').join('')+'</tbody></table></section>'
+ :'';
  return meta(o,c,b,p)+group('Solicitação original',[cell('Bem',o.reference_asset),cell('Crédito pretendido',BR(o.credit_amount)),cell('Lance disponível',BR(o.bid_amount))])+
- '<h2>Alternativas autorizadas</h2>'+ (records.map((q,i)=>'<article class="offer"><h3>Alternativa '+(i+1)+' · '+E(q.label)+'</h3>'+
+ comparison+'<h2>Alternativas autorizadas</h2>'+ (records.map((q,i)=>'<article class="offer"><h3>Alternativa '+(i+1)+' · '+E(q.label)+'</h3>'+
  group('Condições informadas',[cell('Parceiro',q.partner_name),cell('Grupo',q.group_code),cell('Plano',q.plan_name),cell('Crédito',BR(q.credit_amount)),cell('Prazo',q.term_months+' meses'),cell('Parcela informada',BR(q.installment_amount)),cell('Após contemplação',BR(q.installment_after_contemplation)),cell('Taxa adm. total',q.admin_fee_percentage==null?'A confirmar':q.admin_fee_percentage+'%'),cell('Fundo de reserva',q.reserve_fund_percentage==null?'A confirmar':q.reserve_fund_percentage+'%'),cell('Seguro mensal',BR(q.insurance_amount)),cell('Índice',q.adjustment_index),cell('Validade',DATE(q.valid_until))])+
  (q.bid_guidance?'<h4>Lance</h4>'+note(q.bid_guidance):'')+(q.conditions||q.sales_plan_notes?'<h4>Ressalvas</h4>'+note([q.conditions,q.sales_plan_notes].filter(Boolean).join('\n\n')):'')+'</article>').join('')||note('Não há devolutivas publicadas.'))+
  '<aside class="warn">Valores indicativos sujeitos à confirmação da administradora e condições contratuais. Não há garantia de contemplação ou crédito aprovado.</aside>';
@@ -31,6 +34,7 @@ const style=[
 '.subtitle{color:#697e97}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}.item{padding:7px 0;display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #e8edf4;break-inside:avoid}',
 '.item span{color:#697c92}.item strong{max-width:66%;text-align:right;overflow-wrap:anywhere}.note{padding:11px;background:#f5f8fc;border-left:3px solid #2966aa;white-space:pre-line;overflow-wrap:anywhere}',
 '.warn{padding:12px;background:#fff8ec;border-left:3px solid #ad8031;margin:19px 0;font-size:10px}.blank{height:66px;border:1px dashed #b0c3d9;margin:9px 0}',
+'table.comparison{width:100%;border-collapse:collapse;table-layout:fixed}table.comparison th,table.comparison td{border-bottom:1px solid #e1e9f1;padding:7px 5px;text-align:left;font-size:10px;overflow-wrap:anywhere}table.comparison th{background:#f0f5fb;color:#244a7e}',
 '.offer{border:1px solid #d9e4f0;padding:12px;margin:14px 0;border-radius:9px;break-inside:avoid}.toolbar{padding:12px;text-align:center}.toolbar button{padding:11px 20px;color:white;background:#18528e;border:0;border-radius:8px;cursor:pointer}',
 '.foot{margin-top:25px;border-top:1px solid #d8e2f0;padding-top:12px;color:#788ca1;font-size:10px}',
 '@media print{body{background:white}.toolbar{display:none}.paper{width:auto;min-height:unset;margin:0;padding:0;box-shadow:none}.offer{break-inside:avoid}}',
