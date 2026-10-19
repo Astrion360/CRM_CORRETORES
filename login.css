@@ -107,3 +107,21 @@
 #app .astrion-reference-login .reference-signature{text-shadow:0 2px 12px rgba(0,10,35,.7)}
 @media(max-width:980px){#app .astrion-reference-login .reference-scenery .orbita-universe-image{object-position:62% center}}
 @media(max-width:600px){#app .astrion-reference-login .reference-scenery .orbita-universe-image{object-position:71% center}}
+
+/* ÓRBITA v7: bloco integral de login centralizado; assinatura manuscrita eliminada */
+#app .astrion-reference-login .login-left{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:clamp(22px,3vh,42px) clamp(24px,4vw,72px) clamp(24px,3vh,40px)}
+#app .astrion-reference-login .login-left-core{width:min(100%,450px);max-width:450px;display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:clamp(5px,1.6vh,18px);margin:auto;flex:0 0 auto}
+#app .astrion-reference-login .login-left-core .reference-brand{min-height:auto!important;width:100%;margin:0!important}
+#app .astrion-reference-login .login-left-core .reference-brand .orbita-wordmark{width:min(100%,350px)!important;max-height:none!important;height:auto!important;max-width:100%!important;object-fit:contain}
+#app .astrion-reference-login .login-left-core .login-inner{margin:0 auto!important;padding:0!important;width:100%;max-width:450px}
+#app .astrion-reference-login .login-inner>.eyebrow,
+#app .astrion-reference-login .login-inner>h1,
+#app .astrion-reference-login .login-inner>p{text-align:center}
+#app .astrion-reference-login .login-inner>h1{margin-left:auto;margin-right:auto;max-width:430px}
+#app .astrion-reference-login .login-inner>p{max-width:435px;margin-left:auto;margin-right:auto}
+#app .astrion-reference-login .login-foot{flex:0 0 auto;align-self:stretch;margin-top:auto;padding-top:12px;text-align:center}
+#app .astrion-reference-login .reference-bottom{grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.1vw,22px)}
+#app .astrion-reference-login .reference-signature{display:none!important}
+@media(min-width:981px) and (max-height:790px){#app .astrion-reference-login .login-left{padding-top:18px;padding-bottom:14px}#app .astrion-reference-login .login-left-core{gap:3px}#app .astrion-reference-login .login-left-core .reference-brand .orbita-wordmark{max-width:280px!important}#app .astrion-reference-login .login-inner>.eyebrow{margin-bottom:10px}#app .astrion-reference-login .login-inner>p{margin-bottom:15px}#app .astrion-reference-login .login-form{gap:11px}#app .astrion-reference-login .login-assurance{margin-top:17px;padding-top:14px}}
+@media(max-width:980px){#app .astrion-reference-login .login-left{min-height:100svh;padding-left:clamp(20px,6vw,75px);padding-right:clamp(20px,6vw,75px)}#app .astrion-reference-login .login-left-core{margin:auto}}
+@media(max-width:600px){#app .astrion-reference-login .login-left{padding-top:22px;padding-bottom:20px}#app .astrion-reference-login .login-left-core{width:100%;max-width:440px}#app .astrion-reference-login .login-left-core .reference-brand .orbita-wordmark{max-width:300px!important}#app .astrion-reference-login .reference-bottom{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 15px}}

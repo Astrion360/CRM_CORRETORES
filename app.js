@@ -91,7 +91,7 @@ function renderAuth(){if(!validConfig){renderConfig();return;}
  const step=(symbol,label,desc)=>`<div class="reference-step">${loginIcon(symbol)}<strong>${label}</strong><small>${desc}</small></div>`;
  app.innerHTML=`<div class="login-wrap astrion-reference-login">
   <section class="login-left">
-   <div class="reference-brand orbita-login-brand"><img class="orbita-wordmark" src="./assets/orbita-wordmark-navy.svg" alt="ÓRBITA by Astrion" width="812" height="200"></div>
+   <div class="login-left-core"><div class="reference-brand orbita-login-brand"><img class="orbita-wordmark" src="./assets/orbita-wordmark-navy.svg" alt="ÓRBITA by Astrion" width="812" height="200"></div>
    <div class="login-inner">
     <span class="eyebrow">PORTAL RESTRITO · ACESSO SEGURO</span>
     <h1>${title}</h1>
@@ -99,7 +99,7 @@ function renderAuth(){if(!validConfig){renderConfig();return;}
     <form class="login-form" id="auth-form" data-form="${mode}">${fieldEmail}${fieldPassword}${fieldConfirm}<button class="btn btn-primary" type="submit">${buttonText} &nbsp;→</button></form>
     <div class="auth-link">${textActions}</div>
     ${assurance}
-   </div>
+   </div></div>
    <small class="login-foot">© ${new Date().getFullYear()} Astrion Assessoria. Todos os direitos reservados.<br>Uso interno e parceiros autorizados.</small>
   </section>
   <aside class="login-right" aria-label="Consórcios, planejamento e realizações">
@@ -121,7 +121,6 @@ function renderAuth(){if(!validConfig){renderConfig();return;}
     ${step('search','Análise','Nossa equipe avalia o cenário')}
     ${step('file','Cotação','Solicitamos à administradora')}
     ${step('check','Devolutiva','Você recebe as opções organizadas')}
-    <div class="reference-signature">Relacionamentos<br>que giram<br>resultados.</div>
    </div>
   </aside>
  </div>`;
