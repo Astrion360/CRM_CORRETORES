@@ -103,7 +103,7 @@ function renderAuth(){if(!validConfig){renderConfig();return;}
    <small class="login-foot">© ${new Date().getFullYear()} Astrion Assessoria. Todos os direitos reservados.<br>Uso interno e parceiros autorizados.</small>
   </section>
   <aside class="login-right" aria-label="Consórcios, planejamento e realizações">
-   <div class="reference-scenery"><img class="reference-scenery-image orbita-universe-image" src="./assets/orbita-universe.svg" alt="" aria-hidden="true" width="1200" height="940" loading="eager" decoding="async"></div>
+   <div class="reference-scenery"><img class="reference-scenery-image orbita-universe-image" src="./assets/orbita-art-emblematica-v6.svg" alt="" aria-hidden="true" width="1200" height="940" loading="eager" decoding="async"></div>
    <div class="reference-hero-top">
     <div class="eyebrow">CORRETORES · CLIENTES · OPORTUNIDADES</div>
     <h2>Conexões<br><span class="title-gradient">em movimento.</span></h2>
