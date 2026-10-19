@@ -79,3 +79,17 @@
  #app .astrion-reference-login .reference-brand .brand-detail strong{font-size:17px}
  #app .astrion-reference-login .reference-brand .brand-detail span{font-size:9px}
 }
+
+/* ÓRBITA | Logotipo personalizado em SVG e universo de conexões responsivo */
+#app .astrion-reference-login .orbita-login-brand{justify-content:center;min-height:100px}
+#app .astrion-reference-login .orbita-login-brand .orbita-wordmark{display:block;width:min(100%,340px)!important;max-width:100%!important;height:auto!important;max-height:110px!important;object-fit:contain}
+#app .astrion-reference-login .reference-scenery{background:#06182e}
+#app .astrion-reference-login .reference-scenery .orbita-universe-image{object-fit:cover;object-position:60% 48%;filter:none}
+#app .astrion-reference-login .login-right::before{background:linear-gradient(180deg,rgba(2,15,35,.88) 0%,rgba(3,25,55,.76) 20%,rgba(4,34,72,.10) 42%,rgba(2,17,42,.25) 63%,rgba(3,21,48,.89) 81%,#061730 100%)}
+#app .astrion-reference-login .reference-hero-top h2{font-size:clamp(32px,3.65vw,59px);letter-spacing:-.065em}
+#app .astrion-reference-login .reference-hero-top h2 .title-gradient{color:#83ceff}
+#app .astrion-reference-login .reference-hero-top p{max-width:660px}
+#app .astrion-reference-login .reference-signature{font-family:'Great Vibes','Segoe Script',cursive;font-size:clamp(19px,1.95vw,29px);line-height:1.03;text-align:center;word-break:normal}
+#app .astrion-reference-login .reference-cards .reference-card{background:linear-gradient(160deg,rgba(15,63,116,.72),rgba(4,24,56,.82));border-color:rgba(130,207,255,.37)}
+@media(min-width:981px) and (max-height:760px){#app .astrion-reference-login .reference-hero-top h2{font-size:clamp(29px,3vw,43px)}}
+@media(max-width:600px){#app .astrion-reference-login .orbita-login-brand{min-height:84px}#app .astrion-reference-login .orbita-login-brand .orbita-wordmark{width:min(95%,315px)!important}#app .astrion-reference-login .reference-hero-top h2{font-size:clamp(31px,8vw,44px)}#app .astrion-reference-login .reference-signature{font-size:29px}}

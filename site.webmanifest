@@ -1,0 +1,18 @@
+{
+  "name": "ÓRBITA by Astrion",
+  "short_name": "ÓRBITA",
+  "description": "Plataforma de relacionamento, oportunidades e cotações. Conexões em movimento.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#061832",
+  "theme_color": "#091e3d",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

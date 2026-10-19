@@ -68,3 +68,13 @@
 @media (max-width:900px){.login-right{display:none!important}.login-left{min-height:100vh}.login-logo .astrion-logo-holder{width:80px!important;min-width:80px!important;height:72px!important}.login-logo .astrion-logo-holder img{height:70px!important;width:80px!important}.login-logo .brand-name{font-size:22px!important}}
 @media (max-width:580px){.login-left{padding:20px 23px!important}.login-logo{gap:11px}.login-logo .brand-name{font-size:20px!important}.login-logo .brand-sub{font-size:9px!important}}
 @media (prefers-reduced-motion:reduce){.dream-hero,.dream-hero-image{transition:none!important}}
+
+/* ÓRBITA | Identidade principal da plataforma */
+.orbita-sidebar-brand{padding:0 6px 32px!important;display:flex;flex-direction:column;gap:0}
+.orbita-sidebar-wordmark{display:block;width:min(100%,218px);height:auto;margin:0 auto 0 0;object-fit:contain}
+.orbita-sidebar-caption{display:block;margin:0 0 0 6px;color:#9ac8ed;font-size:10px;font-weight:700;letter-spacing:.045em}
+.login-logo .orbita-wordmark-login{width:min(100%,340px);height:auto;object-fit:contain}
+.sidebar{background:linear-gradient(175deg,#061933 0%,#09274E 54%,#061A37 100%)}
+.sidebar .nav-item.active{background:linear-gradient(105deg,#10599a,#143a69);box-shadow:inset 3px 0 0 #5aceff}
+.layout .topbar .eyebrow{color:#357eb8;letter-spacing:.18em}
+@media(max-width:780px){.orbita-sidebar-wordmark{max-width:204px}}

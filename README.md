@@ -1,6 +1,10 @@
-# ASTRION CRM Corretores | Operação de cotações — v3
+# ÓRBITA by Astrion | Plataforma de relacionamento, oportunidades e cotações
 
-**Versão publicada:** https://astrion360.github.io/CRM_CORRETORES/
+**Endereço oficial:** https://corretores.astrion360.com.br/
+
+**Marca:** ÓRBITA by Astrion · **Assinatura:** Conexões em movimento.
+
+**Nota técnica:** Os identificadores do repositório, banco e integrações permanecem inalterados para preservar os acessos e as automações.
 
 ## Jornada comercial v3
 
@@ -90,9 +94,9 @@ Tabelas: `profiles`, `products` (somente categorias genéricas), `clients`, `opp
 
 No novo projeto Supabase, abra **Authentication → Users → Add user → Create new user** (não `Send invite`). Defina o e-mail e uma **senha provisória forte**, com confirmação manual de e-mail no ato de criação. Não compartilhe a senha por e-mail aberto, repositório ou planilha.
 
-No CRM → **Corretores → Cadastrar corretor**, há instruções para esse cadastro. Após criar a conta no Supabase, clique em **Atualizar**, escolha **Gerenciar** para completar nome, empresa e telefone e marque **Ativo**. A conta aparece automaticamente na tabela `profiles` pelo trigger de criação do Auth, inicialmente suspensa.
+Na ÓRBITA → **Corretores → Cadastrar corretor**, há instruções para esse cadastro. Após criar a conta no Supabase, clique em **Atualizar**, escolha **Gerenciar** para completar nome, empresa e telefone e marque **Ativo**. A conta aparece automaticamente na tabela `profiles` pelo trigger de criação do Auth, inicialmente suspensa.
 
-O corretor recebe as credenciais por canal privado e acessa o CRM. **O primeiro acesso exige a substituição da senha provisória**, com mínimo de 12 caracteres e confirmação. Até que o Auth registre a atualização de senha, as políticas RLS impedem o acesso aos clientes, oportunidades, categorias e dados internos; somente o próprio perfil fica visível.
+O corretor recebe as credenciais por canal privado e acessa a ÓRBITA. **O primeiro acesso exige a substituição da senha provisória**, com mínimo de 12 caracteres e confirmação. Até que o Auth registre a atualização de senha, as políticas RLS impedem o acesso aos clientes, oportunidades, categorias e dados internos; somente o próprio perfil fica visível.
 
 Após o primeiro acesso, o usuário também pode selecionar **Alterar minha senha** no menu lateral. A nova senha passa pelo Supabase Auth; por segurança, o portal encerra a sessão globalmente e solicita novo login.
 
