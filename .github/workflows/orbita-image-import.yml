@@ -1,0 +1,37 @@
+name: Importar arte aprovada ÓRBITA
+on:
+  push:
+    paths:
+      - .github/workflows/orbita-image-import.yml
+permissions:
+  contents: write
+jobs:
+  import-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Baixar a arte original aprovada
+        env:
+          ART_SOURCE: "https://s3.amazonaws.com/document-export.canva.com/AWykU/DAHYdmAWykU/1/thumbnail/0001.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUHTDF2ZFFQ%2F20261018%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261018T204733Z&X-Amz-Expires=71858&X-Amz-Signature=a034107c33daf0e1dd73944fa1c19252e04849cb7f1db552e5efd1c09d89c7bd&X-Amz-SignedHeaders=host&response-expires=Mon%2C%2019%20Oct%202026%2016%3A45%3A11%20GMT"
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          curl --fail --location --silent --show-error --retry 3 "$ART_SOURCE" --output assets/orbita-approved-final.png
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          p=Path("assets/orbita-approved-final.png")
+          b=p.read_bytes()
+          assert b[:8]==b"\x89PNG\r\n\x1a\n", "A fonte nao devolveu PNG"
+          w,h=struct.unpack(">II",b[16:24])
+          assert (w,h)==(595,335), f"dimensoes inesperadas {w}x{h}"
+          print(f"Arte aprovada: {w}x{h}, {len(b)} bytes")
+          PY
+      - name: Publicar arquivo no ramo principal
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/orbita-approved-final.png
+          git diff --cached --quiet && exit 0
+          git commit -m "assets: adicionar imagem exata aprovada para login da ÓRBITA"
+          git push origin HEAD:main
