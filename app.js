@@ -102,26 +102,8 @@ function renderAuth(){if(!validConfig){renderConfig();return;}
    </div></div>
    <small class="login-foot">© ${new Date().getFullYear()} Astrion Assessoria. Todos os direitos reservados.<br>Uso interno e parceiros autorizados.</small>
   </section>
-  <aside class="login-right" aria-label="Consórcios, planejamento e realizações">
-   <div class="reference-scenery"><img class="reference-scenery-image orbita-universe-image" src="./assets/orbita-art-emblematica-v6.svg" alt="" aria-hidden="true" width="1200" height="940" loading="eager" decoding="async"></div>
-   <div class="reference-hero-top">
-    <div class="eyebrow">CORRETORES · CLIENTES · OPORTUNIDADES</div>
-    <h2>Conexões<br><span class="title-gradient">em movimento.</span></h2>
-    <p>Uma órbita comercial para transformar planos em conquistas. Organização, inteligência e acompanhamento com a Astrion.</p>
-    <div class="reference-accent"></div>
-   </div>
-   <div class="reference-cards" aria-label="Modalidades de consórcio">
-    ${category('house','Imóveis','Casas, apartamentos, terrenos e muito mais.')}
-    ${category('car','Veículos','Carros, motos, pesados e máquinas.')}
-    ${category('gear','Outros Bens','Equipamentos, eletrônicos e soluções.')}
-    ${category('plane','Serviços','Viagens, educação, procedimentos e mais.')}
-   </div>
-   <div class="reference-bottom" aria-label="Etapas da solicitação">
-    ${step('file','Solicitação','Você registra a oportunidade')}
-    ${step('search','Análise','Nossa equipe avalia o cenário')}
-    ${step('file','Cotação','Solicitamos à administradora')}
-    ${step('check','Devolutiva','Você recebe as opções organizadas')}
-   </div>
+  <aside class="login-right login-right--approved-image" aria-label="ÓRBITA by Astrion — Conexões em movimento. Corretores, clientes, oportunidades e modalidades de consórcio.">
+   <img class="login-right-approved-image" src="./assets/orbita-approved-final.png?v=20261019-exact-v8" width="595" height="335" alt="Conexões em movimento: ÓRBITA conecta corretores, clientes e oportunidades. Imóveis, veículos, outros bens e serviços. Solicitação, análise, cotação e devolutiva." loading="eager" fetchpriority="high" decoding="async">
   </aside>
  </div>`;
 }
