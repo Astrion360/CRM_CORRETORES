@@ -267,34 +267,87 @@ export function renderSimulator(root,ctx) {
   <button class="btn btn-primary sim-print" id="sim-print" type="button" disabled>Gerar relatório em PDF</button>
  </aside></div>`;
 
+
  const el=id=>root.querySelector('#'+id);
  const product=el('sim-product'),planSel=el('sim-plan'),credit=el('sim-credit'),opps=el('sim-opportunity');
  let report=null,activePlan=null,autoCredit=null;
  const activeProduct=()=>ctx.products.find(p=>p.id===product.value);
+ const category=()=>activeProduct()?.category||'';
+ const currentPlan=()=>ctx.plans.find(x=>x.id===planSel.value&&x.product_id===product.value&&x.active&&x.approved_for_use)||null;
+ const bidModeItems=[
+  ['none','Sem lance'],['livre','Lance livre'],['limitado','Lance limitado (até 60%)'],
+  ['fixo30','Lance fixo 30%'],['fixo25','Lance fixo 25% (pesados)'],
+  ['fixo50','Lance fixo 50% (vendas estruturadas)'],['fidelidade25','Lance fidelidade 25%'],
+  ['quitacao','Lance quitação']
+ ];
  function syncRate(){
-   const b=benchmarkForProduct(activeProduct());
-   const rate=el('sim-interest');
-   rate.value=b?String(b.monthly):'';
-   const label=el('sim-rate-source');
-   label.innerHTML=b
-    ?`Taxa inicial ${pct(b.monthly)} a.m. · ${h(b.label)}. <a href="${h(b.url)}" target="_blank" rel="noopener noreferrer">Consultar fonte</a>. Editável; não é CET nem oferta bancária. Simulação com 100% do crédito financiado, sem entrada, IOF ou seguros.`
-    :'Nenhuma referência de juros definida para este produto. Informe uma taxa mensal para calcular. Sem entrada, IOF, seguros ou CET.';
+  const b=benchmarkForProduct(activeProduct());
+  el('sim-interest').value=b?String(b.monthly):'';
+  el('sim-rate-source').innerHTML=b
+   ?`Taxa inicial ${pct(b.monthly)} a.m. · ${h(b.label)}. <a href="${h(b.url)}" target="_blank" rel="noopener noreferrer">Fonte</a>. Não representa CET ou oferta; financiamento integral, sem entrada, seguros, tarifas ou IOF.`
+   :'Não há taxa de referência para este produto. Informe uma taxa de juros mensal para comparar.';
  }
  function syncPricing(p){
    el('sim-admin-fee').value=p?.admin_fee_pct??'';
    el('sim-reserve-fee').value=p?.reserve_fund_pct??'';
    el('sim-payment-mode').value='normal';
+   el('sim-insurance-base').value='credit';
    el('sim-contemplation').max=p?String(Math.max(1,p.term_months-1)):'360';
    el('sim-contemplation').value=p?String(Math.max(1,Math.floor(p.term_months/2))):'';
    el('sim-contemplation').disabled=true;
    el('sim-reduced-info').classList.add('hidden');
  }
+ function syncBidModes(){
+   const group=el('sim-group').value,cat=category();
+   const select=el('sim-bid-mode'),prev=select.value;
+   const modes=bidModeItems.filter(([id])=>
+     id==='none'||(id==='fixo25'?cat==='Pesados':
+       id==='fixo50'?(cat==='Automóveis'&&['578','720'].includes(group)):
+       id==='fixo30'?cat!=='Pesados':true));
+   select.innerHTML=modes.map(([id,label])=>option(id,label,prev)).join('');
+   if(modes.some(x=>x[0]===prev))select.value=prev;else select.value='none';
+   syncBidControls(false);
+ }
+ function syncBidControls(resetPct=true){
+   const group=el('sim-group').value,mode=el('sim-bid-mode').value;
+   const policy=biddingPolicy(category(),group,mode,Number(el('sim-bid-paid').value||0));
+   const none=mode==='none',seventy=el('sim-payment-mode').value==='seventy';
+   const embedded=el('sim-bid-embedded'),key=el('sim-bid-key'),fgts=el('sim-bid-fgts');
+   const isKeyEligible=((['Automóveis','Motos'].includes(category())&&
+      ['462','463','527','529','535','540','541','575','617','619'].includes(group))||
+      (category()==='Pesados'&&['1004','1005'].includes(group)));
+   embedded.disabled=none||seventy||!policy.embeddedAllowed||Number(key.value)>0;
+   key.disabled=none||seventy||!isKeyEligible||(category()==='Pesados'&&mode!=='livre')||Number(embedded.value)>0;
+   fgts.disabled=none||category()!=='Imóveis';
+   el('sim-bid-pct').disabled=none||policy.fixedPercent!=null;
+   el('sim-bid-paid').disabled=mode!=='fidelidade25';
+   if(resetPct){
+     if(none)el('sim-bid-pct').value=0;
+     else if(policy.fixedPercent!=null)el('sim-bid-pct').value=policy.fixedPercent;
+     else el('sim-bid-pct').value=0;
+   }else if(policy.fixedPercent!=null)el('sim-bid-pct').value=policy.fixedPercent;
+   if(embedded.disabled)embedded.value=0;
+   if(key.disabled)key.value=0;
+   if(fgts.disabled)fgts.value=0;
+   const note=none?'Para utilizar lance, selecione a modalidade e o grupo.':
+     (policy.reason||'Percentuais e elegibilidade devem ser confirmados com a administradora.');
+   el('sim-bid-help').textContent=note;
+ }
+ function syncGroups(){
+  const cat=category(),previous=el('sim-group').value;
+  const groups=groupOptions(cat,groupList(ctx,product.value));
+  el('sim-group').innerHTML=option('','Grupo não definido · hipótese genérica',previous)
+   +groups.map(g=>option(g.code,'Grupo '+g.code+(g.source==='Somente no treinamento'?' · treinamento':''),previous)).join('');
+  el('sim-group').value=groups.some(g=>g.code===previous)?previous:'';
+  el('sim-training-details').innerHTML=`<details><summary>Condições adicionais do treinamento · ${h(cat)}</summary>
+   <ul>${supplementaryConditions(cat).map(t=>'<li>'+h(t)+'</li>').join('')}</ul>
+   <small>${h(TRAINING_VERSION)}. É necessário consultar o regulamento atual do grupo e a administradora para uso comercial.</small></details>`;
+  syncBidModes();
+ }
  function syncPlan(){
-   const list=availablePlans(ctx,product.value);
-   const previous=planSel.value;
-   planSel.innerHTML=list.length
-      ?list.map(p=>option(p.id,p.name+(p.group_code?' · Grupo '+p.group_code:''),previous)).join('')
-      :'<option value="">Nenhum plano ativo aprovado</option>';
+   const list=availablePlans(ctx,product.value),previous=planSel.value;
+   planSel.innerHTML=list.length?list.map(p=>option(p.id,p.name+(p.group_code?' · Grupo '+p.group_code:''),previous)).join(''):
+     '<option value="">Nenhum plano ativo aprovado</option>';
    activePlan=list.find(p=>p.id===planSel.value)||list[0]||null;
    if(activePlan){
      planSel.value=activePlan.id;
@@ -303,78 +356,117 @@ export function renderSimulator(root,ctx) {
        autoCredit=Number(activePlan.reference_credit_amount);
      }
    }
-   syncPricing(activePlan);syncRate();update();
+   syncPricing(activePlan);syncRate();syncGroups();update();
  }
  function update(){
-   const p=ctx.plans.find(x=>x.id===planSel.value&&x.product_id===product.value&&x.active&&x.approved_for_use)||null;
+   const p=currentPlan();
    activePlan=p;report=null;el('sim-print').disabled=true;
-   const reduced=el('sim-payment-mode').value==='half';
-   el('sim-reduced-info').classList.toggle('hidden',!reduced);
-   el('sim-contemplation').disabled=!reduced;
-   const seg=productSegment(ctx,product.value),group=planGroup(ctx,p);
-   el('sim-configuration').innerHTML=p
-     ?`<div class="sim-imported"><div class="sim-imported-head"><strong>Condições do produto cadastrado</strong><span class="sim-verified">${h(p.source_label)}</span></div>
-       <div class="sim-facts">
-        <span>Prazo <b>${fmt(p.term_months)} meses</b></span><span>TA do cadastro <b>${pct(p.admin_fee_pct)}</b></span><span>FR do cadastro <b>${pct(p.reserve_fund_pct)}</b></span>
-        <span>Outros encargos totais <b>${pct(p.other_total_pct)}</b></span><span>Prestamista ao mês <b>${pct(Number(p.prestamista_rate_monthly||0)*100)}</b></span><span>Seguro adicional <b>${money(p.insurance_monthly_amount)}</b></span>
-        <span>Crédito de referência <b>${p.reference_credit_amount==null?'A definir':money(p.reference_credit_amount)}</b></span><span>Reajuste anual hipotético <b>${pct(p.annual_adjustment_pct)}</b></span>
-       </div><small>TA e FR digitados acima prevalecem neste cálculo, sem alterar as condições cadastradas. Prestamista calculado sobre o crédito integral; regras e reajustes contratuais dependem de confirmação.</small></div>`
-     :'<div class="sim-alert">Este produto não tem plano de referência liberado para simulação.</div>';
+   const mode=el('sim-payment-mode').value,half=mode==='half',seventy=mode==='seventy';
+   el('sim-reduced-info').classList.toggle('hidden',!half);
+   el('sim-contemplation').disabled=!half;
+   const seg=productSegment(ctx,product.value);
+   const groupCode=el('sim-group').value,group=ctx.groups.find(g=>g.code===groupCode&&g.segment_code===seg?.code);
+   const planPolicy=groupPlanPolicy(groupCode,mode);
+   el('sim-configuration').innerHTML=p?`<div class="sim-imported">
+      <div class="sim-imported-head"><strong>Parâmetros importados do cadastro Astrion</strong><span class="sim-verified">${h(p.source_label)}</span></div>
+      <div class="sim-facts">
+       <span>Prazo <b>${fmt(p.term_months)} meses</b></span>
+       <span>TA original <b>${pct(p.admin_fee_pct)}</b></span>
+       <span>FR original <b>${pct(p.reserve_fund_pct)}</b></span>
+       <span>Encargos adicionais <b>${pct(p.other_total_pct)}</b></span>
+       <span>Prestamista a.m. <b>${pct(Number(p.prestamista_rate_monthly||0)*100)}</b></span>
+       <span>Crédito ref. <b>${p.reference_credit_amount==null?'—':money(p.reference_credit_amount)}</b></span>
+      </div><small>Simulações não alteram o cadastro comercial. Planos especiais e grupos citados no treinamento exigem validação da administradora.</small></div>`
+     :'<div class="sim-alert">Não há parâmetros aprovados para o produto selecionado.</div>';
    const c=nval(credit.value);
    el('sim-finance-linked').textContent=p&&validNumber(c,1,1e10)
-    ?'Crédito financiado: '+money(c)+' · Prazo: '+p.term_months+' meses · Entrada: R$ 0,00'
-    :'O financiamento utilizará o mesmo valor de crédito e prazo do consórcio.';
+     ?'Crédito financiado: '+money(c)+' · Prazo: '+p.term_months+' meses · Entrada: R$ 0,00'
+     :'O financiamento utilizará o crédito e prazo do consórcio.';
    if(!p){el('sim-results').innerHTML='<div class="sim-empty">Aguardando plano comercial.</div>';return;}
    if(!validNumber(c,1,1e10)){el('sim-results').innerHTML='<div class="sim-empty">Informe o valor do crédito.</div>';return;}
    const bounds=group&&group.credit_min!=null&&group.credit_max!=null?group:seg;
    if(bounds&&((bounds.credit_min!=null&&c<Number(bounds.credit_min))||(bounds.credit_max!=null&&c>Number(bounds.credit_max)))){
-     el('sim-results').innerHTML=`<div class="sim-alert">Crédito fora da faixa de referência: ${money(bounds.credit_min||0)} a ${money(bounds.credit_max||0)}. Ajuste o valor ou escolha outra opção.</div>`;return;
+     el('sim-results').innerHTML=`<div class="sim-alert">Crédito fora da faixa: ${money(bounds.credit_min||0)} a ${money(bounds.credit_max||0)}.</div>`;return;
    }
    const fee=nval(el('sim-admin-fee').value),reserve=nval(el('sim-reserve-fee').value);
    if(!validNumber(fee,0,100)||!validNumber(reserve,0,100)){
-     el('sim-results').innerHTML='<div class="sim-alert">Informe TA e fundo de reserva entre 0% e 100% para calcular.</div>';return;
+     el('sim-results').innerHTML='<div class="sim-alert">Informe TA e fundo de reserva entre 0% e 100%.</div>';return;
    }
    const effective={...p,admin_fee_pct:fee,reserve_fund_pct:reserve};
    const month=nval(el('sim-contemplation').value);
-   const legacyTermNotice=seg?.max_term_months&&p.term_months>Number(seg.max_term_months)
-     ?`<div class="sim-alert" style="margin-bottom:12px">Prazo do plano (${fmt(p.term_months)} meses) excede a referência antiga do catálogo (${fmt(seg.max_term_months)}). Confirme a condição antes de ofertar.</div>`:'';
+   const insuranceBase=el('sim-insurance-base').value;
    let calc;
-   try{calc=calculateConsortium(effective,c,{reduced50:reduced,contemplationMonth:month});}
-   catch(e){el('sim-results').innerHTML=`<div class="sim-alert">${h(reduced?'Informe um mês hipotético entre 1 e '+(p.term_months-1)+'.':e.message)}</div>`;return;}
-   const rawRate=el('sim-interest').value;
-   const finInputs={assetValue:c,downPayment:0,monthlyRate:nval(rawRate),months:p.term_months,system:el('sim-system').value,monthlyCosts:0,upfrontCosts:0};
-   let fin=null,finError='';
-   if(rawRate!==''){try{fin=calculateFinancing(finInputs);}catch(e){finError=e.message;}}
-   const cards=legacyTermNotice+outputCards([
-     [reduced?'Parcela inicial reduzida':'Parcela inicial do consórcio',money(calc.first),
-       (reduced?'50% da parcela-base + seguro integral':'Parcela-base + seguro integral')],
-     [reduced?'Parcela após contemplação hipotética':'Última parcela do consórcio',
-       money(reduced?calc.postContemplationFirst:calc.last),
-       reduced?'Desde o mês '+(month+1)+' · saldo redistribuído':'Projeção sem contemplação assumida'],
-     ['Total projetado do consórcio',money(calc.total),
-       'TA '+pct(fee)+' · FR '+pct(reserve)+' · prestamista '+money(calc.prestamistaMonthlyAmount)+'/mês']
+   try{calc=calculateConsortium(effective,c,{paymentMode:mode,contemplationMonth:month,insuranceBase});}
+   catch(err){el('sim-results').innerHTML=`<div class="sim-alert">${h(err.message)}</div>`;return;}
+   const bid=calculateBidScenario({
+     credit:c,category:category(),groupCode,mode:el('sim-bid-mode').value,
+     bidPercent:nval(el('sim-bid-pct').value),embeddedPercent:nval(el('sim-bid-embedded').value),
+     fgtsAmount:nval(el('sim-bid-fgts').value),keyAppraisedValue:nval(el('sim-bid-key').value),
+     paidOnTimeMonths:nval(el('sim-bid-paid').value),application:el('sim-bid-application').value,planMode:mode
+   });
+   const legacyNote=seg?.max_term_months&&p.term_months>Number(seg.max_term_months)
+     ?`<div class="sim-alert">Prazo do plano: ${p.term_months} meses; catálogo anterior: ${seg.max_term_months}. Confirme condição do grupo.</div>`:'';
+   const planError=!planPolicy.allowed?`<div class="sim-alert">${h(planPolicy.reason)}</div>`:'';
+   const planCaution=planPolicy.allowed&&!planPolicy.verified&&mode!=='normal'
+     ?`<div class="sim-hint">${h(planPolicy.reason)}</div>`:'';
+   const labelFirst=half?'Parcela inicial reduzida 50%':seventy?'Parcela do plano 70%':'Parcela inicial integral';
+   const labelSecond=half?'Parcela após contemplação hipotética':'Última parcela estimada';
+   const cards=outputCards([
+    [labelFirst,money(calc.first),
+      half?'50% fundo comum + 100% taxas e seguro':seventy?'70% fundo comum + 100% taxas e seguro':'100% fundo comum, taxas e seguro'],
+    [labelSecond,money(half?calc.postContemplationFirst:calc.last),
+      half?'Mês '+(month+1)+' · principal adiado redistribuído':'Prestamista estimado: '+money(calc.prestamistaMonthlyAmount)+'/mês'],
+    ['Total de parcelas projetadas',money(calc.total),'Antes de eventual abatimento do lance. TA '+pct(fee)+' · FR '+pct(reserve)]
    ]);
-   const deferredNote=reduced
-     ?`<div class="sim-reduced-summary"><strong>50% até o mês ${fmt(month)} (hipótese)</strong><p>Valor adiado redistribuído: <b>${money(calc.deferredAmount)}</b>. O seguro não é reduzido. Sob essas hipóteses, o total desembolsado permanece ${money(calc.normalTotal)}, apenas distribuído de forma diferente. A contemplação e a regra comercial não são garantidas.</p></div>`:'';
+   const reducedSummary=half?`<div class="sim-reduced-summary"><strong>Parcela 50% até o mês ${fmt(month)} (apenas hipótese)</strong>
+    <p>Somente metade do fundo comum é reduzida; taxas e seguro ficam integrais. Valor principal adiado: <b>${money(calc.deferredAmount)}</b>, redistribuído após o mês hipotético. O total sem outras operações permanece ${money(calc.normalTotal)}.</p></div>`:
+    seventy?`<div class="sim-reduced-summary"><strong>Plano 70% · hipótese do treinamento</strong>
+    <p>30% do crédito (${money(calc.plan70EmbeddedAmount)}) é reservado ao lance embutido. Parcela calculada sobre 70% do fundo comum e 100% das taxas. Crédito líquido ilustrativo, antes de outras condições: <b>${money(calc.plan70NetCredit)}</b>. O plano depende do grupo e não garante contemplação.</p></div>`:'';
+   const policy=biddingPolicy(category(),groupCode,el('sim-bid-mode').value,Number(el('sim-bid-paid').value||0));
+   const bidErrors=[...bid.errors,...(planPolicy.allowed?[]:[planPolicy.reason])];
+   const bidNotice=bidErrors.length?`<div class="sim-alert"><strong>Corrigir para simular lance:</strong><ul>${bidErrors.map(msg=>'<li>'+h(msg)+'</li>').join('')}</ul></div>`:'';
+   const bidFlags=bid.warnings.map(w=>`<li>${h(w)}</li>`).join('');
+   const bidInfo=el('sim-bid-mode').value==='none'&&!seventy
+    ?'<div class="sim-hint">Sem lance. Selecione grupo e modalidade para calcular recursos próprios, FGTS, embutido ou troca de chaves.</div>'
+    :`<div class="sim-bid-summary"><strong>Estrutura financeira do lance (hipotética)</strong>
+      <div class="sim-bid-grid">
+       <span>Oferta total <b>${money(bid.bidAmount)}</b></span>
+       <span>Embutido ${seventy?'(incluído no plano 70%)':''} <b>${money(bid.embeddedAmount)}</b></span>
+       <span>FGTS <b>${money(bid.fgtsAmount)}</b></span>
+       <span>Troca de chaves <b>${money(bid.keyAmount)}</b></span>
+       <span>Recursos próprios restantes <b>${money(bid.ownResourcesAmount)}</b></span>
+       <span>Crédito líquido teórico <b>${money(bid.netCredit)}</b></span>
+      </div>
+      <p>Abatimento escolhido: <b>${h(bid.applicationLabel)}</b>. O simulador não aplica esse abatimento às parcelas sem cronograma/regra contratual. Troca de chaves depende de comprovação do bem, avaliação e confirmação pela administradora.</p>
+      ${bidFlags?'<ul>'+bidFlags+'</ul>':''}
+     </div>`;
+   const finInputs={assetValue:c,downPayment:0,monthlyRate:nval(el('sim-interest').value),
+      months:p.term_months,system:el('sim-system').value,monthlyCosts:0,upfrontCosts:0};
+   let fin=null,finError='';
+   if(el('sim-interest').value!==''){try{fin=calculateFinancing(finInputs);}catch(err){finError=err.message;}}
    let comp='';
    if(fin){
-     const max=Math.max(calc.total,fin.total,1),a=(calc.total/max*100).toFixed(1),b=(fin.total/max*100).toFixed(1);
+     const maximum=Math.max(calc.total,fin.total,1),a=(calc.total/maximum*100).toFixed(1),b=(fin.total/maximum*100).toFixed(1);
      comp=`<div class="sim-comparison"><h3>Financiamento · ${h(fin.system)} · ${pct(fin.monthlyRate)} a.m.</h3>
-       ${outputCards([['Parcela inicial',money(fin.first),'Mesmo crédito e prazo do consórcio'],['Parcela final',money(fin.last),fin.system==='SAC'?'SAC: amortização constante':'Price: parcela financeira uniforme'],['Desembolso total',money(fin.total),'Sem entrada, seguro, IOF ou CET']])}
-       <div class="sim-bars"><div><span>Consórcio</span><i><b style="width:${a}%"></b></i><strong>${money(calc.total)}</strong></div><div><span>Financiamento</span><i><b class="finance" style="width:${b}%"></b></i><strong>${money(fin.total)}</strong></div></div>
-       <small>Não equivale ao CET. Financiamento pressupõe concessão de crédito imediato após aprovação; no consórcio é preciso aguardar contemplação. Os totais não incorporam todos os custos contratuais, tributos e indexadores.</small></div>`;
-   }else comp=`<div class="sim-hint">${h(finError||'Informe juros mensais para a comparação com financiamento.')}</div>`;
-   el('sim-results').innerHTML=cards+deferredNote+comp;
-   report={c:calc,f:finInputs,plan:effective,finance:fin,asset:c,credit:c,source:benchmarkForProduct(activeProduct())?.label||'Taxa informada pelo corretor'};
+      ${outputCards([['Parcela inicial',money(fin.first),'Mesmo crédito e prazo do consórcio'],['Parcela final',money(fin.last),'Price ou SAC'],['Total de prestações',money(fin.total),'Sem entrada e custos bancários adicionais']])}
+      <div class="sim-bars"><div><span>Consórcio</span><i><b style="width:${a}%"></b></i><strong>${money(calc.total)}</strong></div>
+       <div><span>Financiamento</span><i><b class="finance" style="width:${b}%"></b></i><strong>${money(fin.total)}</strong></div></div>
+      <small>Comparação de fluxos simplificados; quando há lance, o total do consórcio ainda não contém abatimento contratual, e o crédito efetivamente disponível pode ser menor. Financiamento não inclui IOF, seguros, indexadores e CET.</small></div>`;
+   }else comp=`<div class="sim-hint">${h(finError||'Informe taxa mensal de juros para comparar com financiamento.')}</div>`;
+   el('sim-results').innerHTML=legacyNote+planError+cards+reducedSummary+planCaution+bidNotice+bidInfo+comp;
+   if(bidErrors.length)return;
+   report={c:calc,f:finInputs,plan:effective,finance:fin,asset:c,credit:c,
+     source:benchmarkForProduct(activeProduct())?.label||'Taxa informada pelo usuário',
+     bid,groupCode,paymentMode:mode,trainingVersion:TRAINING_VERSION};
    el('sim-print').disabled=false;
  }
- product.addEventListener('change',()=>syncPlan());
+ product.addEventListener('change',()=>{credit.value='';autoCredit=null;syncPlan();});
  planSel.addEventListener('change',()=>{
-   const p=ctx.plans.find(x=>x.id===planSel.value);
+   const p=currentPlan();
    if(p&&!opps.value&&(!credit.value||Number(credit.value)===autoCredit)&&p.reference_credit_amount!=null){
      credit.value=String(Number(p.reference_credit_amount));autoCredit=Number(p.reference_credit_amount);
    }
-   syncPricing(p);syncRate();update();
+   syncPricing(p);syncRate();syncGroups();update();
  });
  opps.addEventListener('change',()=>{
    const o=ctx.opps.find(x=>x.id===opps.value);
@@ -383,15 +475,22 @@ export function renderSimulator(root,ctx) {
      credit.value=o.credit_amount||'';autoCredit=null;syncPlan();
    }else{credit.value='';autoCredit=null;syncPlan();}
  });
- root.addEventListener('input',e=>{
-  if(e.target.matches('#sim-credit,#sim-admin-fee,#sim-reserve-fee,#sim-contemplation,#sim-interest'))update();
+ el('sim-group').addEventListener('change',()=>{syncBidModes();update();});
+ el('sim-bid-mode').addEventListener('change',()=>{syncBidControls(true);update();});
+ el('sim-payment-mode').addEventListener('change',()=>{syncBidControls(false);update();});
+ root.addEventListener('input',ev=>{
+   if(ev.target.matches('#sim-credit,#sim-admin-fee,#sim-reserve-fee,#sim-contemplation,#sim-interest,'+
+     '#sim-bid-pct,#sim-bid-embedded,#sim-bid-fgts,#sim-bid-key,#sim-bid-paid')){
+     if(ev.target.matches('#sim-bid-embedded,#sim-bid-key'))syncBidControls(false);
+     update();
+   }
  });
- root.addEventListener('change',e=>{
-  if(e.target.matches('#sim-payment-mode,#sim-system'))update();
+ root.addEventListener('change',ev=>{
+   if(ev.target.matches('#sim-insurance-base,#sim-bid-application,#sim-system'))update();
  });
  el('sim-print').addEventListener('click',()=>{if(report)reportPopup(ctx,report);});
  const admin=el('sim-config-link');
- if(admin)admin.addEventListener('click',e=>{e.preventDefault();ctx.navigate('simulator-admin');});
+ if(admin)admin.addEventListener('click',ev=>{ev.preventDefault();ctx.navigate('simulator-admin');});
  if(ctx.prefill){opps.value=ctx.prefill.id;credit.value=ctx.prefill.credit_amount||'';autoCredit=null;}
  syncPlan();
 
