@@ -38,13 +38,33 @@ Os seis planos abaixo foram inseridos e ativados para **simulação referencial*
 
 **Importante:** os seis planos referenciais acima já estão cadastrados e ativos para estudo. Eles não devem ser tratados como tabelas homologadas ou condições definitivas da administradora.
 
+## Alterações V3 · 20/10/2026 — parcela reduzida 50%, TA/FR editáveis, juros pré-preenchidos
+
+O corretor agora pode variar **TA total** e **fundo de reserva total** exclusivamente dentro da simulação; as alterações não mudam \`simulator_plans\` nem contratos ou condições publicadas.
+
+**Parcela reduzida 50% (hipótese):** até o mês hipotético de contemplação escolhido (de 1 até prazo-1), paga-se metade da parte proporcional de crédito, TA, FR e demais encargos + o seguro prestamista integral. A outra metade é diferida, somada sem juros remuneratórios e redistribuída igualmente entre os meses remanescentes. Após o mês hipotético, volta-se à parcela-base e acrescenta-se a parcela diferida. O total da simulação permanece igual ao regime integral, na ausência de regras específicas adicionais. Isto NÃO reproduz automaticamente modalidades comerciais como "plano 50" da administradora e não prevê contemplação.
+
+**Financiamento vinculado:** valor financiado = crédito simulado, entrada = zero, prazo = prazo do consórcio. Só a taxa de juros mensais e o sistema Price/SAC são alteráveis. Não são incluídos IOF, seguros bancários, tarifas, correções monetárias, taxa TR ou CET. Esta padronização facilita comparação aritmética, mas financiamento de 100% e prazos idênticos podem não ser oferecidos por instituições financeiras.
+
+**Taxas de juros de referência por produto, percentuais mensais:**
+- Imóveis: 1,12% a.m.; taxa média de financiamento imobiliário PF com taxas de mercado, BCB SGS 25497, agosto de 2026. Pode envolver indexador não modelado.
+- Automóveis: 1,97% a.m.; taxa média de aquisição de veículos PF, BCB SGS 25471, agosto de 2026.
+- Motos: 1,97% a.m.; **proxy** da média de veículos PF, não cotação específica de motos.
+- Pesados: 1,97% a.m.; **proxy PF** da média de veículos, não taxa confirmada para financiamento PJ/pesados.
+- Outros: 2,94% a.m.; mediana das instituições de aquisição de outros bens PF na primeira semana de setembro de 2026, calculada por Créditoscópio com dados do BCB.
+- Serviços: 5,90% a.m.; **proxy** de crédito pessoal sem consignação PF na primeira semana de setembro de 2026, calculada por Créditoscópio com dados do BCB; não é modalidade bancária de financiamento de serviços.
+
+Fontes: https://dadosabertos.bcb.gov.br/dataset/25497-taxa-media-mensal-de-juros-das-operacoes-de-credito-com-recursos-direcionados---pessoas-fisic ; https://dadosabertos.bcb.gov.br/dataset/25471-taxa-media-mensal-de-juros-das-operacoes-de-credito-com-recursos-livres---pessoas-fisicas---a ; https://creditoscopio.com.br/atualizacoes/2026-09/
+
+As taxas são parâmetros iniciais para comparação e podem ser ajustadas pelo corretor; **não são ofertas, taxas garantidas nem CET**.
+
 ## Como utilizar (corretor)
 
 1. Abra **Órbita Simula**, no menu lateral.
 2. Selecione o produto e o plano aprovado. Opcionalmente, selecione uma solicitação existente; o crédito e o bem serão aproveitados da solicitação.
 3. O valor de referência aparece automaticamente e pode ser alterado. O sistema verifica faixas cadastrais e carrega TA, FR e prestamista sem edição direta pelo corretor.
-4. Confira a parcela-base e o somatório do consórcio.
-5. Para comparar com financiamento, informe taxa efetiva anual, entrada, prazo, sistema Price ou SAC e eventuais custos/seguros. **Não há juros de financiamento padrão**.
+4. Ajuste TA e FR se desejar; escolha parcela integral ou reduzida 50%. Em parcela reduzida, informe um mês hipotético de contemplação para avaliar a compensação posterior.
+5. O financiamento já utiliza automaticamente o mesmo crédito e prazo do consórcio, entrada zero e uma taxa mensal de referência por categoria. Altere somente os juros mensais e, se necessário, o sistema Price/SAC.
 6. Clique em **Gerar relatório em PDF** e, na nova janela, em **Imprimir / Salvar como PDF**.
 
 Dentro dos detalhes de uma solicitação, o botão **Simular crédito** abre o módulo preenchido com o produto e os valores da oportunidade.
@@ -58,9 +78,9 @@ Dentro dos detalhes de uma solicitação, o botão **Simular crédito** abre o m
 - Somatório = soma dos pagamentos de cada mês até o prazo, conforme essas hipóteses.
 - Não modela parcelas reduzidas, antecipação, contemplação, lance embutido, prestamista sobre saldo devedor, regras específicas de grupo ou retorno do fundo.
 
-**Financiamento:**
+**Financiamento (mantido como função independente para casos legados; a interface atual envia juros mensais):**
 - Saldo financiado = valor do bem – entrada.
-- Taxa mensal efetiva = `(1 + taxa anual efetiva)^(1/12) – 1`.
+- O módulo atual usa diretamente a taxa mensal informada ou pré-preenchida. A função também admite taxa anual efetiva para compatibilidade com cálculos legados.
 - Price usa parcela financeira uniforme; SAC usa amortização constante.
 - Custos mensais e iniciais são incluídos apenas se informados.
 - **Não equivale ao CET** nem garante aprovação ou taxa bancária.

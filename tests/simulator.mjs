@@ -1,4 +1,4 @@
-import { calculateConsortium,calculateFinancing } from '../simulator.js';
+import { calculateConsortium,calculateFinancing,FINANCING_BENCHMARKS,benchmarkForProduct } from '../simulator.js';
 import assert from 'node:assert/strict';
 const p={term_months:100,admin_fee_pct:15,reserve_fund_pct:2,other_total_pct:0,insurance_monthly_amount:0,annual_adjustment_pct:0};
 const c=calculateConsortium(p,100000);
@@ -24,4 +24,39 @@ for(const [name,credit,term,fee,reserve,rate,expectedInsurance,expectedFirst,exp
  assert.ok(Math.abs(result.total-expectedTotal)<.01,name+' total');
 }
 assert.throws(()=>calculateConsortium({...p,prestamista_rate_monthly:-.001},10000),/inválidas/);
+
+/* Redução de 50% antes de contemplação hipotética, compensação após ela, sem perda de capital. */
+const normalized={term_months:100,admin_fee_pct:15,reserve_fund_pct:2,other_total_pct:0,
+  prestamista_rate_monthly:0,insurance_monthly_amount:0,annual_adjustment_pct:0};
+const whole=calculateConsortium(normalized,100000);
+const half=calculateConsortium(normalized,100000,{reduced50:true,contemplationMonth:50});
+assert.equal(whole.first,1170);
+assert.equal(half.first,585);
+assert.equal(half.postContemplationFirst,1755);
+assert.equal(half.deferredAmount,29250);
+assert.equal(half.total,whole.total);
+assert.equal(half.reduced50,true);
+const insured=calculateConsortium({...normalized,prestamista_rate_monthly:.0007},100000,{reduced50:true,contemplationMonth:50});
+assert.equal(insured.first,655); // 50% da parcela-base + prêmio integral
+assert.equal(insured.postContemplationFirst,1825);
+assert.equal(insured.total,124000);
+assert.throws(()=>calculateConsortium(normalized,100000,{reduced50:true,contemplationMonth:100}),/inválidas/);
+assert.throws(()=>calculateConsortium(normalized,100000,{reduced50:true,contemplationMonth:0}),/inválidas/);
+// Reajuste anual hipotético: o montante adiado no exemplo é compensado integralmente.
+const annually={...normalized,annual_adjustment_pct:5};
+const annualNormal=calculateConsortium(annually,100000);
+const annualHalf=calculateConsortium(annually,100000,{reduced50:true,contemplationMonth:36});
+assert.ok(Math.abs(annualNormal.total-annualHalf.total)<.000001);
+assert.ok(annualHalf.first<annualNormal.first);
+const linked=calculateFinancing({assetValue:100000,months:100,monthlyRate:1.97,system:'PRICE'});
+const expected=100000*.0197/(1-Math.pow(1.0197,-100));
+assert.ok(Math.abs(linked.first-expected)<.0000001);
+assert.ok(Math.abs(linked.total-expected*100)<.000001);
+assert.equal(linked.down,0);
+assert.equal(linked.monthlyRate,1.97);
+assert.equal(calculateFinancing({assetValue:100000,months:100,monthlyRate:0,system:'PRICE'}).first,1000);
+assert.equal(FINANCING_BENCHMARKS['Imóveis'].monthly,1.12);
+assert.equal(FINANCING_BENCHMARKS['Automóveis'].monthly,1.97);
+assert.equal(benchmarkForProduct({category:'Serviços'}).monthly,5.90);
+
 console.log('Cálculos de referência do Órbita Simula: OK');

@@ -56,3 +56,18 @@
 .sim-plan-row em.ready{background:#e8f7f0;color:#247754}.sim-plan-row em.draft{background:#fff0e2;color:#996322}
 @media(max-width:1170px){.sim-stage-grid,.sim-admin-grid{grid-template-columns:1fr}.sim-side{position:static}}
 @media(max-width:650px){.sim-page-head{display:block}.sim-page-head>.btn{margin-top:15px}.sim-grid{grid-template-columns:1fr}.sim-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.sim-card{padding:18px}.sim-bars>div{grid-template-columns:80px minmax(32px,1fr) auto}}
+
+/* Órbita Simula · personalização temporária de taxas e modalidade reduzida */
+.sim-pricing-block{background:linear-gradient(140deg,#f7fbff,#f0f6fe);border:1px solid #d5e4f2;border-radius:13px;padding:18px;margin:20px 0 18px}
+.sim-pricing-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.sim-pricing-head strong{color:#153a64;font-size:13px}
+.sim-pricing-head span{color:#6a849d;font-size:10px}
+.sim-pricing-block .sim-control input,.sim-pricing-block .sim-control select{background:#fff}
+.sim-reduced-info{font-size:11px;color:#58748f;line-height:1.6;margin-top:14px;border-left:3px solid #9ec7eb;padding:8px 11px;background:#fff}
+.sim-reduced-summary{border:1px solid #c5ddec;background:#eaf5ff;border-radius:12px;padding:15px;margin:14px 0;color:#2b5879}
+.sim-reduced-summary strong{font-size:12px;color:#164b77}
+.sim-reduced-summary p{font-size:11px;line-height:1.6;margin:7px 0 0}
+.sim-linked{border:1px solid #d3e5f5;border-radius:10px;padding:13px 15px;background:#f0f8ff;color:#265a84;font-size:12px;font-weight:700;margin:0 0 15px}
+.sim-rate-source{font-size:11px;color:#687f97;line-height:1.55;margin:12px 0 2px}
+.sim-rate-source a{color:#1765a7;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:650px){.sim-pricing-block{padding:14px}.sim-pricing-head{display:block}.sim-pricing-head span{display:block;margin-top:5px}}
