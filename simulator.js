@@ -1,3 +1,4 @@
+import {groupOptions,groupPlanPolicy,biddingPolicy,calculateBidScenario,supplementaryConditions,TRAINING_VERSION} from './simulator-lances.js';
 /* ÓRBITA SIMULA — calculation rules and authenticated UI. No assumed commercial rates. */
 const h = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
