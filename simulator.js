@@ -555,6 +555,12 @@ export function renderSimulator(root,ctx) {
    credit.value='';
    autoCredit=null;
    syncPlan();
+   el('sim-bid-mode').value='none';
+   el('sim-bid-application').value='inverse';
+   el('sim-system').value='PRICE';
+   for(const field of ['sim-bid-pct','sim-bid-embedded','sim-bid-fgts','sim-bid-key','sim-bid-paid'])el(field).value='0';
+   syncBidControls(true);
+   update();
    el('sim-draft-status').textContent='Nova simulação iniciada. Nenhum rascunho anterior está ativo.';
  });
  root.addEventListener('input',saveDraft);
