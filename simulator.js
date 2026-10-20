@@ -68,7 +68,9 @@ function label(text,id,input,help='') {
  return `<label class="sim-control"><span>${h(text)}</span>${input}${help?'<small>'+h(help)+'</small>':''}</label>`;
 }
 function numberField(text,id,attrs='',help='') {
- return label(text,id,`<input type="number" id="${h(id)}" step="0.01" min="0" ${attrs}>`,help);
+ const step=/\bstep\s*=/.test(attrs)?'':'step="0.01"';
+ const min=/\bmin\s*=/.test(attrs)?'':'min="0"';
+ return label(text,id,`<input type="number" id="${h(id)}" ${step} ${min} ${attrs}>`,help);
 }
 function outputCards(items) {
  return `<div class="sim-kpi-grid">${items.map(x=>`<div class="sim-kpi"><span>${h(x[0])}</span><strong>${h(x[1])}</strong><small>${h(x[2]||'')}</small></div>`).join('')}</div>`;
