@@ -103,7 +103,7 @@ function renderAuth(){if(!validConfig){renderConfig();return;}
    <small class="login-foot">© ${new Date().getFullYear()} Astrion Assessoria. Todos os direitos reservados.<br>Uso interno e parceiros autorizados.</small>
   </section>
   <aside class="login-right login-right--approved-image" aria-label="ÓRBITA by Astrion — Conexões em movimento">
-   <img class="login-right-approved-image" src="./assets/orbita-approved-final.png.png?v=20261020-approved-restored" width="1268" height="855" alt="Conexões em movimento: ÓRBITA conecta corretores, clientes e oportunidades." loading="eager" fetchpriority="high" decoding="async">
+   <img class="login-right-approved-image" src="./assets/orbita-approved-4k.webp?v=20261020-final-4k" width="3804" height="2565" alt="Conexões em movimento: ÓRBITA conecta corretores, clientes e oportunidades." loading="eager" fetchpriority="high" decoding="async">
   </aside>
  </div>`;
 }
