@@ -150,3 +150,32 @@
     width:100%!important;height:auto!important;aspect-ratio:1268/855;object-fit:contain;
   }
 }
+
+/* ORBITA 2026: vector background, real HTML typography and cards, no raster text */
+#app .astrion-reference-login .login-right.login-right--vector{display:block;position:relative;min-height:100svh;height:auto;overflow:hidden;padding:0!important;background:#03132d;color:#fff;isolation:isolate}
+#app .astrion-reference-login .login-right--vector::before{display:none!important}
+#app .astrion-reference-login .orbita-vector-sky{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(1,12,30,.72) 0%,rgba(2,20,47,.25) 39%,rgba(1,11,30,.32) 64%,rgba(1,10,27,.92) 100%),url('./assets/orbita-universe.svg') center 48%/cover no-repeat}
+#app .astrion-reference-login .orbita-right-content{width:100%;min-height:100svh;display:flex;flex-direction:column;position:relative;z-index:1;padding:clamp(28px,4.4vh,58px) clamp(24px,4vw,68px) clamp(24px,3.2vh,42px)}
+#app .astrion-reference-login .orbita-hero-copy{max-width:740px;flex:0 0 auto;text-shadow:0 2px 18px rgba(0,8,24,.45)}
+#app .astrion-reference-login .orbita-kicker{display:block;font-size:clamp(10px,.85vw,13px);font-weight:800;letter-spacing:.31em;color:#c6e5ff;margin-bottom:clamp(13px,2vh,24px)}
+#app .astrion-reference-login .orbita-hero-copy h2{margin:0;color:#fff;font:800 clamp(32px,3.4vw,58px)/1.06 Manrope,sans-serif;letter-spacing:-.055em}
+#app .astrion-reference-login .orbita-hero-copy h2 em{font-style:normal;color:#91d7ff}
+#app .astrion-reference-login .orbita-hero-copy p{margin:clamp(12px,2vh,22px) 0 0;max-width:520px;color:#e1eeff;font-size:clamp(12px,1vw,16px);line-height:1.65}
+#app .astrion-reference-login .orbita-planet-zone{position:relative;flex:1 1 auto;min-height:clamp(100px,16vh,230px);pointer-events:none}
+#app .astrion-reference-login .orbita-orbit-ring{position:absolute;left:50%;top:51%;width:clamp(140px,24vw,380px);height:clamp(50px,8vw,125px);transform:translate(-50%,-50%) rotate(-16deg);border:2px solid rgba(122,217,255,.45);border-radius:50%;box-shadow:0 0 22px rgba(64,185,255,.25)}
+#app .astrion-reference-login .orbita-planet-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#e5f7ff;font-size:clamp(13px,1.8vw,26px);letter-spacing:.3em;font-weight:800;text-shadow:0 0 24px #1c95ed}
+#app .astrion-reference-login .orbita-bottom-content{flex:0 0 auto}
+#app .astrion-reference-login .orbita-product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,.9vw,14px);margin-bottom:clamp(18px,3vh,34px)}
+#app .astrion-reference-login .orbita-product{min-width:0;min-height:clamp(118px,15vh,166px);padding:clamp(11px,1.25vw,20px);border:1px solid rgba(186,225,255,.38);border-radius:15px;background:linear-gradient(140deg,rgba(22,70,121,.77),rgba(4,25,57,.88));box-shadow:inset 0 1px rgba(255,255,255,.14),0 8px 30px rgba(0,0,0,.14);backdrop-filter:blur(12px)}
+#app .astrion-reference-login .orbita-product svg{display:block;width:clamp(25px,2.5vw,37px);height:clamp(25px,2.5vw,37px);margin-bottom:clamp(8px,1vh,13px);color:#b5e7ff}
+#app .astrion-reference-login .orbita-product strong{display:block;font-size:clamp(12px,1vw,16px);font-weight:800;color:#fff;margin-bottom:5px}
+#app .astrion-reference-login .orbita-product small{display:block;font-size:clamp(10px,.73vw,12px);line-height:1.42;color:#d3e4f8}
+#app .astrion-reference-login .orbita-process{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border-top:1px solid rgba(174,219,255,.24);padding-top:clamp(15px,2vh,24px)}
+#app .astrion-reference-login .orbita-process>div{min-width:0}
+#app .astrion-reference-login .orbita-process svg{display:block;width:clamp(22px,2vw,30px);height:clamp(22px,2vw,30px);margin-bottom:7px;color:#d8edff}
+#app .astrion-reference-login .orbita-process strong{display:block;color:#fff;font-size:clamp(10px,.85vw,14px);margin-bottom:3px}
+#app .astrion-reference-login .orbita-process small{display:block;color:#bcd5ef;font-size:clamp(9px,.72vw,12px);line-height:1.45}
+#app .astrion-reference-login .orbita-signature{text-align:right;color:#f3d5a3;font:normal clamp(19px,2vw,28px) 'Great Vibes',cursive;margin-top:clamp(10px,1.7vh,22px)}
+@media(min-width:981px) and (max-height:760px){#app .astrion-reference-login .orbita-right-content{padding-top:23px;padding-bottom:17px}#app .astrion-reference-login .orbita-planet-zone{min-height:55px}#app .astrion-reference-login .orbita-product{min-height:100px;padding:10px}#app .astrion-reference-login .orbita-product-grid{margin-bottom:14px}#app .astrion-reference-login .orbita-product svg{margin-bottom:5px}}
+@media(max-width:980px){#app .astrion-reference-login .login-right.login-right--vector{min-height:750px}#app .astrion-reference-login .orbita-right-content{min-height:750px}#app .astrion-reference-login .orbita-planet-zone{min-height:190px}}
+@media(max-width:600px){#app .astrion-reference-login .orbita-right-content{padding:32px 20px;min-height:930px}#app .astrion-reference-login .orbita-hero-copy h2{font-size:clamp(32px,8vw,43px)}#app .astrion-reference-login .orbita-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#app .astrion-reference-login .orbita-product{min-height:135px;padding:14px}#app .astrion-reference-login .orbita-product strong{font-size:14px}#app .astrion-reference-login .orbita-product small{font-size:11px}#app .astrion-reference-login .orbita-process{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}#app .astrion-reference-login .orbita-process strong{font-size:12px}#app .astrion-reference-login .orbita-process small{font-size:11px}}
