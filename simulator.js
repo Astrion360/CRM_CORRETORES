@@ -140,24 +140,34 @@ export function renderSimulator(root,ctx) {
  root.innerHTML=`
  <div class="sim-page-head"><div><span class="eyebrow">ÓRBITA · INTELIGÊNCIA COMERCIAL</span><h1>Simulador de consórcios</h1><p>Escolha um produto cadastrado e utilize as condições liberadas pela Astrion. Compare cenários de aquisição.</p></div>${ctx.isAdmin?'<a href="#" class="btn btn-outline" id="sim-config-link">Gerenciar planos →</a>':''}</div>
  <div class="sim-stage-grid"><section class="sim-card sim-main">
-  <div class="sim-section-head"><span class="sim-step">01</span><div><h2>Produto e crédito</h2><p>As taxas serão importadas do plano cadastrado, sem digitação manual.</p></div></div>
+  <div class="sim-section-head"><span class="sim-step">01</span><div><h2>Produto e crédito</h2><p>Use os parâmetros cadastrados ou ajuste TA e FR para estudar um cenário, sem alterar o plano oficial.</p></div></div>
   <div class="sim-grid">
    ${label('Solicitação existente (opcional)','sim-opportunity',`<select id="sim-opportunity">${opts}</select>`)}
    ${label('Produto cadastrado','sim-product',`<select id="sim-product">${products.map(p=>option(p.id,p.name,productId)).join('')}</select>`)}
    ${label('Plano configurado','sim-plan','<select id="sim-plan"></select>')}
    ${numberField('Valor do crédito desejado (R$)','sim-credit','placeholder="Ex.: 200000" required','Não é o preço de compra do bem, necessariamente.')}
   </div>
-  <div class="sim-configuration" id="sim-configuration"></div>
-  <div class="sim-section-head sim-second"><span class="sim-step">02</span><div><h2>Comparação com financiamento</h2><p>Informe as condições efetivas ou uma hipótese expressamente identificada.</p></div></div>
-  <div class="sim-grid">
-   ${numberField('Valor de aquisição do bem (R$)','sim-asset','placeholder="Pode ser igual ao crédito"','Se não preenchido, utiliza o crédito para o comparativo.')}
-   ${numberField('Entrada no financiamento (R$)','sim-down','value="0"')}
-   ${numberField('Juros efetivos anuais (%)','sim-interest','placeholder="Informe a taxa; sem taxa, não há cálculo"','A taxa não é importada de nenhum banco.')}
-   ${numberField('Prazo do financiamento (meses)','sim-fin-term','step="1" min="1" max="360"')}
-   ${label('Sistema de amortização','sim-system','<select id="sim-system"><option value="PRICE">Tabela Price</option><option value="SAC">Sistema SAC</option></select>')}
-   ${numberField('Seguro e outros custos mensais (R$)','sim-fin-extra','value="0"')}
-   ${numberField('Custos iniciais adicionais (R$)','sim-fin-upfront','value="0"')}
+
+  <div class="sim-pricing-block">
+    <div class="sim-pricing-head"><strong>Condições da simulação</strong><span>Somente este cálculo · não altera o cadastro</span></div>
+    <div class="sim-grid">
+      ${numberField('Taxa de administração total (%)','sim-admin-fee','step="0.01" max="100"','Editável apenas para esta simulação.')⟧
+      ${numberField('Fundo de reserva total (%)','sim-reserve-fee','step="0.01" max="100"','Editável apenas para esta simulação.')⟧
+      ${label('Modalidade de parcela','sim-payment-mode','<select id="sim-payment-mode"><option value="normal">Parcela integral</option><option value="half">Parcela reduzida 50%</option></select>')⟧
+      ${numberField('Mês hipotético da contemplação','sim-contemplation','step="1" min="1"','Apenas hipótese para redistribuir o saldo; não prevê contemplação.')⟧
+    </div>
+    <div id="sim-reduced-info" class="sim-reduced-info">O seguro prestamista continua integral. A metade adiada será redistribuída após o mês hipotético de contemplação, sem previsão de contemplação real.</div>
   </div>
+
+  <div class="sim-configuration" id="sim-configuration"></div>
+  <div class="sim-section-head sim-second"><span class="sim-step">02</span><div><h2>Comparação com financiamento</h2><p>Mesmo crédito e prazo do consórcio. Apenas a taxa de juros muda, com opção Price ou SAC.</p></div></div>
+
+  <div class="sim-linked" id="sim-finance-linked" aria-live="polite">O crédito e o prazo serão os mesmos do plano de consórcio selecionado.</div>
+  <div class="sim-grid">
+    ${numberField('Taxa de juros de referência do financiamento (% a.m.)','sim-interest','step="0.01" min="0" max="100"','Taxa pré-preenchida com referência de mercado; pode ser ajustada.')⟧
+    ${label('Sistema de amortização','sim-system','<select id="sim-system"><option value="PRICE">Tabela Price</option><option value="SAC">Sistema SAC</option></select>')⟧
+  </div>
+  <div class="sim-rate-source" id="sim-rate-source">As taxas são referências de mercado, não propostas vinculantes. Sem entrada, IOF, seguro bancário ou CET.</div>
  </section><aside class="sim-card sim-side">
   <div class="sim-side-title"><span class="eyebrow">RESULTADOS</span><h2>Visão comparativa</h2></div>
   <div id="sim-results" aria-live="polite"><div class="sim-empty">Escolha um plano liberado e informe o crédito para visualizar os cálculos.</div></div>
