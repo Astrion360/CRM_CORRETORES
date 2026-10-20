@@ -38,44 +38,58 @@ export function benchmarkForProduct(product){
 /* Parcela reduzida: metade da parte de amortização + taxas, com seguro integral.
    Parcela adiada acumulada sem juros e rateada, após mês hipotético de contemplação.
    É uma hipótese financeira; modalidades comerciais podem ter regra distinta. */
+/* Regime de parcelas conforme treinamento, slide 19:
+   normal: 100% fundo comum + 100% taxas;
+   50%: 50% fundo comum + 100% taxas (até mês de contemplação HIPOTÉTICO);
+   70%: 70% fundo comum + 100% taxas (modelo indicativo com 30% LE).
+   O seguro não é reduzido pela modalidade de parcela. */
 export function calculateConsortium(plan,credit,options={}) {
  const c=Number(credit),n=Number(plan?.term_months);
  const fee=Number(plan?.admin_fee_pct),reserve=Number(plan?.reserve_fund_pct);
  const other=Number(plan?.other_total_pct),fixedInsurance=Number(plan?.insurance_monthly_amount);
- const prestamistaRate=Number(plan?.prestamista_rate_monthly ?? 0);
- const insurance=c*prestamistaRate+fixedInsurance;
+ const prestamistaRate=Number(plan?.prestamista_rate_monthly??0);
  const annual=Number(plan?.annual_adjustment_pct);
- const reduced=options?.reduced50===true;
+ const mode=String(options?.paymentMode||(options?.reduced50===true?'half':'normal'));
+ const reduced=mode==='half',plan70=mode==='seventy';
  const month=reduced?Number(options?.contemplationMonth):null;
- if(!validNumber(c,1,1e10)||!Number.isInteger(n)||!validNumber(n,1,360)||
-    !validNumber(fee,0,100)||!validNumber(reserve,0,100)||!validNumber(other,0,100)||
-    !validNumber(fixedInsurance,0,1e6)||!validNumber(prestamistaRate,0,0.05)||
-    !validNumber(annual,0,50)||
-    (reduced&&(!Number.isInteger(month)||month<1||month>=n)))
+ const insuranceBase=options?.insuranceBase==='credit_plus_fees'?'credit_plus_fees':'credit';
+ const taxesTotal=c*(fee+reserve+other)/100;
+ const insuredCapital=insuranceBase==='credit_plus_fees'?c+taxesTotal:c;
+ const prestamistaMonthlyAmount=insuredCapital*prestamistaRate;
+ const insurance=prestamistaMonthlyAmount+fixedInsurance;
+ if(!Number.isFinite(c)||c<=0||c>1e10||!Number.isInteger(n)||n<1||n>360||
+   ![fee,reserve,other].every(x=>validNumber(x,0,100))||
+   !validNumber(fixedInsurance,0,1e6)||!validNumber(prestamistaRate,0,0.05)||
+   !validNumber(annual,0,50)||!['normal','half','seventy'].includes(mode)||
+   (reduced&&(!Number.isInteger(month)||month<1||month>=n)))
      throw Error('Premissas do consórcio inválidas.');
- const base=c*(1+(fee+reserve+other)/100)/n;
+ const principal=c/n,fees=taxesTotal/n,base=principal+fees;
  const factor=m=>Math.pow(1+annual/100,Math.floor((m-1)/12));
  let deferred=0;
- if(reduced)for(let m=1;m<=month;m++)deferred+=base*factor(m)*0.5;
+ if(reduced)for(let m=1;m<=month;m++)deferred+=principal*factor(m)*.5;
  const distributed=reduced?deferred/(n-month):0;
  let total=0,first=0,last=0,after=null,normalTotal=0;
  for(let m=1;m<=n;m++){
-   const full=base*factor(m)+insurance;
+   const f=factor(m),full=base*f+insurance;
    normalTotal+=full;
-   const installment=reduced
-     ? (m<=month?base*factor(m)*0.5+insurance:full+distributed)
+   const installment=plan70?(principal*.7+fees)*f+insurance
+     :reduced?(m<=month?(principal*.5+fees)*f+insurance:full+distributed)
      :full;
    if(m===1)first=installment;
    if(reduced&&m===month+1)after=installment;
-   last=installment;
-   total+=installment;
+   last=installment;total+=installment;
  }
- return {first,last,total,term:n,charges:c*(fee+reserve+other)/100,
-   base,insurance,prestamistaRateMonthly:prestamistaRate,
-   prestamistaMonthlyAmount:c*prestamistaRate,fixedInsurance,
-   annual,normalTotal,reduced50:reduced,contemplationMonth:month,
+ return {
+   first,last,total,term:n,charges:taxesTotal,
+   base,principalComponent:principal,feesComponent:fees,insurance,
+   insuranceBase,insuredCapital,
+   prestamistaRateMonthly:prestamistaRate,prestamistaMonthlyAmount,fixedInsurance,
+   annual,normalTotal,mode,plan70,reduced50:reduced,contemplationMonth:month,
    postContemplationFirst:after,deferredAmount:deferred,normalFirst:base+insurance,
-   nominalNoAdjustment:(base+insurance)*n};
+   grossCredit:c,plan70EmbeddedAmount:plan70?c*.3:0,
+   plan70NetCredit:plan70?c*.7:c,
+   nominalNoAdjustment:(base+insurance)*n
+ };
 }
 export function calculateFinancing({assetValue,downPayment=0,annualRate,monthlyRate,months,system,monthlyCosts=0,upfrontCosts=0}) {
  const asset=Number(assetValue),down=Number(downPayment),n=Number(months);
