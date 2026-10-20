@@ -116,19 +116,78 @@ function outputCards(items) {
  return `<div class="sim-kpi-grid">${items.map(x=>`<div class="sim-kpi"><span>${h(x[0])}</span><strong>${h(x[1])}</strong><small>${h(x[2]||'')}</small></div>`).join('')}</div>`;
 }
 const note='Simulação referencial, não cotação ou oferta. O prestamista foi estimado sobre o crédito integral solicitado, a cada mês, sem redução por amortização; o contrato pode adotar outra base. Uma hipótese de 0% de reajuste não significa ausência de correção contratual. Contemplação não tem data garantida e financiamento depende de aprovação.';
-function reportPopup(ctx,view) {
+
+function reportPopup(ctx,view){
  const popup=window.open('','_blank');
- if(!popup){ctx.toast('Permita janelas pop-up para imprimir ou salvar em PDF.',true);return;}
- const f=view.f,c=view.c,plan=view.plan,finance=view.finance,asset=view.asset;
- const cells=(rows)=>rows.map(r=>`<tr><th>${h(r[0])}</th><td>${h(r[1])}</td></tr>`).join('');
- const cs=cells([['Produto',productTitle(ctx,plan.product_id)],['Plano',plan.name],['Grupo',plan.group_code||'Não vinculado'],['Crédito simulado',money(view.credit)],['Crédito de referência do plano',plan.reference_credit_amount==null?'Não informado':money(plan.reference_credit_amount)],['Prazo',plan.term_months+' meses'],['Taxa de administração total',pct(plan.admin_fee_pct)],['Fundo de reserva total',pct(plan.reserve_fund_pct)],['Outros encargos totais',pct(plan.other_total_pct)],['Taxa prestamista a.m. (sobre crédito)',pct(Number(plan.prestamista_rate_monthly||0)*100)],['Prestamista mensal estimado',money(c.prestamistaMonthlyAmount)],['Seguro fixo adicional',money(c.fixedInsurance)],['Hipótese de reajuste anual',pct(plan.annual_adjustment_pct)],['Primeira parcela-base',money(c.first)],['Última parcela estimada',money(c.last)],['Soma dos pagamentos simulados',money(c.total)],['Origem dos parâmetros',plan.source_label||'Não informada']]);
- const fs=finance?`<h2>Financiamento · ${h(f.system)}</h2><table>${cells([['Valor do bem',money(asset)],['Entrada',money(f.downPayment)],['Prazo',f.months+' meses'],['Juros efetivos anuais informados',pct(f.annualRate)],['Parcela inicial',money(finance.first)],['Parcela final',money(finance.last)],['Juros totais',money(finance.interest)],['Custos adicionais',money(Number(f.monthlyCosts)*f.months+Number(f.upfrontCosts))],['Desembolso total com entrada',money(finance.total)]])}</table>`:'<p>Comparativo de financiamento não preenchido.</p>';
- popup.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Órbita Simula · Relatório</title><style>
- @page{size:A4;margin:17mm}body{font:13px/1.55 Arial,sans-serif;color:#17314d;margin:0}header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #194f91;padding-bottom:18px}header img{width:185px}h1{font-size:24px;margin:28px 0 5px}h2{font-size:15px;color:#164a82;margin-top:22px}table{border-collapse:collapse;width:100%;font-size:11px}th,td{border-bottom:1px solid #e1e8f1;text-align:left;padding:7px 5px;vertical-align:top}th{width:54%;color:#58708a;font-weight:600}.notice{margin-top:22px;border-left:3px solid #bf943d;padding:12px;background:#fff7e9;font-size:11px}.subtitle{color:#67809c}.toolbar{margin:20px 0}.toolbar button{padding:12px 18px;border:0;background:#164c88;color:white;border-radius:7px}@media print{.toolbar{display:none}}</style></head>
- <body><div class="toolbar"><button onclick="window.print()">Imprimir / Salvar como PDF</button></div><header><img src="https://corretores.astrion360.com.br/assets/orbita-wordmark-navy.svg" alt="Órbita by Astrion"><small>SIMULAÇÃO REFERENCIAL<br>${h(new Date().toLocaleString('pt-BR'))}</small></header>
- <h1>Comparativo de aquisição</h1><p class="subtitle">Órbita Simula · Documento informativo elaborado a partir de premissas declaradas.</p>
- <h2>Consórcio</h2><table>${cs}</table>${fs}
- <div class="notice"><strong>Limitações:</strong> ${h(note)} Não se trata de CET, de projeção atuarial da cota ou de previsão de contemplação. Os totais refletem as hipóteses usadas, sem equivalência de disponibilidade imediata do crédito.</div>
+ if(!popup){ctx.toast('Permita pop-ups para imprimir ou salvar em PDF.',true);return;}
+ const f=view.f,c=view.c,p=view.plan,fin=view.finance;
+ const rows=(items)=>items.map(([name,value])=>`<tr><th>${h(name)}</th><td>${h(value)}</td></tr>`).join('');
+ const consRows=[
+  ['Produto',productTitle(ctx,p.product_id)],['Plano',p.name],
+  ['Grupo',p.group_code||'Referência por produto, sem grupo específico'],
+  ['Crédito simulado',money(view.credit)],['Prazo',p.term_months+' meses'],
+  ['Taxa administração total · cenário',pct(p.admin_fee_pct)],
+  ['Fundo de reserva total · cenário',pct(p.reserve_fund_pct)],
+  ['Outros encargos totais',pct(p.other_total_pct)],
+  ['Prestamista mensal sobre crédito',money(c.prestamistaMonthlyAmount)],
+  ['Taxa mensal prestamista',pct(Number(p.prestamista_rate_monthly||0)*100)],
+  ['Seguro mensal adicional',money(c.fixedInsurance)],
+  ['Reajuste anual hipotético',pct(p.annual_adjustment_pct)],
+  ['Modalidade de parcela',c.reduced50?'Reduzida 50% · hipotética':'Integral'],
+  ...(c.reduced50?[
+    ['Mês hipotético da contemplação',String(c.contemplationMonth)],
+    ['Parcela inicial reduzida',money(c.first)],
+    ['Parcela após mês hipotético',money(c.postContemplationFirst)],
+    ['Valor diferido redistribuído',money(c.deferredAmount)]
+   ]:[['Primeira parcela integral',money(c.first)],['Última parcela estimada',money(c.last)]]),
+  ['Total de pagamentos estimados',money(c.total)],
+  ['Fonte do plano',p.source_label||'Não informada']
+ ];
+ const financRows=fin?[
+  ['Crédito financiado (igual ao consórcio)',money(view.credit)],
+  ['Entrada','R$ 0,00 · hipótese de comparação'],
+  ['Prazo (igual ao consórcio)',String(f.months)+' meses'],
+  ['Taxa mensal usada',pct(f.monthlyRate)],
+  ['Referência de mercado',view.source||'Taxa definida pelo usuário'],
+  ['Sistema de amortização',fin.system],
+  ['Primeira parcela',money(fin.first)],
+  ['Última parcela',money(fin.last)],
+  ['Juros totais estimados',money(fin.interest)],
+  ['Somatório das parcelas',money(fin.total)],
+  ['Custos bancários adicionais','Não incluídos: IOF, seguros, tarifas, CET e indexadores']
+ ]:null;
+ const finHtml=financRows?`<h2>Financiamento · ${h(fin.system)}</h2><table>${rows(financRows)}</table>`:
+   '<h2>Financiamento</h2><p>Não calculado. A taxa mensal não foi informada ou é inválida.</p>';
+ const noteText=c.reduced50
+   ?'A parcela de 50% recai sobre a parte principal e encargos proporcionais, não sobre o seguro. O valor postergado foi rateado após um mês de contemplação meramente hipotético, sem juros sobre a postergação. Não representa regra contratual garantida.'
+   :'Cálculo linear referencial do crédito e taxas totais, com seguro integral e reajuste hipotético quando cadastrado.';
+ popup.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Órbita Simula | Relatório</title><style>
+ @page{size:A4;margin:15mm}
+ body{font:12px/1.52 Arial,sans-serif;color:#17314d;margin:0}
+ header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #164c88;padding:0 0 15px;gap:10px}
+ header img{width:170px;max-width:45%}
+ header small{text-align:right;color:#627d9b;font-size:10px}
+ h1{font-size:23px;color:#0b3057;margin:24px 0 0}
+ h2{font-size:15px;color:#164a82;margin:20px 0 9px;break-after:avoid}
+ p{margin:8px 0}
+ table{border-collapse:collapse;width:100%;font-size:10px;break-inside:avoid}
+ th,td{border-bottom:1px solid #e1e8f1;text-align:left;padding:6px 5px;vertical-align:top}
+ th{width:51%;color:#58708a;font-weight:600}
+ .notice{margin-top:18px;border-left:3px solid #bf943d;padding:12px;background:#fff7e9;font-size:10px;break-inside:avoid}
+ .subtitle{color:#657e99}.toolbar{margin:20px 0}
+ .toolbar button{padding:12px 18px;border:0;background:#164c88;color:white;border-radius:7px;cursor:pointer}
+ @media print{.toolbar{display:none}}
+ </style></head><body>
+ <div class="toolbar"><button onclick="window.print()">Imprimir / Salvar como PDF</button></div>
+ <header><img src="https://corretores.astrion360.com.br/assets/orbita-wordmark-navy.svg" alt="Órbita by Astrion">
+ <small>SIMULAÇÃO COMERCIAL REFERENCIAL<br>${h(new Date().toLocaleString('pt-BR'))}</small></header>
+ <h1>Comparativo de aquisição</h1>
+ <p class="subtitle">Mesmo valor de crédito e prazo nas duas modalidades. Parâmetros editados são válidos apenas para esta simulação.</p>
+ <h2>Consórcio</h2><table>${rows(consRows)}</table>
+ <p>${h(noteText)}</p>
+ ${finHtml}
+ <div class="notice"><strong>Limitações importantes.</strong> ${h(note)}
+ A simulação de financiamento usa 100% do valor do crédito, sem entrada; não incorpora IOF, seguros obrigatórios, tributos, tarifas, CET ou TR/IPCA. A taxa de referência é uma hipótese comparativa de mercado, não proposta contratual. O valor total não mede o custo econômico da espera pela contemplação.</div>
  </body></html>`);
  popup.document.close();popup.focus();
 }
