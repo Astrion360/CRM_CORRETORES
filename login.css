@@ -217,3 +217,22 @@
     aspect-ratio:1268 / 855!important;
   }
 }
+
+/* ÓRBITA: eliminate letterbox side bands on desktop while keeping approved artwork */
+@media (min-width: 981px) {
+  #app .astrion-reference-login .login-right.login-right--approved-image {
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    overflow: hidden !important;
+  }
+  #app .astrion-reference-login .login-right-approved-image {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    flex: 1 1 auto !important;
+  }
+}
