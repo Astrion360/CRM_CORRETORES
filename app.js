@@ -1,5 +1,5 @@
 import { openDocument } from './documents.js';
-import { renderSimulator, renderSimulatorAdmin } from './simulator.js?v=orbita-reduzida-20261020';
+import { renderSimulator, renderSimulatorAdmin } from './simulator.js?v=orbita-lances-20261020v4';
 const cfg = window.ASTRION_CRM_CONFIG || {};
 const validConfig = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(cfg.SUPABASE_URL || '') &&
   !!cfg.SUPABASE_PUBLISHABLE_KEY && !/SUBSTITUA|SEU-PROJETO/.test(cfg.SUPABASE_PUBLISHABLE_KEY);
