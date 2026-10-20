@@ -102,8 +102,27 @@ function renderAuth(){if(!validConfig){renderConfig();return;}
    </div></div>
    <small class="login-foot">© ${new Date().getFullYear()} Astrion Assessoria. Todos os direitos reservados.<br>Uso interno e parceiros autorizados.</small>
   </section>
-  <aside class="login-right login-right--approved-image" aria-label="ÓRBITA by Astrion — Conexões em movimento. Corretores, clientes, oportunidades e modalidades de consórcio.">
-   <img class="login-right-approved-image" src="./assets/orbita-approved-final.png.png?v=20261020-approved-hd" width="1268" height="855" alt="Conexões em movimento: ÓRBITA conecta corretores, clientes e oportunidades. Imóveis, veículos, outros bens e serviços. Solicitação, análise, cotação e devolutiva." loading="eager" fetchpriority="high" decoding="async">
+  <aside class="login-right login-right--vector" aria-label="ÓRBITA by Astrion — Conexões em movimento">
+    <div class="orbita-vector-sky" aria-hidden="true"></div>
+    <div class="orbita-right-content">
+      <header class="orbita-hero-copy"><span class="orbita-kicker">ÓRBITA · BY ASTRION</span><h2>Conexões em<br><em>movimento.</em></h2><p>Corretores, clientes e oportunidades conectados em uma só plataforma.</p></header>
+      <div class="orbita-planet-zone" aria-hidden="true"><span class="orbita-orbit-ring"></span><span class="orbita-planet-label">ÓRBITA</span></div>
+      <div class="orbita-bottom-content">
+        <div class="orbita-product-grid">
+          <div class="orbita-product">${loginIcon('house')}<strong>Imóveis</strong><small>Conquistas que criam raízes.</small></div>
+          <div class="orbita-product">${loginIcon('car')}<strong>Veículos</strong><small>Liberdade para ir além.</small></div>
+          <div class="orbita-product">${loginIcon('gear')}<strong>Outros bens</strong><small>Novos planos e possibilidades.</small></div>
+          <div class="orbita-product">${loginIcon('file')}<strong>Serviços</strong><small>Projetos que viram realidade.</small></div>
+        </div>
+        <div class="orbita-process">
+          <div>${loginIcon('file')}<strong>Solicitação</strong><small>O primeiro contato</small></div>
+          <div>${loginIcon('search')}<strong>Análise</strong><small>Entender a necessidade</small></div>
+          <div>${loginIcon('check')}<strong>Cotação</strong><small>Encontrar a solução</small></div>
+          <div>${loginIcon('users')}<strong>Devolutiva</strong><small>Conectar oportunidades</small></div>
+        </div>
+        <div class="orbita-signature">Conexões que transformam.</div>
+      </div>
+    </div>
   </aside>
  </div>`;
 }
