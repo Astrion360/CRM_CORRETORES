@@ -134,7 +134,7 @@
 }
 #app .astrion-reference-login .login-right--approved-image:before{
   content:""!important;display:block!important;position:absolute;z-index:-1;inset:-25px;
-  background:linear-gradient(180deg,rgba(3,12,30,.46),rgba(3,12,30,.64)),url('./assets/orbita-approved-final.png?v=20261019-exact-v8') center/cover no-repeat;
+  background:linear-gradient(180deg,rgba(3,12,30,.46),rgba(3,12,30,.64)),url('./assets/orbita-approved-final.png.png?v=20261020-approved-hd') center/cover no-repeat;
   filter:blur(18px);opacity:.92;pointer-events:none;
 }
 #app .astrion-reference-login .login-right-approved-image{
@@ -144,9 +144,9 @@
 }
 @media(max-width:980px){
   #app .astrion-reference-login .login-right.login-right--approved-image{
-    height:auto!important;min-height:0!important;aspect-ratio:595/335;
+    height:auto!important;min-height:0!important;aspect-ratio:1268/855;
   }
   #app .astrion-reference-login .login-right-approved-image{
-    width:100%!important;height:auto!important;aspect-ratio:595/335;object-fit:contain;
+    width:100%!important;height:auto!important;aspect-ratio:1268/855;object-fit:contain;
   }
 }
