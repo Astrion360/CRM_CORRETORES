@@ -1,0 +1,10 @@
+import { calculateConsortium,calculateFinancing } from '../simulator.js';
+import assert from 'node:assert/strict';
+const p={term_months:100,admin_fee_pct:15,reserve_fund_pct:2,other_total_pct:0,insurance_monthly_amount:0,annual_adjustment_pct:0};
+const c=calculateConsortium(p,100000);
+assert.equal(c.first,1170);assert.equal(c.total,117000);assert.equal(c.last,1170);
+const f0=calculateFinancing({assetValue:100000,downPayment:20000,annualRate:0,months:100,system:'PRICE'});
+assert.equal(f0.first,800);assert.equal(f0.total,100000);
+const sac=calculateFinancing({assetValue:100000,downPayment:0,annualRate:12,months:12,system:'SAC'});
+assert.ok(sac.first>sac.last);assert.ok(sac.total>100000);
+console.log('Cálculos de referência do Órbita Simula: OK');

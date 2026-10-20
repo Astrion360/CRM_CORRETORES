@@ -1,0 +1,58 @@
+
+/* ÓRBITA SIMULA: dedicated responsive simulation and administration */
+.sim-page-head{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:24px}
+.sim-page-head h1{font:800 clamp(23px,2.2vw,30px)/1.2 Manrope,sans-serif;color:#102d50;letter-spacing:-.045em;margin:7px 0}
+.sim-page-head p{margin:0;color:#7287a0;font-size:13px}
+.sim-stage-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(335px,1fr);gap:18px;align-items:start}
+.sim-card{background:#fff;border:1px solid #e2e9f3;border-radius:16px;padding:clamp(20px,2vw,29px);box-shadow:0 10px 30px #12376008;min-width:0}
+.sim-card h2{font:800 18px Manrope,sans-serif;letter-spacing:-.03em;color:#102d50;margin:0}
+.sim-section-head{display:flex;align-items:center;gap:15px;margin-bottom:19px}
+.sim-section-head p{font-size:12px;color:#8091a4;margin:4px 0 0}
+.sim-second{border-top:1px solid #e3ebf5;padding-top:25px;margin-top:25px}
+.sim-step{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:11px;background:#e7f3ff;color:#116bb7;font-weight:900;font-size:12px}
+.sim-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.sim-control{display:flex;flex-direction:column;gap:6px;min-width:0;color:#3b5571;font-weight:700;font-size:12px}
+.sim-control input,.sim-control select{width:100%;padding:11px 12px;border:1px solid #cedcec;border-radius:9px;background:#fafdff;color:#122e4d;min-height:44px;font-size:13px}
+.sim-control input:focus,.sim-control select:focus{outline:2px solid #a0cffa;outline-offset:1px}
+.sim-control small{font-size:10px;font-weight:400;line-height:1.45;color:#73869a}
+.sim-configuration{margin:18px 0 4px}
+.sim-imported{border:1px solid #cfe2f2;background:linear-gradient(135deg,#f0f8ff,#fafcff);padding:17px;border-radius:12px}
+.sim-imported-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;color:#15395d}
+.sim-imported-head strong{font-size:13px}.sim-verified{color:#2472b0;font-size:10px}
+.sim-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:11px}
+.sim-facts span{font-size:10px;color:#69839c}.sim-facts b{display:block;font-size:13px;color:#173757;margin-top:4px}
+.sim-imported>small{display:block;font-size:10px;color:#687e98;line-height:1.5}
+.sim-side{position:sticky;top:20px}
+.sim-side-title{border-bottom:1px solid #e9eef5;padding-bottom:17px;margin-bottom:18px}
+.sim-side-title h2{margin:6px 0 0}
+.sim-kpi-grid{display:grid;gap:10px}
+.sim-kpi{border:1px solid #e4ebf3;background:#f9fbfe;border-radius:10px;padding:13px}
+.sim-kpi span{display:block;font-size:11px;color:#637f99;font-weight:650}
+.sim-kpi strong{display:block;color:#0e3764;font:800 clamp(18px,2vw,25px) Manrope,sans-serif;letter-spacing:-.04em;margin:4px 0}
+.sim-kpi small{display:block;color:#7e90a4;font-size:10px}
+.sim-hint,.sim-empty{color:#607b98;font-size:12px;border:1px dashed #bad0e4;border-radius:12px;padding:20px;line-height:1.6;background:#f9fbff}
+.sim-hint{margin-top:15px}.sim-alert{background:#fff8ec;border:1px solid #eed19e;border-radius:10px;padding:14px;color:#805c2d;font-size:12px;line-height:1.55}
+.sim-disclaimer{font-size:10px;color:#75869b;line-height:1.65;margin:20px 0;padding-top:14px;border-top:1px solid #e6edf4}
+.sim-print{width:100%}
+.sim-comparison{margin-top:18px;padding-top:18px;border-top:1px solid #e6edf5}
+.sim-comparison h3{color:#153c68;font-size:14px;margin:0 0 12px}
+.sim-comparison small{display:block;margin-top:10px;color:#7e90a2;font-size:10px;line-height:1.5}
+.sim-bars{margin-top:19px;display:grid;gap:13px}
+.sim-bars>div{display:grid;grid-template-columns:95px minmax(50px,1fr) auto;align-items:center;gap:9px;font-size:10px;color:#52708f}
+.sim-bars>div>i{height:10px;border-radius:15px;background:#e9f1f8;overflow:hidden;display:block}
+.sim-bars>div>i b{display:block;height:100%;background:#1776c0;border-radius:15px}
+.sim-bars>div>i b.finance{background:#2b968d}
+.sim-bars>div>strong{font-size:10px;color:#20415d}
+.sim-admin-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(285px,1fr);gap:18px;align-items:start}
+.sim-help{font-size:12px;color:#7a8da2;line-height:1.5;margin:8px 0 23px}
+.sim-approval{grid-column:1/-1;display:grid;gap:10px;padding:13px;background:#f2f7fd;border:1px solid #dfeaf5;border-radius:10px}
+.sim-approval label{display:flex;align-items:center;gap:10px;font-size:12px;color:#214566;font-weight:700}
+.sim-approval input{width:16px;height:16px}
+.sim-form-actions{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
+.sim-plan-row{text-align:left;width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:#fff;border:1px solid #dfebf6;border-radius:10px;padding:14px;margin:10px 0}
+.sim-plan-row:hover{border-color:#6aaee1;background:#f8fbff}
+.sim-plan-row strong{color:#17406b;font-size:12px}.sim-plan-row small{color:#72869c;font-size:11px}
+.sim-plan-row em{font-style:normal;font-size:10px;border-radius:20px;padding:4px 9px}
+.sim-plan-row em.ready{background:#e8f7f0;color:#247754}.sim-plan-row em.draft{background:#fff0e2;color:#996322}
+@media(max-width:1170px){.sim-stage-grid,.sim-admin-grid{grid-template-columns:1fr}.sim-side{position:static}}
+@media(max-width:650px){.sim-page-head{display:block}.sim-page-head>.btn{margin-top:15px}.sim-grid{grid-template-columns:1fr}.sim-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.sim-card{padding:18px}.sim-bars>div{grid-template-columns:80px minmax(32px,1fr) auto}}
