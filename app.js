@@ -164,7 +164,7 @@ try{
  toast(safe(e),true);
  if(!state.profile){app.innerHTML=`<div class="empty"><h2>Não foi possível carregar seu perfil.</h2><p>${H(safe(e))}</p><button class="btn btn-outline" data-action="logout">Sair</button></div>`;}
 }finally{state.loading=false;}}
-async function enter(){if(!sb)return;const {data:{user},error}=await sb.auth.getUser();if(error||!user){state.user=null;state.profile=null;renderAuth();return;}state.user=user;await loadData(true);if(!state.interval)state.interval=window.setInterval(()=>{if(state.user&&!document.hidden&&!modalRoot.children.length)loadData(true);},60000);}
+async function enter(){if(!sb)return;const {data:{user},error}=await sb.auth.getUser();if(error||!user){state.user=null;state.profile=null;renderAuth();return;}state.user=user;await loadData(true);if(!state.interval)state.interval=window.setInterval(()=>{if(state.user&&!document.hidden&&!modalRoot.children.length&&!['simulator','simulator-admin'].includes(state.page))loadData(true);},60000);}
 
 function extraRequestFields(o){
  const defaultCategory=state.products.find(p=>p.id===o?.product_id)?.category||state.products.find(p=>p.active)?.category;
