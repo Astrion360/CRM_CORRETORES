@@ -42,9 +42,13 @@ export function biddingPolicy(category,groupCode,mode,paidOnTimeMonths=0){
  const onTime=Number(paidOnTimeMonths)||0;
  const none={allowed:true,embeddedAllowed:false,fixedPercent:null,reason:''};
  if(!mode||mode==='none')return none;
- if(!['livre','limitado','fixo30','fixo25','fixo50','fidelidade25','quitacao'].includes(mode))
+ if(!['livre','limitado','fixo30','fixo25','fixo50','fidelidade25','quitacao','troca_chaves'].includes(mode))
   return {...none,allowed:false,reason:'Modalidade de lance desconhecida.'};
  const result={allowed:true,embeddedAllowed:false,fixedPercent:null,reason:'',maxPercent:100};
+ if(mode==='troca_chaves'){
+   if(!auto&&!heavy){result.allowed=false;result.reason='Troca de chaves referenciada apenas para automóveis, motos e pesados.';}
+   else result.reason='Troca de chaves é forma de composição do lance livre; o grupo, a avaliação do bem e a aceitação devem ser confirmados.';
+ }
  if(mode==='limitado'){result.maxPercent=60;result.reason='Lance limitado a 60% do crédito; critérios de desempate por pedra-chave.';}
  if(mode==='fixo30'){result.fixedPercent=30;if(heavy){result.allowed=false;result.reason='Grupos pesados utilizam lance fixo de 25% no treinamento.';}}
  if(mode==='fixo25'){result.fixedPercent=25;if(!heavy){result.allowed=false;result.reason='Lance fixo 25% referenciado apenas para pesados.';}}
@@ -65,11 +69,12 @@ export function biddingPolicy(category,groupCode,mode,paidOnTimeMonths=0){
    if(mode==='quitacao')result.reason='Quitação tem prioridade na modalidade de lance livre do grupo 708.';
  }else if(group==='1008'){result.embeddedAllowed=false;result.reason='Grupo 1008: treinamento exclui lance embutido.';}
  else if(mode==='livre'){
-   if(group&&(imovel||auto||heavy))result.embeddedAllowed=true;
-   if(!group)result.reason='Selecione grupo para verificar possibilidade de lance embutido.';
+   if(imovel||auto||heavy)result.embeddedAllowed=true;
+   if(!group)result.reason='Lance embutido apenas ilustrativo; consultar elegibilidade do grupo antes de contratar.';
  }
  if(mode==='quitacao'&&(!group||group==='708'))result.reason='Quitação depende do saldo devedor e da ordem de assembleia.';
- if(!group&&mode!=='none'&&!result.reason)result.reason='Grupo não informado. Modalidade deve ser validada antes da oferta.';
+ if(!group&&mode==='fixo30'&&imovel)result.embeddedAllowed=true;
+ if(!group&&mode!=='none'&&!result.reason)result.reason='Simulação genérica: condições e modalidades devem ser validadas na administradora.';
  return result;
 }
 export function calculateBidScenario(args={}){
@@ -105,11 +110,15 @@ export function calculateBidScenario(args={}){
  if(fgts>0)warnings.push('Uso de FGTS depende de enquadramento legal, regras do grupo e documentação.');
  const auto=(category==='Automóveis'||category==='Motos');
  const heavy=category==='Pesados';
- const keyEligible=(auto&&KEY_AUTO_GROUPS.includes(group))||(heavy&&KEY_HEAVY_GROUPS.includes(group));
+ const keyEligible=group
+   ? (auto&&KEY_AUTO_GROUPS.includes(group))||(heavy&&KEY_HEAVY_GROUPS.includes(group))
+   : (auto||heavy);
  let keyLimit=0;
+ if(mode==='troca_chaves'&&key<=0)errors.push('Informe o valor do bem oferecido na Troca de Chaves.');
  if(key>0){
-   if(!keyEligible)errors.push('Troca de chaves indisponível para este grupo/segmento no treinamento.');
-   if(heavy&&mode!=='livre')errors.push('Pesados: troca de chaves apenas após contemplação por lance livre.');
+   if(!keyEligible)errors.push('Troca de chaves não referenciada para este produto no treinamento.');
+   if(!group&&mode!=='troca_chaves')errors.push('Selecione a modalidade Troca de Chaves para utilizar um bem como parte do lance.');
+   if(heavy&&mode!=='livre'&&mode!=='troca_chaves')errors.push('Pesados: troca de chaves integra lance livre.');
    if(embedPct>0||planSeventy)errors.push('Troca de chaves não pode ser combinada com lance embutido.');
    if(mode==='none')errors.push('Troca de chaves exige oferta de lance.');
    keyLimit=auto?total*.5:credit*.5;
@@ -118,7 +127,7 @@ export function calculateBidScenario(args={}){
  }
  if(mode==='none'&&planSeventy)warnings.push('O plano 70% prevê 30% de crédito reservado ao lance, mas a oferta efetiva exige seleção da modalidade.');
  if(group&&!policy.embeddedAllowed&&embedPct===0&&!key)warnings.push('Modalidades de lance e regras devem ser confirmadas com a administradora.');
- if(!group&&mode!=='none')warnings.push('Grupo não selecionado: condições especiais não são consideradas elegíveis.');
+ if(!group&&mode!=='none')warnings.push('Simulação genérica sem vinculação a grupo: lance, embutido e troca de chaves dependem de regulamento, disponibilidade e aceite da administradora.');
  const cash=Math.max(0,total-effectiveEmbedded-fgts-key);
  if(mode!=='none'&&total+1e-7<effectiveEmbedded+fgts+key)errors.push('Recursos ofertados superam o valor total do lance.');
  const netCredit=credit-effectiveEmbedded-key;
