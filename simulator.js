@@ -20,36 +20,76 @@ function groupList(ctx,productId) {
 }
 function validNumber(x,min,max) {return Number.isFinite(x)&&x>=min&&x<=max;}
 
-export function calculateConsortium(plan,credit) {
+
+/* Fonte das referências: SGS/BCB, ago/2026, para Imóveis e Veículos;
+   medianas das instituições em set/2026 (creditoscopio/BCB) para demais categorias.
+   Taxas-base comparativas, NÃO taxas garantidas nem CET. */
+export const FINANCING_BENCHMARKS = Object.freeze({
+  'Imóveis': {monthly:1.12,label:'BCB SGS 25497 · financiamento imobiliário PF · ago/2026',url:'https://dadosabertos.bcb.gov.br/dataset/25497-taxa-media-mensal-de-juros-das-operacoes-de-credito-com-recursos-direcionados---pessoas-fisic'},
+  'Automóveis': {monthly:1.97,label:'BCB SGS 25471 · aquisição de veículos PF · ago/2026',url:'https://dadosabertos.bcb.gov.br/dataset/25471-taxa-media-mensal-de-juros-das-operacoes-de-credito-com-recursos-livres---pessoas-fisicas---a'},
+  'Motos': {monthly:1.97,label:'Proxy: aquisição de veículos PF · BCB SGS 25471 · ago/2026',url:'https://dadosabertos.bcb.gov.br/dataset/25471-taxa-media-mensal-de-juros-das-operacoes-de-credito-com-recursos-livres---pessoas-fisicas---a'},
+  'Pesados': {monthly:1.97,label:'Proxy PF: aquisição de veículos · não reflete necessariamente financiamento PJ/pesados · ago/2026',url:'https://dadosabertos.bcb.gov.br/dataset/25471-taxa-media-mensal-de-juros-das-operacoes-de-credito-com-recursos-livres---pessoas-fisicas---a'},
+  'Outros': {monthly:2.94,label:'Mediana das instituições · outros bens PF · 1ª semana set/2026',url:'https://creditoscopio.com.br/atualizacoes/2026-09/'},
+  'Serviços': {monthly:5.90,label:'Proxy: crédito pessoal sem consignado PF · 1ª semana set/2026 (não é financiamento específico de serviços)',url:'https://creditoscopio.com.br/atualizacoes/2026-09/'}
+});
+export function benchmarkForProduct(product){
+ return FINANCING_BENCHMARKS[product?.category] || null;
+}
+/* Parcela reduzida: metade da parte de amortização + taxas, com seguro integral.
+   Parcela adiada acumulada sem juros e rateada, após mês hipotético de contemplação.
+   É uma hipótese financeira; modalidades comerciais podem ter regra distinta. */
+export function calculateConsortium(plan,credit,options={}) {
  const c=Number(credit),n=Number(plan?.term_months);
  const fee=Number(plan?.admin_fee_pct),reserve=Number(plan?.reserve_fund_pct);
  const other=Number(plan?.other_total_pct),fixedInsurance=Number(plan?.insurance_monthly_amount);
  const prestamistaRate=Number(plan?.prestamista_rate_monthly ?? 0);
  const insurance=c*prestamistaRate+fixedInsurance;
  const annual=Number(plan?.annual_adjustment_pct);
+ const reduced=options?.reduced50===true;
+ const month=reduced?Number(options?.contemplationMonth):null;
  if(!validNumber(c,1,1e10)||!Number.isInteger(n)||!validNumber(n,1,360)||
     !validNumber(fee,0,100)||!validNumber(reserve,0,100)||!validNumber(other,0,100)||
     !validNumber(fixedInsurance,0,1e6)||!validNumber(prestamistaRate,0,0.05)||
-    !validNumber(annual,0,50)) throw Error('Premissas do consórcio inválidas.');
+    !validNumber(annual,0,50)||
+    (reduced&&(!Number.isInteger(month)||month<1||month>=n)))
+     throw Error('Premissas do consórcio inválidas.');
  const base=c*(1+(fee+reserve+other)/100)/n;
- let total=0, last=0;
- for(let month=1;month<=n;month++){
-   last=base*Math.pow(1+annual/100,Math.floor((month-1)/12))+insurance;
-   total+=last;
+ const factor=m=>Math.pow(1+annual/100,Math.floor((m-1)/12));
+ let deferred=0;
+ if(reduced)for(let m=1;m<=month;m++)deferred+=base*factor(m)*0.5;
+ const distributed=reduced?deferred/(n-month):0;
+ let total=0,first=0,last=0,after=null,normalTotal=0;
+ for(let m=1;m<=n;m++){
+   const full=base*factor(m)+insurance;
+   normalTotal+=full;
+   const installment=reduced
+     ? (m<=month?base*factor(m)*0.5+insurance:full+distributed)
+     :full;
+   if(m===1)first=installment;
+   if(reduced&&m===month+1)after=installment;
+   last=installment;
+   total+=installment;
  }
- const first=base+insurance;
  return {first,last,total,term:n,charges:c*(fee+reserve+other)/100,
    base,insurance,prestamistaRateMonthly:prestamistaRate,
    prestamistaMonthlyAmount:c*prestamistaRate,fixedInsurance,
-   annual,nominalNoAdjustment:(base+insurance)*n};
+   annual,normalTotal,reduced50:reduced,contemplationMonth:month,
+   postContemplationFirst:after,deferredAmount:deferred,normalFirst:base+insurance,
+   nominalNoAdjustment:(base+insurance)*n};
 }
-export function calculateFinancing({assetValue,downPayment,annualRate,months,system,monthlyCosts=0,upfrontCosts=0}) {
- const asset=Number(assetValue),down=Number(downPayment),annual=Number(annualRate),n=Number(months);
+export function calculateFinancing({assetValue,downPayment=0,annualRate,monthlyRate,months,system,monthlyCosts=0,upfrontCosts=0}) {
+ const asset=Number(assetValue),down=Number(downPayment),n=Number(months);
  const monthlyOther=Number(monthlyCosts),upfront=Number(upfrontCosts);
- if(!validNumber(asset,1,1e10)||!validNumber(down,0,asset)||!validNumber(annual,0,100)||
+ const useMonthly=monthlyRate!=null;
+ const annual=annualRate==null?null:Number(annualRate);
+ const mon=useMonthly?Number(monthlyRate):null;
+ if(!validNumber(asset,1,1e10)||!validNumber(down,0,asset)||
+    (useMonthly?!validNumber(mon,0,100):!validNumber(annual,0,100))||
     !Number.isInteger(n)||!validNumber(n,1,360)||!['PRICE','SAC'].includes(system)||
-    !validNumber(monthlyOther,0,1e6)||!validNumber(upfront,0,1e9)) throw Error('Premissas do financiamento inválidas.');
- const principal=asset-down,rate=Math.pow(1+annual/100,1/12)-1;
+    !validNumber(monthlyOther,0,1e6)||!validNumber(upfront,0,1e9))
+      throw Error('Premissas do financiamento inválidas.');
+ const principal=asset-down;
+ const rate=useMonthly?mon/100:Math.pow(1+annual/100,1/12)-1;
  let first=0,last=0,interest=0;
  if(system==='PRICE'){
    const pmt=rate===0?principal/n:principal*rate/(1-Math.pow(1+rate,-n));
@@ -62,7 +102,7 @@ export function calculateFinancing({assetValue,downPayment,annualRate,months,sys
  }
  return {first,last,interest,principal,term:n,rate,system,
    total:down+principal+interest+monthlyOther*n+upfront,
-   down,upfront,monthlyOther};
+   down,upfront,monthlyOther,monthlyRate:rate*100};
 }
 function label(text,id,input,help='') {
  return `<label class="sim-control"><span>${h(text)}</span>${input}${help?'<small>'+h(help)+'</small>':''}</label>`;
