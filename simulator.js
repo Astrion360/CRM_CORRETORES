@@ -550,9 +550,12 @@ export function renderSimulator(root,ctx) {
  }
  el('sim-clear-draft').addEventListener('click',()=>{
    try{window.sessionStorage.removeItem(draftKey);}catch(err){}
-   renderSimulator(root,{...ctx,prefill:null});
-   const status=root.querySelector('#sim-draft-status');
-   if(status)status.textContent='Nova simulação iniciada.';
+   opps.value='';
+   product.value=products[0].id;
+   credit.value='';
+   autoCredit=null;
+   syncPlan();
+   el('sim-draft-status').textContent='Nova simulação iniciada. Nenhum rascunho anterior está ativo.';
  });
  root.addEventListener('input',saveDraft);
  root.addEventListener('change',saveDraft);
