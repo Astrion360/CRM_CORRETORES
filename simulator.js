@@ -139,25 +139,30 @@ function reportPopup(ctx,view){
  const rows=(items)=>items.map(([name,value])=>`<tr><th>${h(name)}</th><td>${h(value)}</td></tr>`).join('');
  const consRows=[
   ['Produto',productTitle(ctx,p.product_id)],['Plano',p.name],
-  ['Grupo',p.group_code||'Referência por produto, sem grupo específico'],
+  ['Grupo',view.groupCode||'Grupo não definido (simulação genérica)'],
   ['Crédito simulado',money(view.credit)],['Prazo',p.term_months+' meses'],
   ['Taxa administração total · cenário',pct(p.admin_fee_pct)],
   ['Fundo de reserva total · cenário',pct(p.reserve_fund_pct)],
   ['Outros encargos totais',pct(p.other_total_pct)],
-  ['Prestamista mensal sobre crédito',money(c.prestamistaMonthlyAmount)],
+  ['Base de cálculo do prestamista',c.insuranceBase==='credit_plus_fees'?'Crédito + taxas totais':'Crédito contratado'],
+  ['Prestamista mensal estimado',money(c.prestamistaMonthlyAmount)],
   ['Taxa mensal prestamista',pct(Number(p.prestamista_rate_monthly||0)*100)],
   ['Seguro mensal adicional',money(c.fixedInsurance)],
   ['Reajuste anual hipotético',pct(p.annual_adjustment_pct)],
-  ['Modalidade de parcela',c.reduced50?'Reduzida 50% · hipotética':'Integral'],
+  ['Modalidade de parcela',c.mode==='half'?'Parcela 50% · taxas integrais':c.mode==='seventy'?'Plano 70% · embutido 30%':'Integral'],
   ...(c.reduced50?[
     ['Mês hipotético da contemplação',String(c.contemplationMonth)],
     ['Parcela inicial reduzida',money(c.first)],
     ['Parcela após mês hipotético',money(c.postContemplationFirst)],
     ['Valor diferido redistribuído',money(c.deferredAmount)]
    ]:[['Primeira parcela integral',money(c.first)],['Última parcela estimada',money(c.last)]]),
-  ['Total de pagamentos estimados',money(c.total)],
+  ...(c.plan70?[['Crédito líquido ilustrativo no plano 70%',money(c.plan70NetCredit)]]:[]),
+  ['Total de pagamentos estimados (sem abatimento de lance)',money(c.total)],
   ['Fonte do plano',p.source_label||'Não informada']
  ];
+ const bid=view.bid||null;
+ const bidRows=bid?[['Modalidade de lance',bid.mode==='none'?'Não ofertado':bid.mode],['Grupo da cota',view.groupCode||'Não definido'],['Oferta total (antes de redução contratual)',money(bid.bidAmount)],['Lance embutido (dedução do crédito)',money(bid.embeddedAmount)],['FGTS informado (sujeito à regra)',money(bid.fgtsAmount)],['Troca de chaves (valor avaliado hipotético)',money(bid.keyAmount)],['Complemento em recursos próprios',money(bid.ownResourcesAmount)],['Crédito líquido teórico para compra',money(bid.netCredit)],['Forma de abatimento declarada',bid.applicationLabel]]:null;
+ const bidHtml=bidRows?`<h2>Lance e crédito líquido · projeção de composição</h2><table>${rows(bidRows)}</table><p>A aplicação do lance no saldo devedor e nas prestações não foi recalculada. Troca de chaves e lance embutido não podem ser combinados; elegibilidade depende do grupo.</p>`:'';
  const financRows=fin?[
   ['Crédito financiado (igual ao consórcio)',money(view.credit)],
   ['Entrada','R$ 0,00 · hipótese de comparação'],
@@ -174,8 +179,9 @@ function reportPopup(ctx,view){
  const finHtml=financRows?`<h2>Financiamento · ${h(fin.system)}</h2><table>${rows(financRows)}</table>`:
    '<h2>Financiamento</h2><p>Não calculado. A taxa mensal não foi informada ou é inválida.</p>';
  const noteText=c.reduced50
-   ?'A parcela de 50% recai sobre a parte principal e encargos proporcionais, não sobre o seguro. O valor postergado foi rateado após um mês de contemplação meramente hipotético, sem juros sobre a postergação. Não representa regra contratual garantida.'
-   :'Cálculo linear referencial do crédito e taxas totais, com seguro integral e reajuste hipotético quando cadastrado.';
+   ?'Parcela de 50%: apenas metade do fundo comum, com 100% das taxas e seguro. Valor diferido redistribuído após mês de contemplação hipotético; não reproduz obrigatoriamente o regulamento.'
+   :c.plan70?'Plano 70%: 70% do fundo comum, 100% das taxas e seguro. Embutido de 30% reservado conforme hipótese do treinamento; confirmar elegibilidade e regras do grupo.'
+   :'Cálculo linear referencial com fundo comum, taxas e seguro integral, sujeito a correção e demais condições reais.';
  popup.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Órbita Simula | Relatório</title><style>
  @page{size:A4;margin:15mm}
  body{font:12px/1.52 Arial,sans-serif;color:#17314d;margin:0}
@@ -200,9 +206,10 @@ function reportPopup(ctx,view){
  <p class="subtitle">Mesmo valor de crédito e prazo nas duas modalidades. Parâmetros editados são válidos apenas para esta simulação.</p>
  <h2>Consórcio</h2><table>${rows(consRows)}</table>
  <p>${h(noteText)}</p>
+ ${bidHtml}
  ${finHtml}
  <div class="notice"><strong>Limitações importantes.</strong> ${h(note)}
- A simulação de financiamento usa 100% do valor do crédito, sem entrada; não incorpora IOF, seguros obrigatórios, tributos, tarifas, CET ou TR/IPCA. A taxa de referência é uma hipótese comparativa de mercado, não proposta contratual. O valor total não mede o custo econômico da espera pela contemplação.</div>
+ A simulação de financiamento usa 100% do valor do crédito, sem entrada; não incorpora IOF, seguros obrigatórios, tributos, tarifas, CET ou TR/IPCA. A taxa de referência é uma hipótese comparativa de mercado, não proposta contratual. O valor total não mede o custo econômico da espera pela contemplação nem incorpora os efeitos de amortização de lance, FGTS e troca de chaves.</div>
  </body></html>`);
  popup.document.close();popup.focus();
 }
