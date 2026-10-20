@@ -220,6 +220,7 @@ export function renderSimulator(root,ctx) {
  const opts=`<option value="">Selecione uma solicitação, se desejar</option>${ctx.opps.map(o=>option(o.id,(ctx.clients.find(c=>c.id===o.client_id)?.full_name||'Cliente')+' · '+productTitle(ctx,o.product_id),ctx.prefill?.id)).join('')}`;
  root.innerHTML=`
  <div class="sim-page-head"><div><span class="eyebrow">ÓRBITA · INTELIGÊNCIA COMERCIAL</span><h1>Simulador de consórcios</h1><p>Escolha um produto cadastrado e utilize as condições liberadas pela Astrion. Compare cenários de aquisição.</p></div>${ctx.isAdmin?'<a href="#" class="btn btn-outline" id="sim-config-link">Gerenciar planos →</a>':''}</div>
+ <div class="sim-draft-toolbar"><span id="sim-draft-status">O Órbita mantém o rascunho desta simulação na aba atual.</span><button type="button" id="sim-clear-draft" class="btn btn-outline btn-sm">Nova simulação</button></div>
  <div class="sim-stage-grid"><section class="sim-card sim-main">
   <div class="sim-section-head"><span class="sim-step">01</span><div><h2>Produto e crédito</h2><p>Use os parâmetros cadastrados ou ajuste TA e FR para estudar um cenário, sem alterar o plano oficial.</p></div></div>
   <div class="sim-grid">
@@ -495,8 +496,70 @@ export function renderSimulator(root,ctx) {
  el('sim-print').addEventListener('click',()=>{if(report)reportPopup(ctx,report);});
  const admin=el('sim-config-link');
  if(admin)admin.addEventListener('click',ev=>{ev.preventDefault();ctx.navigate('simulator-admin');});
+
+ const draftKey='orbita-simula:draft:v6:'+String(ctx.userId||'guest');
+ const draftIds=[
+  'sim-opportunity','sim-product','sim-plan','sim-credit',
+  'sim-admin-fee','sim-reserve-fee','sim-payment-mode','sim-contemplation','sim-insurance-base',
+  'sim-bid-mode','sim-bid-pct','sim-bid-embedded','sim-bid-fgts','sim-bid-key','sim-bid-paid','sim-bid-application',
+  'sim-interest','sim-system'
+ ];
+ function saveDraft(){
+  try{
+   const values={};
+   for(const id of draftIds){
+    const node=el(id);
+    if(node)values[id]=node.value;
+   }
+   window.sessionStorage.setItem(draftKey,JSON.stringify({version:6,savedAt:Date.now(),values}));
+   const status=el('sim-draft-status');
+   if(status)status.textContent='Rascunho mantido nesta aba · alterações salvas automaticamente';
+  }catch(err){/* Storage pode estar desabilitado. A simulação continua sem gravação. */}
+ }
+ function restoreDraft(){
+   let draft;
+   try{
+    draft=JSON.parse(window.sessionStorage.getItem(draftKey)||'null');
+    if(!draft||draft.version!==6||!draft.values||Date.now()-draft.savedAt>7*24*60*60*1000)return false;
+   }catch(err){return false;}
+   const v=draft.values;
+   if(v['sim-product']&&products.some(p=>p.id===v['sim-product'])){
+     product.value=v['sim-product'];
+     syncPlan();
+   }
+   if(v['sim-plan']&&availablePlans(ctx,product.value).some(p=>p.id===v['sim-plan'])){
+     planSel.value=v['sim-plan'];
+     syncPricing(currentPlan());syncRate();syncGenericBid();
+   }
+   if(v['sim-opportunity']&&ctx.opps.some(o=>o.id===v['sim-opportunity']))
+      opps.value=v['sim-opportunity'];
+   const pri=['sim-payment-mode','sim-bid-mode'];
+   for(const id of pri){
+    if(v[id]===undefined)continue;
+    const node=el(id);
+    if(node&&[...node.options].some(x=>x.value===v[id]))node.value=v[id];
+   }
+   for(const id of draftIds){
+    if(['sim-opportunity','sim-product','sim-plan',...pri].includes(id))continue;
+    const node=el(id);if(node&&v[id]!==undefined)node.value=v[id];
+   }
+   syncBidControls(false);update();
+   const status=el('sim-draft-status');
+   if(status)status.textContent='Rascunho recuperado nesta aba. Você pode continuar de onde parou.';
+   return true;
+ }
+ el('sim-clear-draft').addEventListener('click',()=>{
+   try{window.sessionStorage.removeItem(draftKey);}catch(err){}
+   renderSimulator(root,{...ctx,prefill:null});
+   const status=root.querySelector('#sim-draft-status');
+   if(status)status.textContent='Nova simulação iniciada.';
+ });
+ root.addEventListener('input',saveDraft);
+ root.addEventListener('change',saveDraft);
  if(ctx.prefill){opps.value=ctx.prefill.id;credit.value=ctx.prefill.credit_amount||'';autoCredit=null;}
  syncPlan();
+ if(!ctx.prefill)restoreDraft();
+
 
 }
 export function renderSimulatorAdmin(root,ctx){
