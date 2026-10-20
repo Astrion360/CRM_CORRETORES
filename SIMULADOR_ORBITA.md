@@ -1,5 +1,42 @@
 # Órbita Simula — manual técnico e operacional (V1)
 
+## Regras complementares do treinamento (implantação V4)
+
+Fonte: arquivo fornecido pelo usuário, Treinamento atualizado(1).pptm, 25 slides. Trata-se de treinamento comercial, não de confirmação atual de disponibilidade ou de regulamento individual de grupo.
+
+### Planos de parcela (slide 19)
+
+- Normal: 100% do fundo comum + 100% de TA, FR e outros encargos, divididos pelo prazo; seguro adicionado integralmente.
+- Plano 50%: 50% somente do fundo comum + 100% das taxas. A distribuição do principal adiado após mês hipotético da contemplação é uma hipótese matemática implementada para estudo, não expressamente especificada pelo treinamento.
+- Plano 70%: 70% do fundo comum + 100% das taxas. O treinamento vincula o plano a 30% de lance embutido, com impacto sobre o crédito líquido. Os procedimentos contratuais específicos devem ser validados.
+- Prestamista: simulador permite base crédito contratado ou crédito mais taxas, pois o slide 19 menciona Crédito + Taxas, mas a apólice/seguradora deverá confirmar a base real.
+
+### Lance e grupos (slides 7, 8, 11 a 18)
+
+- Lance livre: percentual livre; embutido de até 30% do crédito apenas quando admitido pela modalidade/grupo.
+- Lance limitado: no treinamento, máximo de 60% do crédito.
+- Lance fixo: 30% na maioria dos grupos, 25% nos grupos pesados, e 50% exclusivamente para vendas estruturadas/investidores dos grupos 578/720.
+- Lance fidelidade: 25% mediante pelo menos seis parcelas pagas em dia; o grupo 708 também descreve modalidades de 12, 18 e 24 parcelas.
+- Grupo 708: lance livre sem embutido; lance fixo 30% com embutido.
+- Grupo 1008: material expressamente exclui lance embutido.
+- Troca de chaves em automóveis/motos: grupos 462, 463, 527, 529, 535, 540, 541, 575, 617, 619. Limite de até 50% do lance. Não permite lance embutido concomitante.
+- Troca de chaves em pesados: grupos 1004 e 1005, após contemplação por lance livre; limite de até 50% do crédito; não permite lance embutido.
+- Troca de chaves exige documento do veículo/bem em nome do titular até 24h após a assembleia e avaliação FIPE/MOLICAR ou referências admissíveis. Diferenças do lance devem ser pagas conforme prazo orientativo de até 48h úteis.
+- FGTS é listado como fonte para lance de imóveis; precisa cumprir requisitos legais, operacionais e do grupo.
+- Abatimento do lance: ordem inversa, amortização das três próximas parcelas ou diluição. São apresentados como orientações, sem recálculo do fluxo porque as regras contratuais por grupo não foram fornecidas.
+- Multi-ofertas de lance: registrar uma modalidade de cada vez; lance contemplado não poderá ser alterado, conforme material.
+
+### Outros pontos do treinamento (slides 4, 6, 9, 10, 20 a 24)
+
+- Junção de cotas é mencionada em imóveis, automóveis, outros bens e serviços, desde que condições e contemplação permitam.
+- A compra com uma cota pode abranger até seis bens do mesmo segmento, conforme treinamento; a validação documental é necessária.
+- Transferência: material prevê taxa de 1% limitada a R$ 1.000, sujeita ao segmento e estágio de contemplação.
+- Correção: imóveis referenciados pelo INCC; veículos, IGP-M ou tabela de fabricante; serviços, IGP-M; outros bens e ouro sem correção, conforme material.
+- Requisitos de renda e garantias são específicos do segmento; no treinamento, serviços exigem renda quatro vezes a prestação na etapa de faturamento.
+
+### Limites do simulador
+
+Os resultados de lance representam a composição da oferta e o crédito líquido teórico, mas não incorporam amortização contratual do saldo devedor ou alteração das parcelas por abatimento. A contemplação é uma hipótese nos planos reduzidos e não uma previsão. Os grupos importados apenas do treinamento aparecem identificados como tal e não confirmam que haja cotas disponíveis.
 ## Escopo
 
 O Órbita Simula é um módulo autenticado do CRM de corretores. Reaproveita os produtos `public.products` e o catálogo `catalog_segments`/`catalog_groups`. Os **valores comerciais não vêm do catálogo antigo** porque nele não havia taxas de administração e fundo de reserva em colunas confiáveis.
