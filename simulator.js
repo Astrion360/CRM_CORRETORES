@@ -227,14 +227,32 @@ export function renderSimulator(root,ctx) {
     <div class="sim-grid">
       ${numberField('Taxa de administração total (%)','sim-admin-fee','step="0.01" max="100"','Editável apenas para esta simulação.')}
       ${numberField('Fundo de reserva total (%)','sim-reserve-fee','step="0.01" max="100"','Editável apenas para esta simulação.')}
-      ${label('Modalidade de parcela','sim-payment-mode','<select id="sim-payment-mode"><option value="normal">Parcela integral</option><option value="half">Parcela reduzida 50%</option></select>')}
-      ${numberField('Mês hipotético da contemplação','sim-contemplation','step="1" min="1"','Apenas hipótese para redistribuir o saldo; não prevê contemplação.')}
+      ${label('Modalidade de parcela','sim-payment-mode','<select id="sim-payment-mode"><option value="normal">Parcela integral</option><option value="half">Parcela reduzida 50%</option><option value="seventy">Plano 70% · 30% reservado para lance embutido</option></select>')}
+      ${numberField('Mês hipotético da contemplação','sim-contemplation','step="1" min="1"','Necessário só na opção 50%; não prevê contemplação.')}
+      ${label('Base do seguro prestamista','sim-insurance-base','<select id="sim-insurance-base"><option value="credit">Crédito contratado (padrão atual)</option><option value="credit_plus_fees">Crédito + taxas totais (cenário do treinamento)</option></select>','O treinamento informa Crédito + Taxas; a base contratual depende da apólice.')}
     </div>
-    <div id="sim-reduced-info" class="sim-reduced-info">O seguro prestamista continua integral. A metade adiada será redistribuída após o mês hipotético de contemplação, sem previsão de contemplação real.</div>
+    <div id="sim-reduced-info" class="sim-reduced-info">No plano 50%, somente o fundo comum é reduzido: as taxas e o seguro continuam integrais. O saldo principal adiado é redistribuído após o mês hipotético de contemplação.</div>
   </div>
 
   <div class="sim-configuration" id="sim-configuration"></div>
-  <div class="sim-section-head sim-second"><span class="sim-step">02</span><div><h2>Comparação com financiamento</h2><p>Mesmo crédito e prazo do consórcio. Apenas a taxa de juros muda, com opção Price ou SAC.</p></div></div>
+
+  <div class="sim-section-head sim-second"><span class="sim-step">02</span><div>
+   <h2>Grupo, lance e crédito líquido</h2><p>Lance livre, limitado, fixo, fidelidade, embutido, FGTS e troca de chaves, conforme elegibilidade citada no treinamento.</p></div></div>
+  <div class="sim-grid">
+    ${label('Grupo da cota','sim-group','<select id="sim-group"><option value="">Sem grupo definido · simulação genérica</option></select>',
+      'A escolha do grupo altera as condições admitidas. Grupos do treinamento não são confirmação de oferta ativa.')}
+    ${label('Modalidade de lance','sim-bid-mode','<select id="sim-bid-mode"></select>')}
+    ${numberField('Oferta total de lance (% do crédito)','sim-bid-pct','step="0.01" max="100" value="0"','Exemplo: 40 equivale a 40% do crédito.')}
+    ${numberField('Lance embutido (% do crédito)','sim-bid-embedded','step="0.01" max="30" value="0"','Até 30% nas modalidades/grupos indicados. Deduz do crédito líquido.')}
+    ${numberField('FGTS para lance (R$)','sim-bid-fgts','step="0.01" value="0"','Disponível como hipótese apenas em imóveis.')}
+    ${numberField('Bem ofertado na troca de chaves (R$)','sim-bid-key','step="0.01" value="0"','Valor sujeito à avaliação FIPE/MOLICAR ou referências aceitas.')}
+    ${numberField('Parcelas pagas em dia','sim-bid-paid','step="1" min="0" value="0"','Necessário para verificar elegibilidade de lance fidelidade.')}
+    ${label('Abatimento do lance','sim-bid-application','<select id="sim-bid-application"><option value="inverse">Últimas parcelas · ordem inversa</option><option value="next3">Três próximas parcelas</option><option value="dilute">Diluição do lance</option></select>',
+      'A modalidade é informativa; sem cronograma contratual, não recalculamos prestações após o lance.')}
+  </div>
+  <div id="sim-bid-help" class="sim-help-block" aria-live="polite"></div>
+  <div class="sim-training-details" id="sim-training-details"></div>
+  <div class="sim-section-head sim-second"><span class="sim-step">03</span><div><h2>Comparação com financiamento</h2><p>Mesmo crédito e prazo do consórcio. Apenas a taxa de juros muda, com opção Price ou SAC.</p></div></div>
 
   <div class="sim-linked" id="sim-finance-linked" aria-live="polite">O crédito e o prazo serão os mesmos do plano de consórcio selecionado.</div>
   <div class="sim-grid">
