@@ -1,3 +1,11 @@
+## Atualização: simulações genéricas e rascunho seguro (20/10/2026)
+
+- A lista de grupos foi retirada apenas da tela de simulação, mantendo o catálogo administrativo inalterado. As regras comerciais por grupo dependem de confirmação antes de qualquer proposta.
+- **Troca de Chaves** aparece na seleção de lance para Automóveis, Motos e Pesados. Estima a contribuição do bem e o crédito líquido. Limites referenciais: autos/motos até 50% do lance; pesados até 50% do crédito, sempre sujeitos à avaliação, regulamento e validação.
+- Lance embutido pode ser simulado genericamente até 30% como hipótese, sem confirmação automática de elegibilidade por grupo.
+- O CRM deixa de fazer a atualização automática de dados a cada 60 segundos na página Órbita Simula e na administração de seus planos; outros painéis seguem atualizando.
+- Os campos digitados ficam na sessionStorage da aba, vinculada à identidade do corretor autenticado, e são recuperados após recriação da tela. Expiram logicamente em sete dias. O botão **Nova simulação** zera o rascunho. Nenhum dado é gravado automaticamente na oportunidade ou enviado à administradora.
+
 # Órbita Simula — manual técnico e operacional (V1)
 
 ## Regras complementares do treinamento (implantação V4)

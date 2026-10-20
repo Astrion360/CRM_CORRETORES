@@ -90,3 +90,10 @@
 .sim-alert ul{margin:9px 0 0;padding-left:18px}
 .sim-control input:disabled,.sim-control select:disabled{background:#f2f4f7;color:#8b9aad;cursor:not-allowed}
 @media(max-width:650px){.sim-bid-grid{grid-template-columns:1fr 1fr}.sim-bid-grid b{font-size:15px}}
+
+/* Rascunho do simulador genérico */
+.sim-draft-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:10px 14px;border:1px solid #d9e8f6;border-radius:11px;background:#f5faff}
+.sim-draft-toolbar span{font-size:11px;color:#567491;line-height:1.5}
+.sim-draft-toolbar button{white-space:nowrap}
+.sim-training-details p{font-size:11px;color:#5b7893;line-height:1.55}
+@media(max-width:650px){.sim-draft-toolbar{align-items:flex-start}}
