@@ -179,3 +179,41 @@
 @media(min-width:981px) and (max-height:760px){#app .astrion-reference-login .orbita-right-content{padding-top:23px;padding-bottom:17px}#app .astrion-reference-login .orbita-planet-zone{min-height:55px}#app .astrion-reference-login .orbita-product{min-height:100px;padding:10px}#app .astrion-reference-login .orbita-product-grid{margin-bottom:14px}#app .astrion-reference-login .orbita-product svg{margin-bottom:5px}}
 @media(max-width:980px){#app .astrion-reference-login .login-right.login-right--vector{min-height:750px}#app .astrion-reference-login .orbita-right-content{min-height:750px}#app .astrion-reference-login .orbita-planet-zone{min-height:190px}}
 @media(max-width:600px){#app .astrion-reference-login .orbita-right-content{padding:32px 20px;min-height:930px}#app .astrion-reference-login .orbita-hero-copy h2{font-size:clamp(32px,8vw,43px)}#app .astrion-reference-login .orbita-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#app .astrion-reference-login .orbita-product{min-height:135px;padding:14px}#app .astrion-reference-login .orbita-product strong{font-size:14px}#app .astrion-reference-login .orbita-product small{font-size:11px}#app .astrion-reference-login .orbita-process{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}#app .astrion-reference-login .orbita-process strong{font-size:12px}#app .astrion-reference-login .orbita-process small{font-size:11px}}
+
+/* Approved ÓRBITA artwork: restore original 31/69 split and preserve all content. */
+@media (min-width: 981px) {
+  #app .astrion-reference-login {
+    grid-template-columns: minmax(410px, 31.05%) minmax(0, 1fr)!important;
+  }
+  #app .astrion-reference-login .login-left {
+    padding-left: clamp(26px, 3.2vw, 70px)!important;
+    padding-right: clamp(26px, 3.2vw, 70px)!important;
+  }
+}
+#app .astrion-reference-login .login-right.login-right--approved-image {
+  background:radial-gradient(ellipse at 62% 38%,#10447b 0%,#071f4a 42%,#020e25 100%)!important;
+}
+#app .astrion-reference-login .login-right--approved-image::before {
+  display:none!important;
+}
+#app .astrion-reference-login .login-right-approved-image {
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  image-rendering:auto!important;
+  filter:contrast(1.045) saturate(1.035)!important;
+}
+@media(max-width:980px){
+  #app .astrion-reference-login .login-right.login-right--approved-image {
+    height:auto!important;
+    min-height:0!important;
+    aspect-ratio:1268 / 855!important;
+  }
+  #app .astrion-reference-login .login-right-approved-image {
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    aspect-ratio:1268 / 855!important;
+  }
+}
