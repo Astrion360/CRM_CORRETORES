@@ -151,10 +151,10 @@ export function renderSimulator(root,ctx) {
   <div class="sim-pricing-block">
     <div class="sim-pricing-head"><strong>Condições da simulação</strong><span>Somente este cálculo · não altera o cadastro</span></div>
     <div class="sim-grid">
-      ${numberField('Taxa de administração total (%)','sim-admin-fee','step="0.01" max="100"','Editável apenas para esta simulação.')⟧
-      ${numberField('Fundo de reserva total (%)','sim-reserve-fee','step="0.01" max="100"','Editável apenas para esta simulação.')⟧
-      ${label('Modalidade de parcela','sim-payment-mode','<select id="sim-payment-mode"><option value="normal">Parcela integral</option><option value="half">Parcela reduzida 50%</option></select>')⟧
-      ${numberField('Mês hipotético da contemplação','sim-contemplation','step="1" min="1"','Apenas hipótese para redistribuir o saldo; não prevê contemplação.')⟧
+      ${numberField('Taxa de administração total (%)','sim-admin-fee','step="0.01" max="100"','Editável apenas para esta simulação.')}
+      ${numberField('Fundo de reserva total (%)','sim-reserve-fee','step="0.01" max="100"','Editável apenas para esta simulação.')}
+      ${label('Modalidade de parcela','sim-payment-mode','<select id="sim-payment-mode"><option value="normal">Parcela integral</option><option value="half">Parcela reduzida 50%</option></select>')}
+      ${numberField('Mês hipotético da contemplação','sim-contemplation','step="1" min="1"','Apenas hipótese para redistribuir o saldo; não prevê contemplação.')}
     </div>
     <div id="sim-reduced-info" class="sim-reduced-info">O seguro prestamista continua integral. A metade adiada será redistribuída após o mês hipotético de contemplação, sem previsão de contemplação real.</div>
   </div>
@@ -164,8 +164,8 @@ export function renderSimulator(root,ctx) {
 
   <div class="sim-linked" id="sim-finance-linked" aria-live="polite">O crédito e o prazo serão os mesmos do plano de consórcio selecionado.</div>
   <div class="sim-grid">
-    ${numberField('Taxa de juros de referência do financiamento (% a.m.)','sim-interest','step="0.01" min="0" max="100"','Taxa pré-preenchida com referência de mercado; pode ser ajustada.')⟧
-    ${label('Sistema de amortização','sim-system','<select id="sim-system"><option value="PRICE">Tabela Price</option><option value="SAC">Sistema SAC</option></select>')⟧
+    ${numberField('Taxa de juros de referência do financiamento (% a.m.)','sim-interest','step="0.01" min="0" max="100"','Taxa pré-preenchida com referência de mercado; pode ser ajustada.')}
+    ${label('Sistema de amortização','sim-system','<select id="sim-system"><option value="PRICE">Tabela Price</option><option value="SAC">Sistema SAC</option></select>')}
   </div>
   <div class="sim-rate-source" id="sim-rate-source">As taxas são referências de mercado, não propostas vinculantes. Sem entrada, IOF, seguro bancário ou CET.</div>
  </section><aside class="sim-card sim-side">
@@ -174,78 +174,135 @@ export function renderSimulator(root,ctx) {
   <div class="sim-disclaimer">${h(note)}</div>
   <button class="btn btn-primary sim-print" id="sim-print" type="button" disabled>Gerar relatório em PDF</button>
  </aside></div>`;
+
  const el=id=>root.querySelector('#'+id);
  const product=el('sim-product'),planSel=el('sim-plan'),credit=el('sim-credit'),opps=el('sim-opportunity');
- let report=null;let activePlan=null,autoCredit=null;
+ let report=null,activePlan=null,autoCredit=null;
+ const activeProduct=()=>ctx.products.find(p=>p.id===product.value);
+ function syncRate(){
+   const b=benchmarkForProduct(activeProduct());
+   const rate=el('sim-interest');
+   rate.value=b?String(b.monthly):'';
+   const label=el('sim-rate-source');
+   label.innerHTML=b
+    ?`Taxa inicial ${pct(b.monthly)} a.m. · ${h(b.label)}. <a href="${h(b.url)}" target="_blank" rel="noopener noreferrer">Consultar fonte</a>. Editável; não é CET nem oferta bancária. Simulação com 100% do crédito financiado, sem entrada, IOF ou seguros.`
+    :'Nenhuma referência de juros definida para este produto. Informe uma taxa mensal para calcular. Sem entrada, IOF, seguros ou CET.';
+ }
+ function syncPricing(p){
+   el('sim-admin-fee').value=p?.admin_fee_pct??'';
+   el('sim-reserve-fee').value=p?.reserve_fund_pct??'';
+   el('sim-payment-mode').value='normal';
+   el('sim-contemplation').max=p?String(Math.max(1,p.term_months-1)):'360';
+   el('sim-contemplation').value=p?String(Math.max(1,Math.floor(p.term_months/2))):'';
+   el('sim-contemplation').disabled=true;
+   el('sim-reduced-info').classList.add('hidden');
+ }
  function syncPlan(){
    const list=availablePlans(ctx,product.value);
    const previous=planSel.value;
-   planSel.innerHTML=list.length?list.map(p=>option(p.id,p.name+(p.group_code?' · Grupo '+p.group_code:''),previous)).join(''):'<option value="">Nenhum plano ativo aprovado</option>';
+   planSel.innerHTML=list.length
+      ?list.map(p=>option(p.id,p.name+(p.group_code?' · Grupo '+p.group_code:''),previous)).join('')
+      :'<option value="">Nenhum plano ativo aprovado</option>';
    activePlan=list.find(p=>p.id===planSel.value)||list[0]||null;
    if(activePlan){
      planSel.value=activePlan.id;
-     if(!el('sim-fin-term').value)el('sim-fin-term').value=activePlan.term_months;
-     if(!opps.value&&(!credit.value||credit.value===String(autoCredit))&&activePlan.reference_credit_amount!=null){
-       credit.value=String(Number(activePlan.reference_credit_amount));autoCredit=Number(activePlan.reference_credit_amount);
+     if(!opps.value&&(!credit.value||Number(credit.value)===autoCredit)&&activePlan.reference_credit_amount!=null){
+       credit.value=String(Number(activePlan.reference_credit_amount));
+       autoCredit=Number(activePlan.reference_credit_amount);
      }
    }
-   update();
+   syncPricing(activePlan);syncRate();update();
  }
  function update(){
-  const p=ctx.plans.find(x=>x.id===planSel.value&&x.product_id===product.value&&x.active&&x.approved_for_use)||null;
-  activePlan=p;report=null;el('sim-print').disabled=true;
-  const seg=productSegment(ctx,product.value),group=planGroup(ctx,p);
-  el('sim-configuration').innerHTML=p?
-    `<div class="sim-imported"><div class="sim-imported-head"><strong>Parâmetros do plano</strong><span class="sim-verified">${h(p.source_label)}</span></div>
-      <div class="sim-facts">
-       <span>Prazo <b>${fmt(p.term_months)} meses</b></span><span>Taxa adm. total <b>${pct(p.admin_fee_pct)}</b></span><span>Fundo de reserva <b>${pct(p.reserve_fund_pct)}</b></span>
-       <span>Outros encargos totais <b>${pct(p.other_total_pct)}</b></span><span>Prestamista ao mês <b>${pct(Number(p.prestamista_rate_monthly||0)*100)}</b></span><span>Seguro fixo adicional <b>${money(p.insurance_monthly_amount)}</b></span>
-       <span>Crédito de referência <b>${p.reference_credit_amount==null?'A definir':money(p.reference_credit_amount)}</b></span><span>Reajuste anual hipotético <b>${pct(p.annual_adjustment_pct)}</b></span>
-      </div><small>Referência para estudo, não condição homologada de um grupo. O prestamista é calculado sobre o crédito simulado em cada mês; regras reais, atualizações e contemplação dependem de validação. Taxa de reajuste 0% significa apenas que nenhuma foi informada.</small></div>`
-    :'<div class="sim-alert">Este produto ainda não tem um plano liberado com taxas cadastradas pela Astrion. Solicite a configuração para simular.</div>';
-  const c=nval(credit.value);
-  if(!p){el('sim-results').innerHTML='<div class="sim-empty">Aguardando cadastro e aprovação do plano comercial.</div>';return;}
-  if(!validNumber(c,1,1e10)){el('sim-results').innerHTML='<div class="sim-empty">Informe o valor do crédito para calcular.</div>';return;}
-  const bounds=group&&group.credit_min!=null&&group.credit_max!=null?group:seg;
-  if(bounds&&(bounds.credit_min!=null&&c<Number(bounds.credit_min)||bounds.credit_max!=null&&c>Number(bounds.credit_max))){
-    el('sim-results').innerHTML=`<div class="sim-alert">Crédito fora da faixa de referência disponível: ${money(bounds.credit_min||0)} a ${money(bounds.credit_max||0)}. Ajuste o valor ou escolha outra opção.</div>`;
-    return;
-  }
-  const legacyTermNotice=seg?.max_term_months&&p.term_months>Number(seg.max_term_months)?
-    `<div class="sim-alert" style="margin-bottom:12px">Atenção: prazo de referência de ${fmt(p.term_months)} meses maior que o limite anterior do catálogo (${fmt(seg.max_term_months)}). A Astrion deve confirmar a aplicabilidade ao grupo antes de ofertar.</div>`:'';
-  let calc;
-  try{calc=calculateConsortium(p,c);}catch(e){el('sim-results').innerHTML=`<div class="sim-alert">${h(e.message)}</div>`;return;}
-  const asset=nval(el('sim-asset').value)||c;
-  const annualRaw=el('sim-interest').value;
-  const finInputs={assetValue:asset,downPayment:nval(el('sim-down').value),annualRate:nval(annualRaw),months:nval(el('sim-fin-term').value),system:el('sim-system').value,monthlyCosts:nval(el('sim-fin-extra').value),upfrontCosts:nval(el('sim-fin-upfront').value)};
-  let fin=null,finError='';
-  if(annualRaw!==''){try{fin=calculateFinancing(finInputs);}catch(e){finError=e.message;}}
-  const cards=legacyTermNotice+outputCards([['Parcela inicial do consórcio',money(calc.first),'Inclui prestamista estimado: '+money(calc.prestamistaMonthlyAmount)],['Desembolso acumulado consórcio',money(calc.total),'Premissas de reajuste não homologadas'],['Última parcela projetada',money(calc.last),'Prestamista sobre crédito, sem redução']]);
-  let comp='';
-  if(fin){
-   const max=Math.max(calc.total,fin.total,1),a=(calc.total/max*100).toFixed(1),b=(fin.total/max*100).toFixed(1);
-   comp=`<div class="sim-comparison"><h3>Financiamento · ${h(fin.system)}</h3>
-      ${outputCards([['Parcela inicial',money(fin.first),'Inclui custos mensais informados'],['Parcela final',money(fin.last),'SAC tende a reduzir'],['Desembolso total',money(fin.total),'Inclui entrada e custos informados']])}
-      <div class="sim-bars"><div><span>Consórcio</span><i><b style="width:${a}%"></b></i><strong>${money(calc.total)}</strong></div><div><span>Financiamento</span><i><b class="finance" style="width:${b}%"></b></i><strong>${money(fin.total)}</strong></div></div>
-      <small>Os valores não representam alternativas economicamente equivalentes: entrada, disponibilidade imediata do bem, custos e tempo até a contemplação são diferentes. Sem estimativa de CET.</small></div>`;
-  }else comp=`<div class="sim-hint">${h(finError||'Informe uma taxa anual de financiamento para habilitar o comparativo Price/SAC.')}</div>`;
-  el('sim-results').innerHTML=cards+comp;
-  report={c:calc,f:finInputs,plan:p,finance:fin,asset,credit:c};
-  el('sim-print').disabled=false;
+   const p=ctx.plans.find(x=>x.id===planSel.value&&x.product_id===product.value&&x.active&&x.approved_for_use)||null;
+   activePlan=p;report=null;el('sim-print').disabled=true;
+   const reduced=el('sim-payment-mode').value==='half';
+   el('sim-reduced-info').classList.toggle('hidden',!reduced);
+   el('sim-contemplation').disabled=!reduced;
+   const seg=productSegment(ctx,product.value),group=planGroup(ctx,p);
+   el('sim-configuration').innerHTML=p
+     ?`<div class="sim-imported"><div class="sim-imported-head"><strong>Condições do produto cadastrado</strong><span class="sim-verified">${h(p.source_label)}</span></div>
+       <div class="sim-facts">
+        <span>Prazo <b>${fmt(p.term_months)} meses</b></span><span>TA do cadastro <b>${pct(p.admin_fee_pct)}</b></span><span>FR do cadastro <b>${pct(p.reserve_fund_pct)}</b></span>
+        <span>Outros encargos totais <b>${pct(p.other_total_pct)}</b></span><span>Prestamista ao mês <b>${pct(Number(p.prestamista_rate_monthly||0)*100)}</b></span><span>Seguro adicional <b>${money(p.insurance_monthly_amount)}</b></span>
+        <span>Crédito de referência <b>${p.reference_credit_amount==null?'A definir':money(p.reference_credit_amount)}</b></span><span>Reajuste anual hipotético <b>${pct(p.annual_adjustment_pct)}</b></span>
+       </div><small>TA e FR digitados acima prevalecem neste cálculo, sem alterar as condições cadastradas. Prestamista calculado sobre o crédito integral; regras e reajustes contratuais dependem de confirmação.</small></div>`
+     :'<div class="sim-alert">Este produto não tem plano de referência liberado para simulação.</div>';
+   const c=nval(credit.value);
+   el('sim-finance-linked').textContent=p&&validNumber(c,1,1e10)
+    ?'Crédito financiado: '+money(c)+' · Prazo: '+p.term_months+' meses · Entrada: R$ 0,00'
+    :'O financiamento utilizará o mesmo valor de crédito e prazo do consórcio.';
+   if(!p){el('sim-results').innerHTML='<div class="sim-empty">Aguardando plano comercial.</div>';return;}
+   if(!validNumber(c,1,1e10)){el('sim-results').innerHTML='<div class="sim-empty">Informe o valor do crédito.</div>';return;}
+   const bounds=group&&group.credit_min!=null&&group.credit_max!=null?group:seg;
+   if(bounds&&((bounds.credit_min!=null&&c<Number(bounds.credit_min))||(bounds.credit_max!=null&&c>Number(bounds.credit_max)))){
+     el('sim-results').innerHTML=`<div class="sim-alert">Crédito fora da faixa de referência: ${money(bounds.credit_min||0)} a ${money(bounds.credit_max||0)}. Ajuste o valor ou escolha outra opção.</div>`;return;
+   }
+   const fee=nval(el('sim-admin-fee').value),reserve=nval(el('sim-reserve-fee').value);
+   if(!validNumber(fee,0,100)||!validNumber(reserve,0,100)){
+     el('sim-results').innerHTML='<div class="sim-alert">Informe TA e fundo de reserva entre 0% e 100% para calcular.</div>';return;
+   }
+   const effective={...p,admin_fee_pct:fee,reserve_fund_pct:reserve};
+   const month=nval(el('sim-contemplation').value);
+   const legacyTermNotice=seg?.max_term_months&&p.term_months>Number(seg.max_term_months)
+     ?`<div class="sim-alert" style="margin-bottom:12px">Prazo do plano (${fmt(p.term_months)} meses) excede a referência antiga do catálogo (${fmt(seg.max_term_months)}). Confirme a condição antes de ofertar.</div>`:'';
+   let calc;
+   try{calc=calculateConsortium(effective,c,{reduced50:reduced,contemplationMonth:month});}
+   catch(e){el('sim-results').innerHTML=`<div class="sim-alert">${h(reduced?'Informe um mês hipotético entre 1 e '+(p.term_months-1)+'.':e.message)}</div>`;return;}
+   const rawRate=el('sim-interest').value;
+   const finInputs={assetValue:c,downPayment:0,monthlyRate:nval(rawRate),months:p.term_months,system:el('sim-system').value,monthlyCosts:0,upfrontCosts:0};
+   let fin=null,finError='';
+   if(rawRate!==''){try{fin=calculateFinancing(finInputs);}catch(e){finError=e.message;}}
+   const cards=legacyTermNotice+outputCards([
+     [reduced?'Parcela inicial reduzida':'Parcela inicial do consórcio',money(calc.first),
+       (reduced?'50% da parcela-base + seguro integral':'Parcela-base + seguro integral')],
+     [reduced?'Parcela após contemplação hipotética':'Última parcela do consórcio',
+       money(reduced?calc.postContemplationFirst:calc.last),
+       reduced?'Desde o mês '+(month+1)+' · saldo redistribuído':'Projeção sem contemplação assumida'],
+     ['Total projetado do consórcio',money(calc.total),
+       'TA '+pct(fee)+' · FR '+pct(reserve)+' · prestamista '+money(calc.prestamistaMonthlyAmount)+'/mês']
+   ]);
+   const deferredNote=reduced
+     ?`<div class="sim-reduced-summary"><strong>50% até o mês ${fmt(month)} (hipótese)</strong><p>Valor adiado redistribuído: <b>${money(calc.deferredAmount)}</b>. O seguro não é reduzido. Sob essas hipóteses, o total desembolsado permanece ${money(calc.normalTotal)}, apenas distribuído de forma diferente. A contemplação e a regra comercial não são garantidas.</p></div>`:'';
+   let comp='';
+   if(fin){
+     const max=Math.max(calc.total,fin.total,1),a=(calc.total/max*100).toFixed(1),b=(fin.total/max*100).toFixed(1);
+     comp=`<div class="sim-comparison"><h3>Financiamento · ${h(fin.system)} · ${pct(fin.monthlyRate)} a.m.</h3>
+       ${outputCards([['Parcela inicial',money(fin.first),'Mesmo crédito e prazo do consórcio'],['Parcela final',money(fin.last),fin.system==='SAC'?'SAC: amortização constante':'Price: parcela financeira uniforme'],['Desembolso total',money(fin.total),'Sem entrada, seguro, IOF ou CET']])}
+       <div class="sim-bars"><div><span>Consórcio</span><i><b style="width:${a}%"></b></i><strong>${money(calc.total)}</strong></div><div><span>Financiamento</span><i><b class="finance" style="width:${b}%"></b></i><strong>${money(fin.total)}</strong></div></div>
+       <small>Não equivale ao CET. Financiamento pressupõe concessão de crédito imediato após aprovação; no consórcio é preciso aguardar contemplação. Os totais não incorporam todos os custos contratuais, tributos e indexadores.</small></div>`;
+   }else comp=`<div class="sim-hint">${h(finError||'Informe juros mensais para a comparação com financiamento.')}</div>`;
+   el('sim-results').innerHTML=cards+deferredNote+comp;
+   report={c:calc,f:finInputs,plan:effective,finance:fin,asset:c,credit:c,source:benchmarkForProduct(activeProduct())?.label||'Taxa informada pelo corretor'};
+   el('sim-print').disabled=false;
  }
- product.addEventListener('change',()=>{el('sim-fin-term').value='';syncPlan();});
- planSel.addEventListener('change',()=>{const p=ctx.plans.find(x=>x.id===planSel.value);if(p){el('sim-fin-term').value=p.term_months;if(!opps.value&&(!credit.value||credit.value===String(autoCredit))&&p.reference_credit_amount!=null){credit.value=String(Number(p.reference_credit_amount));autoCredit=Number(p.reference_credit_amount);}}update();});
+ product.addEventListener('change',()=>syncPlan());
+ planSel.addEventListener('change',()=>{
+   const p=ctx.plans.find(x=>x.id===planSel.value);
+   if(p&&!opps.value&&(!credit.value||Number(credit.value)===autoCredit)&&p.reference_credit_amount!=null){
+     credit.value=String(Number(p.reference_credit_amount));autoCredit=Number(p.reference_credit_amount);
+   }
+   syncPricing(p);syncRate();update();
+ });
  opps.addEventListener('change',()=>{
    const o=ctx.opps.find(x=>x.id===opps.value);
-   if(o){if(products.some(p=>p.id===o.product_id))product.value=o.product_id;credit.value=o.credit_amount||'';autoCredit=null;el('sim-asset').value=o.asset_value||'';el('sim-down').value='0';el('sim-fin-term').value='';syncPlan();}
-   else {credit.value='';autoCredit=null;el('sim-asset').value='';syncPlan();}
+   if(o){
+     if(products.some(p=>p.id===o.product_id))product.value=o.product_id;
+     credit.value=o.credit_amount||'';autoCredit=null;syncPlan();
+   }else{credit.value='';autoCredit=null;syncPlan();}
  });
- root.addEventListener('input',e=>{if(e.target.matches('#sim-credit,#sim-asset,#sim-down,#sim-interest,#sim-fin-term,#sim-fin-extra,#sim-fin-upfront'))update();});
- root.addEventListener('change',e=>{if(e.target.matches('#sim-system'))update();});
+ root.addEventListener('input',e=>{
+  if(e.target.matches('#sim-credit,#sim-admin-fee,#sim-reserve-fee,#sim-contemplation,#sim-interest'))update();
+ });
+ root.addEventListener('change',e=>{
+  if(e.target.matches('#sim-payment-mode,#sim-system'))update();
+ });
  el('sim-print').addEventListener('click',()=>{if(report)reportPopup(ctx,report);});
- const admin=el('sim-config-link');if(admin)admin.addEventListener('click',e=>{e.preventDefault();ctx.navigate('simulator-admin');});
- if(ctx.prefill){opps.value=ctx.prefill.id;credit.value=ctx.prefill.credit_amount||'';el('sim-asset').value=ctx.prefill.asset_value||'';}
+ const admin=el('sim-config-link');
+ if(admin)admin.addEventListener('click',e=>{e.preventDefault();ctx.navigate('simulator-admin');});
+ if(ctx.prefill){opps.value=ctx.prefill.id;credit.value=ctx.prefill.credit_amount||'';autoCredit=null;}
  syncPlan();
+
 }
 export function renderSimulatorAdmin(root,ctx){
  if(!ctx.isAdmin){root.innerHTML='<p>Sem permissão.</p>';return;}
