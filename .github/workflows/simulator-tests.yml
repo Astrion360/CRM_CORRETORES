@@ -1,0 +1,26 @@
+name: Validate Órbita Simula
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'simulator.js'
+      - 'simulator.css'
+      - 'app.js'
+      - 'tests/simulator.mjs'
+      - '.github/workflows/simulator-tests.yml'
+  workflow_dispatch:
+jobs:
+  simulator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JavaScript syntax
+        run: |
+          node --check simulator.js
+          node --check app.js
+          node --check documents.js
+      - name: Run financial calculation tests
+        run: node --experimental-default-type=module tests/simulator.mjs
