@@ -13,6 +13,13 @@ const credit=root.querySelector('#sim-credit');
 assert.ok(credit);
 assert.equal(credit.value,'71200');
 assert.equal(root.querySelector('#sim-interest').value,'1.97');
+assert.ok(root.querySelector('#sim-group'));
+assert.ok(root.querySelector('#sim-bid-embedded'));
+assert.ok(root.querySelector('#sim-bid-key'));
+assert.ok(root.querySelector('#sim-insurance-base'));
+assert.ok([...root.querySelector('#sim-group').options].some(x=>x.value==='462'));
+assert.ok([...root.querySelector('#sim-payment-mode').options].some(x=>x.value==='seventy'));
+
 assert.equal(root.querySelector('#sim-admin-fee').value,'18.31');
 assert.equal(root.querySelector('#sim-reserve-fee').value,'2');
 credit.value='100000';credit.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
@@ -38,6 +45,23 @@ month.value='40';month.dispatchEvent(new dom.window.Event('input',{bubbles:true}
 assert.match(root.querySelector('#sim-results').textContent,/mês 40/);
 assert.equal(root.querySelector('#sim-print').disabled,false);
 assert.ok(!root.querySelector('#sim-reduced-info').classList.contains('hidden'));
+mode.value='normal';mode.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+const group=root.querySelector('#sim-group');group.value='462';group.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+const bidMode=root.querySelector('#sim-bid-mode');
+bidMode.value='livre';bidMode.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+const offer=root.querySelector('#sim-bid-pct');offer.value='40';offer.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+const embedded=root.querySelector('#sim-bid-embedded');embedded.value='30';
+embedded.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+assert.match(root.querySelector('#sim-results').textContent,/Crédito líquido teórico/);
+assert.match(root.querySelector('#sim-results').textContent,/70.000/);
+assert.equal(root.querySelector('#sim-print').disabled,false);
+assert.equal(root.querySelector('#sim-bid-key').disabled,true);
+const insuredBase=root.querySelector('#sim-insurance-base');insuredBase.value='credit_plus_fees';
+insuredBase.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+assert.match(root.querySelector('#sim-results').textContent,/prestamista/i);
+mode.value='seventy';mode.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+assert.equal(root.querySelector('#sim-bid-embedded').disabled,true);
+assert.match(root.querySelector('#sim-results').textContent,/Plano 70%/);
 const admin={...ctx,isAdmin:true,navigate:()=>{},sb:{},reload:async()=>{}};
 renderSimulatorAdmin(root,admin);
 assert.ok(root.querySelector('#sim-admin-form'));
@@ -51,6 +75,17 @@ const referenceCtx={...ctx,products:[service],plans:[servicePlan],segments:[{cod
 renderSimulator(root,referenceCtx);
 assert.equal(root.querySelector('#sim-credit').value,'15600');
 assert.equal(root.querySelector('#sim-print').disabled,false);
-assert.match(root.querySelector('#sim-results').textContent,/excede a referência antiga/);
+assert.match(root.querySelector('#sim-results').textContent,/catálogo anterior/);
 assert.equal(root.querySelector('#sim-interest').value,'5.9');
+const realEstate={id:'real',name:'Imóveis',category:'Imóveis',active:true};
+const realPlan={...plan,id:'real-plan',product_id:'real',term_months:216,reference_credit_amount:220000};
+const realCtx={...ctx,products:[realEstate],plans:[realPlan],segments:[{code:'imoveis',product_category:'Imóveis',credit_min:50000,credit_max:600000,max_term_months:240}],
+groups:[{code:'700',segment_code:'imoveis',confirmed_by_partner:false},{code:'704',segment_code:'imoveis',confirmed_by_partner:false}]};
+renderSimulator(root,realCtx);
+root.querySelector('#sim-group').value='700';root.querySelector('#sim-group').dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+root.querySelector('#sim-payment-mode').value='half';root.querySelector('#sim-payment-mode').dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+assert.equal(root.querySelector('#sim-print').disabled,true);
+root.querySelector('#sim-group').value='704';root.querySelector('#sim-group').dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+assert.equal(root.querySelector('#sim-print').disabled,false);
+
 console.log('Órbita Simula DOM smoke tests: OK');
