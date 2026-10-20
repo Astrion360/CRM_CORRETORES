@@ -100,4 +100,17 @@ assert.equal(plan70B.eligible,true);
 assert.equal(plan70B.embeddedAmount,30000);
 assert.equal(plan70B.netCredit,70000);
 assert.equal(calculateBidScenario({credit:100000,category:'Pesados',groupCode:'1008',mode:'livre',bidPercent:40,embeddedPercent:20}).eligible,false);
+// Cenários genéricos sem grupo são permitidos apenas como hipóteses.
+const genericEmbedded=calculateBidScenario({credit:100000,category:'Automóveis',groupCode:'',mode:'livre',bidPercent:40,embeddedPercent:30});
+assert.equal(genericEmbedded.eligible,true);
+assert.equal(genericEmbedded.netCredit,70000);
+assert.ok(genericEmbedded.warnings.some(w=>w.includes('genérica')));
+const genericKey=calculateBidScenario({credit:100000,category:'Automóveis',groupCode:'',mode:'troca_chaves',bidPercent:40,keyAppraisedValue:15000});
+assert.equal(genericKey.eligible,true);
+assert.equal(genericKey.ownResourcesAmount,25000);
+assert.equal(genericKey.netCredit,85000);
+assert.equal(genericKey.keyLimit,20000);
+assert.equal(calculateBidScenario({credit:100000,category:'Automóveis',groupCode:'',mode:'troca_chaves',bidPercent:40,keyAppraisedValue:25000}).eligible,false);
+assert.equal(calculateBidScenario({credit:100000,category:'Imóveis',groupCode:'',mode:'troca_chaves',bidPercent:40,keyAppraisedValue:15000}).eligible,false);
+assert.equal(calculateBidScenario({credit:100000,category:'Pesados',groupCode:'',mode:'troca_chaves',bidPercent:40,keyAppraisedValue:15000}).eligible,true);
 console.log('Cálculos de referência e lances Órbita: OK');

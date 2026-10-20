@@ -7,17 +7,17 @@ globalThis.window=dom.window;
 const root=document.querySelector('#root');
 const product={id:'auto',name:'Automóveis',category:'Automóveis',active:true};
 const plan={id:'plan',product_id:'auto',name:'Plano normal',group_code:null,reference_credit_amount:71200,term_months:89,admin_fee_pct:18.31,reserve_fund_pct:2,other_total_pct:0,insurance_monthly_amount:0,prestamista_rate_monthly:.0007,annual_adjustment_pct:0,source_label:'Premissa de referência Astrion',active:true,approved_for_use:true};
-const ctx={products:[product],plans:[plan],segments:[{code:'auto',product_category:'Automóveis',credit_min:10000,credit_max:500000,max_term_months:100}],groups:[],opps:[],clients:[],prefill:null,isAdmin:false,toast:()=>{}};
+const ctx={products:[product],plans:[plan],segments:[{code:'auto',product_category:'Automóveis',credit_min:10000,credit_max:500000,max_term_months:100}],groups:[],opps:[],clients:[],prefill:null,userId:'broker-auto',isAdmin:false,toast:()=>{}};
 renderSimulator(root,ctx);
 const credit=root.querySelector('#sim-credit');
 assert.ok(credit);
 assert.equal(credit.value,'71200');
 assert.equal(root.querySelector('#sim-interest').value,'1.97');
-assert.ok(root.querySelector('#sim-group'));
+assert.equal(root.querySelector('#sim-group'),null);
 assert.ok(root.querySelector('#sim-bid-embedded'));
 assert.ok(root.querySelector('#sim-bid-key'));
 assert.ok(root.querySelector('#sim-insurance-base'));
-assert.ok([...root.querySelector('#sim-group').options].some(x=>x.value==='462'));
+assert.ok([...root.querySelector('#sim-bid-mode').options].some(x=>x.value==='troca_chaves'));
 assert.ok([...root.querySelector('#sim-payment-mode').options].some(x=>x.value==='seventy'));
 
 assert.equal(root.querySelector('#sim-admin-fee').value,'18.31');
@@ -46,7 +46,6 @@ assert.match(root.querySelector('#sim-results').textContent,/mês 40/);
 assert.equal(root.querySelector('#sim-print').disabled,false);
 assert.ok(!root.querySelector('#sim-reduced-info').classList.contains('hidden'));
 mode.value='normal';mode.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
-const group=root.querySelector('#sim-group');group.value='462';group.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
 const bidMode=root.querySelector('#sim-bid-mode');
 bidMode.value='livre';bidMode.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
 const offer=root.querySelector('#sim-bid-pct');offer.value='40';offer.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
@@ -56,6 +55,30 @@ assert.match(root.querySelector('#sim-results').textContent,/Crédito líquido t
 assert.match(root.querySelector('#sim-results').textContent,/70.000/);
 assert.equal(root.querySelector('#sim-print').disabled,false);
 assert.equal(root.querySelector('#sim-bid-key').disabled,true);
+// Troca de Chaves passa a ser uma modalidade própria na seleção.
+bidMode.value='troca_chaves';bidMode.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+assert.equal(root.querySelector('#sim-bid-embedded').disabled,true);
+const keyInput=root.querySelector('#sim-bid-key');
+assert.equal(keyInput.disabled,false);
+offer.value='40';offer.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+keyInput.value='15000';keyInput.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+assert.match(root.querySelector('#sim-results').textContent,/85.000/);
+assert.match(root.querySelector('#sim-results').textContent,/25.000/);
+assert.equal(root.querySelector('#sim-print').disabled,false);
+// Simula reconstrução do DOM pela navegação ou refresh, mantendo sessionStorage.
+const restoredRoot=document.createElement('div');document.body.appendChild(restoredRoot);
+renderSimulator(restoredRoot,ctx);
+assert.equal(restoredRoot.querySelector('#sim-credit').value,'100000');
+assert.equal(restoredRoot.querySelector('#sim-admin-fee').value,'20');
+assert.equal(restoredRoot.querySelector('#sim-reserve-fee').value,'3');
+assert.equal(restoredRoot.querySelector('#sim-bid-mode').value,'troca_chaves');
+assert.equal(restoredRoot.querySelector('#sim-bid-key').value,'15000');
+assert.equal(restoredRoot.querySelector('#sim-interest').value,'2.12');
+assert.equal(restoredRoot.querySelector('#sim-print').disabled,false);
+restoredRoot.querySelector('#sim-clear-draft').click();
+assert.equal(restoredRoot.querySelector('#sim-credit').value,'71200');
+assert.equal(restoredRoot.querySelector('#sim-bid-mode').value,'none');
+assert.equal(window.sessionStorage.getItem('orbita-simula:draft:v6:broker-auto'),null);
 const insuredBase=root.querySelector('#sim-insurance-base');insuredBase.value='credit_plus_fees';
 insuredBase.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
 assert.match(root.querySelector('#sim-results').textContent,/prestamista/i);
@@ -71,7 +94,7 @@ assert.ok(root.querySelector('#adm-reference'));
 // Referência de Serviços: prazo informado de 39m, contra limite anterior do catálogo de 36m.
 const service={id:'service',name:'Serviços',category:'Serviços',active:true};
 const servicePlan={...plan,id:'service-plan',product_id:'service',term_months:39,reference_credit_amount:15600,admin_fee_pct:24.56,reserve_fund_pct:5,prestamista_rate_monthly:.0007};
-const referenceCtx={...ctx,products:[service],plans:[servicePlan],segments:[{code:'services',product_category:'Serviços',credit_min:8000,credit_max:16000,max_term_months:36}]};
+const referenceCtx={...ctx,userId:'broker-service',products:[service],plans:[servicePlan],segments:[{code:'services',product_category:'Serviços',credit_min:8000,credit_max:16000,max_term_months:36}]};
 renderSimulator(root,referenceCtx);
 assert.equal(root.querySelector('#sim-credit').value,'15600');
 assert.equal(root.querySelector('#sim-print').disabled,false);
@@ -79,13 +102,15 @@ assert.match(root.querySelector('#sim-results').textContent,/catálogo anterior/
 assert.equal(root.querySelector('#sim-interest').value,'5.9');
 const realEstate={id:'real',name:'Imóveis',category:'Imóveis',active:true};
 const realPlan={...plan,id:'real-plan',product_id:'real',term_months:216,reference_credit_amount:220000};
-const realCtx={...ctx,products:[realEstate],plans:[realPlan],segments:[{code:'imoveis',product_category:'Imóveis',credit_min:50000,credit_max:600000,max_term_months:240}],
+const realCtx={...ctx,userId:'broker-imovel',products:[realEstate],plans:[realPlan],segments:[{code:'imoveis',product_category:'Imóveis',credit_min:50000,credit_max:600000,max_term_months:240}],
 groups:[{code:'700',segment_code:'imoveis',confirmed_by_partner:false},{code:'704',segment_code:'imoveis',confirmed_by_partner:false}]};
 renderSimulator(root,realCtx);
-root.querySelector('#sim-group').value='700';root.querySelector('#sim-group').dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+assert.equal(root.querySelector('#sim-group'),null);
+assert.ok(![...root.querySelector('#sim-bid-mode').options].some(x=>x.value==='troca_chaves'));
 root.querySelector('#sim-payment-mode').value='half';root.querySelector('#sim-payment-mode').dispatchEvent(new dom.window.Event('change',{bubbles:true}));
-assert.equal(root.querySelector('#sim-print').disabled,true);
-root.querySelector('#sim-group').value='704';root.querySelector('#sim-group').dispatchEvent(new dom.window.Event('change',{bubbles:true}));
 assert.equal(root.querySelector('#sim-print').disabled,false);
+const {readFileSync}=await import('node:fs');
+const appCode=readFileSync(new URL('../app.js',import.meta.url),'utf8');
+assert.match(appCode,/!\['simulator','simulator-admin'\]\.includes\(state\.page\)/);
 
 console.log('Órbita Simula DOM smoke tests: OK');
