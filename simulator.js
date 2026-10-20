@@ -1,4 +1,4 @@
-import {groupOptions,groupPlanPolicy,biddingPolicy,calculateBidScenario,supplementaryConditions,TRAINING_VERSION} from './simulator-lances.js';
+import {biddingPolicy,calculateBidScenario,supplementaryConditions,TRAINING_VERSION} from './simulator-lances.js';
 /* ÓRBITA SIMULA — calculation rules and authenticated UI. No assumed commercial rates. */
 const h = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
@@ -139,7 +139,7 @@ function reportPopup(ctx,view){
  const rows=(items)=>items.map(([name,value])=>`<tr><th>${h(name)}</th><td>${h(value)}</td></tr>`).join('');
  const consRows=[
   ['Produto',productTitle(ctx,p.product_id)],['Plano',p.name],
-  ['Grupo',view.groupCode||'Grupo não definido (simulação genérica)'],
+  ['Enquadramento da simulação','Genérico — sem grupo vinculado'],
   ['Crédito simulado',money(view.credit)],['Prazo',p.term_months+' meses'],
   ['Taxa administração total · cenário',pct(p.admin_fee_pct)],
   ['Fundo de reserva total · cenário',pct(p.reserve_fund_pct)],
@@ -161,7 +161,7 @@ function reportPopup(ctx,view){
   ['Fonte do plano',p.source_label||'Não informada']
  ];
  const bid=view.bid||null;
- const bidRows=bid?[['Modalidade de lance',bid.mode==='none'?'Não ofertado':bid.mode],['Grupo da cota',view.groupCode||'Não definido'],['Oferta total (antes de redução contratual)',money(bid.bidAmount)],['Lance embutido (dedução do crédito)',money(bid.embeddedAmount)],['FGTS informado (sujeito à regra)',money(bid.fgtsAmount)],['Troca de chaves (valor avaliado hipotético)',money(bid.keyAmount)],['Complemento em recursos próprios',money(bid.ownResourcesAmount)],['Crédito líquido teórico para compra',money(bid.netCredit)],['Forma de abatimento declarada',bid.applicationLabel]]:null;
+ const bidRows=bid?[['Modalidade de lance',bid.mode==='none'?'Não ofertado':bid.mode],['Enquadramento','Simulação genérica — sujeita ao grupo'],['Oferta total (antes de redução contratual)',money(bid.bidAmount)],['Lance embutido (dedução do crédito)',money(bid.embeddedAmount)],['FGTS informado (sujeito à regra)',money(bid.fgtsAmount)],['Troca de chaves (valor avaliado hipotético)',money(bid.keyAmount)],['Complemento em recursos próprios',money(bid.ownResourcesAmount)],['Crédito líquido teórico para compra',money(bid.netCredit)],['Forma de abatimento declarada',bid.applicationLabel]]:null;
  const bidHtml=bidRows?`<h2>Lance e crédito líquido · projeção de composição</h2><table>${rows(bidRows)}</table><p>A aplicação do lance no saldo devedor e nas prestações não foi recalculada. Troca de chaves e lance embutido não podem ser combinados; elegibilidade depende do grupo.</p>`:'';
  const financRows=fin?[
   ['Crédito financiado (igual ao consórcio)',money(view.credit)],
@@ -244,19 +244,18 @@ export function renderSimulator(root,ctx) {
   <div class="sim-configuration" id="sim-configuration"></div>
 
   <div class="sim-section-head sim-second"><span class="sim-step">02</span><div>
-   <h2>Grupo, lance e crédito líquido</h2><p>Lance livre, limitado, fixo, fidelidade, embutido, FGTS e troca de chaves, conforme elegibilidade citada no treinamento.</p></div></div>
+   <h2>Lance e crédito líquido</h2><p>Simulação genérica, sem vinculação a grupo. Compare lance próprio, embutido, FGTS e Troca de Chaves.</p></div></div>
   <div class="sim-grid">
-    ${label('Grupo da cota','sim-group','<select id="sim-group"><option value="">Sem grupo definido · simulação genérica</option></select>',
-      'A escolha do grupo altera as condições admitidas. Grupos do treinamento não são confirmação de oferta ativa.')}
     ${label('Modalidade de lance','sim-bid-mode','<select id="sim-bid-mode"></select>')}
     ${numberField('Oferta total de lance (% do crédito)','sim-bid-pct','step="0.01" max="100" value="0"','Exemplo: 40 equivale a 40% do crédito.')}
     ${numberField('Lance embutido (% do crédito)','sim-bid-embedded','step="0.01" max="30" value="0"','Até 30% nas modalidades/grupos indicados. Deduz do crédito líquido.')}
     ${numberField('FGTS para lance (R$)','sim-bid-fgts','step="0.01" value="0"','Disponível como hipótese apenas em imóveis.')}
-    ${numberField('Bem ofertado na troca de chaves (R$)','sim-bid-key','step="0.01" value="0"','Valor sujeito à avaliação FIPE/MOLICAR ou referências aceitas.')}
+    ${numberField('Bem ofertado na troca de chaves (R$)','sim-bid-key','step="0.01" value="0"','Preencha ao escolher Troca de Chaves; depende da avaliação do bem e do regulamento.')}
     ${numberField('Parcelas pagas em dia','sim-bid-paid','step="1" min="0" value="0"','Necessário para verificar elegibilidade de lance fidelidade.')}
     ${label('Abatimento do lance','sim-bid-application','<select id="sim-bid-application"><option value="inverse">Últimas parcelas · ordem inversa</option><option value="next3">Três próximas parcelas</option><option value="dilute">Diluição do lance</option></select>',
       'A modalidade é informativa; sem cronograma contratual, não recalculamos prestações após o lance.')}
   </div>
+  <div class="sim-linked">Simulação genérica: a modalidade e a aceitação do bem deverão ser confirmadas pela administradora.</div>
   <div id="sim-bid-help" class="sim-help-block" aria-live="polite"></div>
   <div class="sim-training-details" id="sim-training-details"></div>
   <div class="sim-section-head sim-second"><span class="sim-step">03</span><div><h2>Comparação com financiamento</h2><p>Mesmo crédito e prazo do consórcio. Apenas a taxa de juros muda, com opção Price ou SAC.</p></div></div>
@@ -282,7 +281,7 @@ export function renderSimulator(root,ctx) {
  const category=()=>activeProduct()?.category||'';
  const currentPlan=()=>ctx.plans.find(x=>x.id===planSel.value&&x.product_id===product.value&&x.active&&x.approved_for_use)||null;
  const bidModeItems=[
-  ['none','Sem lance'],['livre','Lance livre'],['limitado','Lance limitado (até 60%)'],
+  ['none','Sem lance'],['livre','Lance livre'],['troca_chaves','Troca de Chaves'],['limitado','Lance limitado (até 60%)'],
   ['fixo30','Lance fixo 30%'],['fixo25','Lance fixo 25% (pesados)'],
   ['fixo50','Lance fixo 50% (vendas estruturadas)'],['fidelidade25','Lance fidelidade 25%'],
   ['quitacao','Lance quitação']
@@ -304,52 +303,51 @@ export function renderSimulator(root,ctx) {
    el('sim-contemplation').disabled=true;
    el('sim-reduced-info').classList.add('hidden');
  }
+
  function syncBidModes(){
-   const group=el('sim-group').value,cat=category();
-   const select=el('sim-bid-mode'),prev=select.value;
-   const modes=bidModeItems.filter(([id])=>
-     id==='none'||(id==='fixo25'?cat==='Pesados':
-       id==='fixo50'?(cat==='Automóveis'&&['578','720'].includes(group)):
-       id==='fixo30'?cat!=='Pesados':true));
-   select.innerHTML=modes.map(([id,label])=>option(id,label,prev)).join('');
-   if(modes.some(x=>x[0]===prev))select.value=prev;else select.value='none';
+   const cat=category(),select=el('sim-bid-mode'),prev=select.value;
+   const modes=bidModeItems.filter(([bid])=>
+     bid==='fixo50'?false:
+     bid==='fixo25'?cat==='Pesados':
+     bid==='fixo30'?cat!=='Pesados':
+     bid==='troca_chaves'?['Automóveis','Motos','Pesados'].includes(cat):
+     true);
+   select.innerHTML=modes.map(([code,title])=>option(code,title,prev)).join('');
+   if(modes.some(([code])=>code===prev))select.value=prev;
+   else select.value='none';
    syncBidControls(false);
  }
  function syncBidControls(resetPct=true){
-   const group=el('sim-group').value,mode=el('sim-bid-mode').value;
-   const policy=biddingPolicy(category(),group,mode,Number(el('sim-bid-paid').value||0));
-   const none=mode==='none',seventy=el('sim-payment-mode').value==='seventy';
+   const mode=el('sim-bid-mode').value;
+   const policy=biddingPolicy(category(),'',mode,Number(el('sim-bid-paid').value||0));
+   const none=mode==='none',seventy=el('sim-payment-mode').value==='seventy',keyMode=mode==='troca_chaves';
    const embedded=el('sim-bid-embedded'),key=el('sim-bid-key'),fgts=el('sim-bid-fgts');
-   const isKeyEligible=((['Automóveis','Motos'].includes(category())&&
-      ['462','463','527','529','535','540','541','575','617','619'].includes(group))||
-      (category()==='Pesados'&&['1004','1005'].includes(group)));
-   embedded.disabled=none||seventy||!policy.embeddedAllowed||Number(key.value)>0;
-   key.disabled=none||seventy||!isKeyEligible||(category()==='Pesados'&&mode!=='livre')||Number(embedded.value)>0;
-   fgts.disabled=none||category()!=='Imóveis';
+   embedded.disabled=none||keyMode||seventy||!policy.embeddedAllowed;
+   key.disabled=!keyMode||seventy;
+   fgts.disabled=none||keyMode||category()!=='Imóveis';
    el('sim-bid-pct').disabled=none||policy.fixedPercent!=null;
    el('sim-bid-paid').disabled=mode!=='fidelidade25';
    if(resetPct){
-     if(none)el('sim-bid-pct').value=0;
-     else if(policy.fixedPercent!=null)el('sim-bid-pct').value=policy.fixedPercent;
-     else el('sim-bid-pct').value=0;
-   }else if(policy.fixedPercent!=null)el('sim-bid-pct').value=policy.fixedPercent;
-   if(embedded.disabled)embedded.value=0;
-   if(key.disabled)key.value=0;
-   if(fgts.disabled)fgts.value=0;
-   const note=none?'Para utilizar lance, selecione a modalidade e o grupo.':
-     (policy.reason||'Percentuais e elegibilidade devem ser confirmados com a administradora.');
-   el('sim-bid-help').textContent=note;
+     if(none)el('sim-bid-pct').value='0';
+     else if(policy.fixedPercent!=null)el('sim-bid-pct').value=String(policy.fixedPercent);
+     else el('sim-bid-pct').value='0';
+   }else if(policy.fixedPercent!=null)el('sim-bid-pct').value=String(policy.fixedPercent);
+   if(embedded.disabled)embedded.value='0';
+   if(key.disabled)key.value='0';
+   if(fgts.disabled)fgts.value='0';
+   const tip=none?'Selecione uma modalidade para simular um lance.':
+     keyMode?'Troca de Chaves: informe o lance total e o valor do bem oferecido. Lance embutido é incompatível.':
+     policy.reason||'Condições dependem do regulamento e da administradora.';
+   el('sim-bid-help').textContent=tip+' Simulação genérica, sem grupo vinculado.';
  }
- function syncGroups(){
-  const cat=category(),previous=el('sim-group').value;
-  const groups=groupOptions(cat,groupList(ctx,product.value));
-  el('sim-group').innerHTML=option('','Grupo não definido · hipótese genérica',previous)
-   +groups.map(g=>option(g.code,'Grupo '+g.code+(g.source==='Somente no treinamento'?' · treinamento':''),previous)).join('');
-  el('sim-group').value=groups.some(g=>g.code===previous)?previous:'';
-  el('sim-training-details').innerHTML=`<details><summary>Condições adicionais do treinamento · ${h(cat)}</summary>
-   <ul>${supplementaryConditions(cat).map(t=>'<li>'+h(t)+'</li>').join('')}</ul>
-   <small>${h(TRAINING_VERSION)}. É necessário consultar o regulamento atual do grupo e a administradora para uso comercial.</small></details>`;
-  syncBidModes();
+ function syncGenericBid(){
+   const cat=category();
+   el('sim-training-details').innerHTML=`
+     <details><summary>Orientações comerciais · ${h(cat)}</summary>
+     <p>Sem vinculação a grupo: a modalidade de lance, avaliação do bem e prazos devem ser confirmados com a administradora.</p>
+     <ul>${supplementaryConditions(cat).map(t=>'<li>'+h(t)+'</li>').join('')}</ul>
+     <small>${h(TRAINING_VERSION)}. O regulamento vigente prevalece sobre esta simulação.</small></details>`;
+   syncBidModes();
  }
  function syncPlan(){
    const list=availablePlans(ctx,product.value),previous=planSel.value;
@@ -363,7 +361,7 @@ export function renderSimulator(root,ctx) {
        autoCredit=Number(activePlan.reference_credit_amount);
      }
    }
-   syncPricing(activePlan);syncRate();syncGroups();update();
+   syncPricing(activePlan);syncRate();syncGenericBid();update();
  }
  function update(){
    const p=currentPlan();
@@ -372,8 +370,8 @@ export function renderSimulator(root,ctx) {
    el('sim-reduced-info').classList.toggle('hidden',!half);
    el('sim-contemplation').disabled=!half;
    const seg=productSegment(ctx,product.value);
-   const groupCode=el('sim-group').value,group=ctx.groups.find(g=>g.code===groupCode&&g.segment_code===seg?.code);
-   const planPolicy=groupPlanPolicy(groupCode,mode);
+   const groupCode='',group=null;
+   const planPolicy={allowed:true,verified:false,reason:'Simulação genérica: confirme a disponibilidade e o regulamento com a administradora.'};
    el('sim-configuration').innerHTML=p?`<div class="sim-imported">
       <div class="sim-imported-head"><strong>Parâmetros importados do cadastro Astrion</strong><span class="sim-verified">${h(p.source_label)}</span></div>
       <div class="sim-facts">
@@ -391,7 +389,7 @@ export function renderSimulator(root,ctx) {
      :'O financiamento utilizará o crédito e prazo do consórcio.';
    if(!p){el('sim-results').innerHTML='<div class="sim-empty">Aguardando plano comercial.</div>';return;}
    if(!validNumber(c,1,1e10)){el('sim-results').innerHTML='<div class="sim-empty">Informe o valor do crédito.</div>';return;}
-   const bounds=group&&group.credit_min!=null&&group.credit_max!=null?group:seg;
+   const bounds=seg;
    if(bounds&&((bounds.credit_min!=null&&c<Number(bounds.credit_min))||(bounds.credit_max!=null&&c>Number(bounds.credit_max)))){
      el('sim-results').innerHTML=`<div class="sim-alert">Crédito fora da faixa: ${money(bounds.credit_min||0)} a ${money(bounds.credit_max||0)}.</div>`;return;
    }
@@ -413,7 +411,7 @@ export function renderSimulator(root,ctx) {
    });
    const legacyNote=seg?.max_term_months&&p.term_months>Number(seg.max_term_months)
      ?`<div class="sim-alert">Prazo do plano: ${p.term_months} meses; catálogo anterior: ${seg.max_term_months}. Confirme condição do grupo.</div>`:'';
-   const planError=!planPolicy.allowed?`<div class="sim-alert">${h(planPolicy.reason)}</div>`:'';
+   const planError='';
    const planCaution=planPolicy.allowed&&!planPolicy.verified&&mode!=='normal'
      ?`<div class="sim-hint">${h(planPolicy.reason)}</div>`:'';
    const labelFirst=half?'Parcela inicial reduzida 50%':seventy?'Parcela do plano 70%':'Parcela inicial integral';
@@ -430,11 +428,11 @@ export function renderSimulator(root,ctx) {
     seventy?`<div class="sim-reduced-summary"><strong>Plano 70% · hipótese do treinamento</strong>
     <p>30% do crédito (${money(calc.plan70EmbeddedAmount)}) é reservado ao lance embutido. Parcela calculada sobre 70% do fundo comum e 100% das taxas. Crédito líquido ilustrativo, antes de outras condições: <b>${money(calc.plan70NetCredit)}</b>. O plano depende do grupo e não garante contemplação.</p></div>`:'';
    const policy=biddingPolicy(category(),groupCode,el('sim-bid-mode').value,Number(el('sim-bid-paid').value||0));
-   const bidErrors=[...bid.errors,...(planPolicy.allowed?[]:[planPolicy.reason])];
+   const bidErrors=[...bid.errors];
    const bidNotice=bidErrors.length?`<div class="sim-alert"><strong>Corrigir para simular lance:</strong><ul>${bidErrors.map(msg=>'<li>'+h(msg)+'</li>').join('')}</ul></div>`:'';
    const bidFlags=bid.warnings.map(w=>`<li>${h(w)}</li>`).join('');
    const bidInfo=el('sim-bid-mode').value==='none'&&!seventy
-    ?'<div class="sim-hint">Sem lance. Selecione grupo e modalidade para calcular recursos próprios, FGTS, embutido ou troca de chaves.</div>'
+    ?'<div class="sim-hint">Sem lance. Selecione uma modalidade para calcular recursos próprios, FGTS, embutido ou Troca de Chaves.</div>'
     :`<div class="sim-bid-summary"><strong>Estrutura financeira do lance (hipotética)</strong>
       <div class="sim-bid-grid">
        <span>Oferta total <b>${money(bid.bidAmount)}</b></span>
@@ -473,7 +471,7 @@ export function renderSimulator(root,ctx) {
    if(p&&!opps.value&&(!credit.value||Number(credit.value)===autoCredit)&&p.reference_credit_amount!=null){
      credit.value=String(Number(p.reference_credit_amount));autoCredit=Number(p.reference_credit_amount);
    }
-   syncPricing(p);syncRate();syncGroups();update();
+   syncPricing(p);syncRate();syncGenericBid();update();
  });
  opps.addEventListener('change',()=>{
    const o=ctx.opps.find(x=>x.id===opps.value);
@@ -482,7 +480,6 @@ export function renderSimulator(root,ctx) {
      credit.value=o.credit_amount||'';autoCredit=null;syncPlan();
    }else{credit.value='';autoCredit=null;syncPlan();}
  });
- el('sim-group').addEventListener('change',()=>{syncBidModes();update();});
  el('sim-bid-mode').addEventListener('change',()=>{syncBidControls(true);update();});
  el('sim-payment-mode').addEventListener('change',()=>{syncBidControls(false);update();});
  root.addEventListener('input',ev=>{
