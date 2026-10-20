@@ -23,11 +23,14 @@ function validNumber(x,min,max) {return Number.isFinite(x)&&x>=min&&x<=max;}
 export function calculateConsortium(plan,credit) {
  const c=Number(credit),n=Number(plan?.term_months);
  const fee=Number(plan?.admin_fee_pct),reserve=Number(plan?.reserve_fund_pct);
- const other=Number(plan?.other_total_pct),insurance=Number(plan?.insurance_monthly_amount);
+ const other=Number(plan?.other_total_pct),fixedInsurance=Number(plan?.insurance_monthly_amount);
+ const prestamistaRate=Number(plan?.prestamista_rate_monthly ?? 0);
+ const insurance=c*prestamistaRate+fixedInsurance;
  const annual=Number(plan?.annual_adjustment_pct);
  if(!validNumber(c,1,1e10)||!Number.isInteger(n)||!validNumber(n,1,360)||
     !validNumber(fee,0,100)||!validNumber(reserve,0,100)||!validNumber(other,0,100)||
-    !validNumber(insurance,0,1e6)||!validNumber(annual,0,50)) throw Error('Premissas do consórcio inválidas.');
+    !validNumber(fixedInsurance,0,1e6)||!validNumber(prestamistaRate,0,0.05)||
+    !validNumber(annual,0,50)) throw Error('Premissas do consórcio inválidas.');
  const base=c*(1+(fee+reserve+other)/100)/n;
  let total=0, last=0;
  for(let month=1;month<=n;month++){
@@ -36,7 +39,9 @@ export function calculateConsortium(plan,credit) {
  }
  const first=base+insurance;
  return {first,last,total,term:n,charges:c*(fee+reserve+other)/100,
-   base,insurance,annual,nominalNoAdjustment:(base+insurance)*n};
+   base,insurance,prestamistaRateMonthly:prestamistaRate,
+   prestamistaMonthlyAmount:c*prestamistaRate,fixedInsurance,
+   annual,nominalNoAdjustment:(base+insurance)*n};
 }
 export function calculateFinancing({assetValue,downPayment,annualRate,months,system,monthlyCosts=0,upfrontCosts=0}) {
  const asset=Number(assetValue),down=Number(downPayment),annual=Number(annualRate),n=Number(months);
@@ -68,13 +73,13 @@ function numberField(text,id,attrs='',help='') {
 function outputCards(items) {
  return `<div class="sim-kpi-grid">${items.map(x=>`<div class="sim-kpi"><span>${h(x[0])}</span><strong>${h(x[1])}</strong><small>${h(x[2]||'')}</small></div>`).join('')}</div>`;
 }
-const note='Simulação matemática, não cotação, proposta, oferta ou garantia. Os prazos de contemplação não são previsíveis. Reajustes, seguros e condições podem variar conforme regulamento do grupo. O financiamento oferece acesso imediato ao bem conforme aprovação; o consórcio depende de contemplação.';
+const note='Simulação referencial, não cotação ou oferta. O prestamista foi estimado sobre o crédito integral solicitado, a cada mês, sem redução por amortização; o contrato pode adotar outra base. Uma hipótese de 0% de reajuste não significa ausência de correção contratual. Contemplação não tem data garantida e financiamento depende de aprovação.';
 function reportPopup(ctx,view) {
  const popup=window.open('','_blank');
  if(!popup){ctx.toast('Permita janelas pop-up para imprimir ou salvar em PDF.',true);return;}
  const f=view.f,c=view.c,plan=view.plan,finance=view.finance,asset=view.asset;
  const cells=(rows)=>rows.map(r=>`<tr><th>${h(r[0])}</th><td>${h(r[1])}</td></tr>`).join('');
- const cs=cells([['Produto',productTitle(ctx,plan.product_id)],['Plano',plan.name],['Grupo',plan.group_code||'Não vinculado'],['Crédito',money(view.credit)],['Prazo',plan.term_months+' meses'],['Taxa de administração total',pct(plan.admin_fee_pct)],['Fundo de reserva total',pct(plan.reserve_fund_pct)],['Outros encargos totais',pct(plan.other_total_pct)],['Seguro mensal informado',money(plan.insurance_monthly_amount)],['Hipótese de reajuste anual',pct(plan.annual_adjustment_pct)],['Primeira parcela-base',money(c.first)],['Última parcela estimada',money(c.last)],['Soma dos pagamentos simulados',money(c.total)],['Origem dos parâmetros',plan.source_label||'Não informada']]);
+ const cs=cells([['Produto',productTitle(ctx,plan.product_id)],['Plano',plan.name],['Grupo',plan.group_code||'Não vinculado'],['Crédito simulado',money(view.credit)],['Crédito de referência do plano',plan.reference_credit_amount==null?'Não informado':money(plan.reference_credit_amount)],['Prazo',plan.term_months+' meses'],['Taxa de administração total',pct(plan.admin_fee_pct)],['Fundo de reserva total',pct(plan.reserve_fund_pct)],['Outros encargos totais',pct(plan.other_total_pct)],['Taxa prestamista a.m. (sobre crédito)',pct(Number(plan.prestamista_rate_monthly||0)*100)],['Prestamista mensal estimado',money(c.prestamistaMonthlyAmount)],['Seguro fixo adicional',money(c.fixedInsurance)],['Hipótese de reajuste anual',pct(plan.annual_adjustment_pct)],['Primeira parcela-base',money(c.first)],['Última parcela estimada',money(c.last)],['Soma dos pagamentos simulados',money(c.total)],['Origem dos parâmetros',plan.source_label||'Não informada']]);
  const fs=finance?`<h2>Financiamento · ${h(f.system)}</h2><table>${cells([['Valor do bem',money(asset)],['Entrada',money(f.downPayment)],['Prazo',f.months+' meses'],['Juros efetivos anuais informados',pct(f.annualRate)],['Parcela inicial',money(finance.first)],['Parcela final',money(finance.last)],['Juros totais',money(finance.interest)],['Custos adicionais',money(Number(f.monthlyCosts)*f.months+Number(f.upfrontCosts))],['Desembolso total com entrada',money(finance.total)]])}</table>`:'<p>Comparativo de financiamento não preenchido.</p>';
  popup.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Órbita Simula · Relatório</title><style>
  @page{size:A4;margin:17mm}body{font:13px/1.55 Arial,sans-serif;color:#17314d;margin:0}header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #194f91;padding-bottom:18px}header img{width:185px}h1{font-size:24px;margin:28px 0 5px}h2{font-size:15px;color:#164a82;margin-top:22px}table{border-collapse:collapse;width:100%;font-size:11px}th,td{border-bottom:1px solid #e1e8f1;text-align:left;padding:7px 5px;vertical-align:top}th{width:54%;color:#58708a;font-weight:600}.notice{margin-top:22px;border-left:3px solid #bf943d;padding:12px;background:#fff7e9;font-size:11px}.subtitle{color:#67809c}.toolbar{margin:20px 0}.toolbar button{padding:12px 18px;border:0;background:#164c88;color:white;border-radius:7px}@media print{.toolbar{display:none}}</style></head>
@@ -119,13 +124,19 @@ export function renderSimulator(root,ctx) {
  </aside></div>`;
  const el=id=>root.querySelector('#'+id);
  const product=el('sim-product'),planSel=el('sim-plan'),credit=el('sim-credit'),opps=el('sim-opportunity');
- let report=null;let activePlan=null;
+ let report=null;let activePlan=null,autoCredit=null;
  function syncPlan(){
    const list=availablePlans(ctx,product.value);
    const previous=planSel.value;
    planSel.innerHTML=list.length?list.map(p=>option(p.id,p.name+(p.group_code?' · Grupo '+p.group_code:''),previous)).join(''):'<option value="">Nenhum plano ativo aprovado</option>';
    activePlan=list.find(p=>p.id===planSel.value)||list[0]||null;
-   if(activePlan){planSel.value=activePlan.id;if(!el('sim-fin-term').value)el('sim-fin-term').value=activePlan.term_months;}
+   if(activePlan){
+     planSel.value=activePlan.id;
+     if(!el('sim-fin-term').value)el('sim-fin-term').value=activePlan.term_months;
+     if(!opps.value&&(!credit.value||credit.value===String(autoCredit))&&activePlan.reference_credit_amount!=null){
+       credit.value=String(Number(activePlan.reference_credit_amount));autoCredit=Number(activePlan.reference_credit_amount);
+     }
+   }
    update();
  }
  function update(){
@@ -136,8 +147,9 @@ export function renderSimulator(root,ctx) {
     `<div class="sim-imported"><div class="sim-imported-head"><strong>Parâmetros do plano</strong><span class="sim-verified">${h(p.source_label)}</span></div>
       <div class="sim-facts">
        <span>Prazo <b>${fmt(p.term_months)} meses</b></span><span>Taxa adm. total <b>${pct(p.admin_fee_pct)}</b></span><span>Fundo de reserva <b>${pct(p.reserve_fund_pct)}</b></span>
-       <span>Outros encargos totais <b>${pct(p.other_total_pct)}</b></span><span>Seguro mensal informado <b>${money(p.insurance_monthly_amount)}</b></span><span>Hipótese de reajuste anual <b>${pct(p.annual_adjustment_pct)}</b></span>
-      </div><small>O cálculo usa rateio linear do crédito e das taxas totais no prazo. Não reproduz parcelas reduzidas ou regras específicas de contemplação.</small></div>`
+       <span>Outros encargos totais <b>${pct(p.other_total_pct)}</b></span><span>Prestamista ao mês <b>${pct(Number(p.prestamista_rate_monthly||0)*100)}</b></span><span>Seguro fixo adicional <b>${money(p.insurance_monthly_amount)}</b></span>
+       <span>Crédito de referência <b>${p.reference_credit_amount==null?'A definir':money(p.reference_credit_amount)}</b></span><span>Reajuste anual hipotético <b>${pct(p.annual_adjustment_pct)}</b></span>
+      </div><small>Referência para estudo, não condição homologada de um grupo. O prestamista é calculado sobre o crédito simulado em cada mês; regras reais, atualizações e contemplação dependem de validação. Taxa de reajuste 0% significa apenas que nenhuma foi informada.</small></div>`
     :'<div class="sim-alert">Este produto ainda não tem um plano liberado com taxas cadastradas pela Astrion. Solicite a configuração para simular.</div>';
   const c=nval(credit.value);
   if(!p){el('sim-results').innerHTML='<div class="sim-empty">Aguardando cadastro e aprovação do plano comercial.</div>';return;}
@@ -147,9 +159,8 @@ export function renderSimulator(root,ctx) {
     el('sim-results').innerHTML=`<div class="sim-alert">Crédito fora da faixa de referência disponível: ${money(bounds.credit_min||0)} a ${money(bounds.credit_max||0)}. Ajuste o valor ou escolha outra opção.</div>`;
     return;
   }
-  if(seg?.max_term_months&&p.term_months>Number(seg.max_term_months)){
-    el('sim-results').innerHTML='<div class="sim-alert">O prazo do plano supera o limite de referência do produto. Peça à Astrion para revisar o cadastro.</div>';return;
-  }
+  const legacyTermNotice=seg?.max_term_months&&p.term_months>Number(seg.max_term_months)?
+    `<div class="sim-alert" style="margin-bottom:12px">Atenção: prazo de referência de ${fmt(p.term_months)} meses maior que o limite anterior do catálogo (${fmt(seg.max_term_months)}). A Astrion deve confirmar a aplicabilidade ao grupo antes de ofertar.</div>`:'';
   let calc;
   try{calc=calculateConsortium(p,c);}catch(e){el('sim-results').innerHTML=`<div class="sim-alert">${h(e.message)}</div>`;return;}
   const asset=nval(el('sim-asset').value)||c;
@@ -157,7 +168,7 @@ export function renderSimulator(root,ctx) {
   const finInputs={assetValue:asset,downPayment:nval(el('sim-down').value),annualRate:nval(annualRaw),months:nval(el('sim-fin-term').value),system:el('sim-system').value,monthlyCosts:nval(el('sim-fin-extra').value),upfrontCosts:nval(el('sim-fin-upfront').value)};
   let fin=null,finError='';
   if(annualRaw!==''){try{fin=calculateFinancing(finInputs);}catch(e){finError=e.message;}}
-  const cards=outputCards([['Parcela inicial do consórcio',money(calc.first),'Parcela-base de referência'],['Desembolso acumulado consórcio',money(calc.total),'Inclui reajuste anual hipotético'],['Última parcela projetada',money(calc.last),'Seguro fixo na hipótese']]);
+  const cards=legacyTermNotice+outputCards([['Parcela inicial do consórcio',money(calc.first),'Inclui prestamista estimado: '+money(calc.prestamistaMonthlyAmount)],['Desembolso acumulado consórcio',money(calc.total),'Premissas de reajuste não homologadas'],['Última parcela projetada',money(calc.last),'Prestamista sobre crédito, sem redução']]);
   let comp='';
   if(fin){
    const max=Math.max(calc.total,fin.total,1),a=(calc.total/max*100).toFixed(1),b=(fin.total/max*100).toFixed(1);
@@ -171,10 +182,11 @@ export function renderSimulator(root,ctx) {
   el('sim-print').disabled=false;
  }
  product.addEventListener('change',()=>{el('sim-fin-term').value='';syncPlan();});
- planSel.addEventListener('change',()=>{const p=ctx.plans.find(x=>x.id===planSel.value);if(p)el('sim-fin-term').value=p.term_months;update();});
+ planSel.addEventListener('change',()=>{const p=ctx.plans.find(x=>x.id===planSel.value);if(p){el('sim-fin-term').value=p.term_months;if(!opps.value&&(!credit.value||credit.value===String(autoCredit))&&p.reference_credit_amount!=null){credit.value=String(Number(p.reference_credit_amount));autoCredit=Number(p.reference_credit_amount);}}update();});
  opps.addEventListener('change',()=>{
    const o=ctx.opps.find(x=>x.id===opps.value);
-   if(o){if(products.some(p=>p.id===o.product_id))product.value=o.product_id;credit.value=o.credit_amount||'';el('sim-asset').value=o.asset_value||'';el('sim-down').value='0';el('sim-fin-term').value='';syncPlan();}
+   if(o){if(products.some(p=>p.id===o.product_id))product.value=o.product_id;credit.value=o.credit_amount||'';autoCredit=null;el('sim-asset').value=o.asset_value||'';el('sim-down').value='0';el('sim-fin-term').value='';syncPlan();}
+   else {credit.value='';autoCredit=null;el('sim-asset').value='';syncPlan();}
  });
  root.addEventListener('input',e=>{if(e.target.matches('#sim-credit,#sim-asset,#sim-down,#sim-interest,#sim-fin-term,#sim-fin-extra,#sim-fin-upfront'))update();});
  root.addEventListener('change',e=>{if(e.target.matches('#sim-system'))update();});
@@ -193,26 +205,28 @@ export function renderSimulatorAdmin(root,ctx){
  ${label('Produto','adm-product',`<select id="adm-product" required>${products.map(p=>option(p.id,p.name,'')).join('')}</select>`)}
  ${label('Grupo (opcional)','adm-group','<select id="adm-group"></select>')}
  ${label('Nome do plano','adm-name','<input id="adm-name" maxlength="120" minlength="3" required placeholder="Ex.: Plano normal · 100 meses">')}
+ ${numberField('Crédito de referência (R$)','adm-reference','step="0.01" min="1"','Sugestão de valor inicial; não representa mínimo ou máximo.')}
  ${numberField('Prazo em meses','adm-term','step="1" min="1" max="360" required')}
  ${numberField('Taxa de administração total (%)','adm-fee','required step="0.0001" min="0" max="100"')}
  ${numberField('Fundo de reserva total (%)','adm-reserve','required value="0" step="0.0001"')}
  ${numberField('Outros encargos totais (%)','adm-other','required value="0" step="0.0001"')}
- ${numberField('Seguro mensal fixo (R$)','adm-insurance','required value="0"')}
+ ${numberField('Taxa prestamista a.m. (fração)','adm-prestamista','required value="0" step="0.00001" min="0" max="0.05"','Ex.: 0.0003 corresponde a 0,03% ao mês sobre o crédito.')}
+ ${numberField('Seguro mensal fixo adicional (R$)','adm-insurance','required value="0"','Preencha apenas se houver encargo fixo além do prestamista.')}
  ${numberField('Reajuste anual hipotético (%)','adm-adjustment','required value="0" step="0.0001" max="50"','Não é índice contratual automático; informe apenas se houver premissa validada.')}
  ${label('Origem e data da condição','adm-source','<input id="adm-source" maxlength="500" placeholder="Ex.: Tabela aprovada · 20/10/2026">','Obrigatório para liberar aos corretores.')}
  <div class="sim-approval"><label><input type="checkbox" id="adm-active"> Plano ativo</label><label><input type="checkbox" id="adm-approved"> Condições verificadas e liberadas pela Astrion</label></div>
  <div class="sim-form-actions"><button class="btn btn-primary" type="submit">Salvar parâmetros</button><button class="btn btn-outline" type="button" id="adm-new">Limpar formulário</button></div>
  </form></section>
  <section class="sim-card sim-admin-list"><h2>Planos cadastrados</h2><p class="sim-help">Clique em um plano para editar. Todos os planos ficam restritos à administração enquanto não forem liberados.</p>
- ${plans.length?plans.map(p=>`<button class="sim-plan-row" data-edit-plan="${h(p.id)}" type="button"><strong>${h(productTitle(ctx,p.product_id))} · ${h(p.name)}</strong><small>${fmt(p.term_months)} meses · TA ${pct(p.admin_fee_pct)} · FR ${pct(p.reserve_fund_pct)}</small><em class="${p.active&&p.approved_for_use?'ready':'draft'}">${p.active&&p.approved_for_use?'Disponível':'Não publicado'}</em></button>`).join(''):'<div class="sim-empty">Nenhum plano cadastrado. Inclua as condições aprovadas dos produtos.</div>'}
+ ${plans.length?plans.map(p=>`<button class="sim-plan-row" data-edit-plan="${h(p.id)}" type="button"><strong>${h(productTitle(ctx,p.product_id))} · ${h(p.name)}</strong><small>${fmt(p.term_months)} meses · TA ${pct(p.admin_fee_pct)} · FR ${pct(p.reserve_fund_pct)} · Prestamista ${pct(Number(p.prestamista_rate_monthly||0)*100)} a.m.</small><em class="${p.active&&p.approved_for_use?'ready':'draft'}">${p.active&&p.approved_for_use?'Disponível':'Não publicado'}</em></button>`).join(''):'<div class="sim-empty">Nenhum plano cadastrado. Inclua as condições aprovadas dos produtos.</div>'}
  </section></div>`;
  const e=id=>root.querySelector('#'+id), form=e('sim-admin-form');
  function groups(current){const p=e('adm-product').value; e('adm-group').innerHTML=option('','Sem grupo específico',current)+groupList(ctx,p).map(g=>option(g.code,'Grupo '+g.code,current)).join('');}
- function reset(){form.reset();e('adm-id').value='';e('adm-product').value=products[0]?.id||'';for(const id of ['adm-reserve','adm-other','adm-insurance','adm-adjustment'])e(id).value=0;groups('');}
+ function reset(){form.reset();e('adm-id').value='';e('adm-product').value=products[0]?.id||'';for(const id of ['adm-reserve','adm-other','adm-insurance','adm-prestamista','adm-adjustment'])e(id).value=0;groups('');}
  function edit(id){
   const p=plans.find(x=>x.id===id);if(!p)return;
   e('adm-id').value=p.id;e('adm-product').value=p.product_id;groups(p.group_code||'');
-  for(const [key,v] of [['name',p.name],['term',p.term_months],['fee',p.admin_fee_pct],['reserve',p.reserve_fund_pct],['other',p.other_total_pct],['insurance',p.insurance_monthly_amount],['adjustment',p.annual_adjustment_pct],['source',p.source_label]])e('adm-'+key).value=v??'';
+  for(const [key,v] of [['name',p.name],['reference',p.reference_credit_amount],['term',p.term_months],['fee',p.admin_fee_pct],['reserve',p.reserve_fund_pct],['other',p.other_total_pct],['prestamista',p.prestamista_rate_monthly],['insurance',p.insurance_monthly_amount],['adjustment',p.annual_adjustment_pct],['source',p.source_label]])e('adm-'+key).value=v??'';
   e('adm-active').checked=!!p.active;e('adm-approved').checked=!!p.approved_for_use;
   form.scrollIntoView({behavior:'smooth',block:'start'});
  }
@@ -226,19 +240,23 @@ export function renderSimulatorAdmin(root,ctx){
   const id=e('adm-id').value;
   const productId=e('adm-product').value;
   const data={product_id:productId,group_code:e('adm-group').value||null,name:e('adm-name').value.trim(),
+    reference_credit_amount:e('adm-reference').value===''?null:nval(e('adm-reference').value),
     term_months:Number(e('adm-term').value),admin_fee_pct:nval(e('adm-fee').value),
     reserve_fund_pct:nval(e('adm-reserve').value),other_total_pct:nval(e('adm-other').value),
-    insurance_monthly_amount:nval(e('adm-insurance').value),annual_adjustment_pct:nval(e('adm-adjustment').value),
+    insurance_monthly_amount:nval(e('adm-insurance').value),prestamista_rate_monthly:nval(e('adm-prestamista').value),
+    annual_adjustment_pct:nval(e('adm-adjustment').value),
     source_label:e('adm-source').value.trim(),active:e('adm-active').checked,approved_for_use:e('adm-approved').checked,
     updated_at:new Date().toISOString()};
   const seg=productSegment(ctx,productId);
   if(!data.name||data.name.length<3||!Number.isInteger(data.term_months)||!validNumber(data.term_months,1,360)
    ||!validNumber(data.admin_fee_pct,0,100)||!validNumber(data.reserve_fund_pct,0,100)
    ||!validNumber(data.other_total_pct,0,100)||!validNumber(data.insurance_monthly_amount,0,1e6)
+   ||!validNumber(data.prestamista_rate_monthly,0,0.05)
+   ||(data.reference_credit_amount!=null&&!validNumber(data.reference_credit_amount,1,1e10))
    ||!validNumber(data.annual_adjustment_pct,0,50)){
     ctx.toast('Revise os campos e limites dos parâmetros comerciais.',true);return;
   }
-  if(seg?.max_term_months&&data.term_months>Number(seg.max_term_months)){ctx.toast('Prazo acima do limite de referência deste produto.',true);return;}
+  // Os prazos legados do catálogo são informativos; não bloquear plano referencial aprovado apenas por discrepância histórica.
   if(data.group_code&&!groupList(ctx,productId).some(g=>g.code===data.group_code)){ctx.toast('O grupo selecionado não pertence ao produto.',true);return;}
   if(data.approved_for_use&&data.source_label.length<3){ctx.toast('Informe a fonte dos valores antes de aprovar.',true);return;}
   const btn=form.querySelector('[type=submit]');btn.disabled=true;
